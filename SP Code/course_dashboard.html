@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #003366;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+        }
+
+        .menu-heading {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: white;
+            display: block;
+            margin: 5px 0;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .sub-menu {
+            margin-left: 15px;
+        }
+
+        .sidebar a:hover {
+            background-color: #00509E;
+        }
+
+        .sidebar a.active {
+            background-color: #00509E;
+        }
+
+        .main-content {
+            flex: 1;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .dropdown {
+            padding: 5px;
+            font-size: 1rem;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .chart-item {
+            flex: 1;
+            margin: 0 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>MUICT LEARNING</h2>
+        <div class="menu-heading">Dashboard</div>
+        <div class="sub-menu">
+            <a href="course_dashboard.html" id="course-overview" class="active">Course Overview</a>
+            <a href="student_profile.html" id="student-profile">Student Profile</a>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <div class="dashboard-title">Dashboard &gt; Course Overview</div>
+            <select class="dropdown">
+                <option>Object Oriented Programming</option>
+            </select>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Student Enrollment</h3>
+                <p><strong>200</strong> Students Enrolled</p>
+            </div>
+            <div class="card">
+                <h3>Class Average Score</h3>
+                <p><strong>67/100</strong></p>
+            </div>
+        </div>
+
+        <div class="chart">
+            <div class="chart-item">
+                <h3>Student Engagement</h3>
+                <p>Attendance Chart Placeholder</p>
+            </div>
+            <div class="chart-item">
+                <h3>Assignment Submissions</h3>
+                <p>Submission Chart Placeholder</p>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>TOP 5 Scores</h3>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Attendance</th>
+                        <th>Score</th>
+                        <th>GPA</th>
+                    </tr>
+                    <tr>
+                        <td>Mr. A</td>
+                        <td>15/15</td>
+                        <td>100</td>
+                        <td>3.91</td>
+                    </tr>
+                    <tr>
+                        <td>Mr. B</td>
+                        <td>14/15</td>
+                        <td>99</td>
+                        <td>3.87</td>
+                    </tr>
+                    <tr>
+                        <td>Mr. C</td>
+                        <td>13/15</td>
+                        <td>98</td>
+                        <td>3.84</td>
+                    </tr>
+                    <tr>
+                        <td>Mr. D</td>
+                        <td>14/15</td>
+                        <td>96</td>
+                        <td>3.78</td>
+                    </tr>
+                    <tr>
+                        <td>Mr. E</td>
+                        <td>14/15</td>
+                        <td>94</td>
+                        <td>3.75</td>
+                    </tr>
+                    <!-- Additional rows as needed -->
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>LEAST 5 Scores</h3>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Attendance</th>
+                        <th>Score</th>
+                        <th>GPA</th>
+                    </tr>
+                    <tr>
+                        <td>Ms. V</td>
+                        <td>8/15</td>
+                        <td>51</td>
+                        <td>2.15</td>
+                    </tr>
+                    <tr>
+                        <td>Ms. W</td>
+                        <td>9/15</td>
+                        <td>53</td>
+                        <td>2.25</td>
+                    </tr>
+                    <tr>
+                        <td>Ms. X</td>
+                        <td>11/15</td>
+                        <td>54</td>
+                        <td>2.31</td>
+                    </tr>
+                    <tr>
+                        <td>Ms. Y</td>
+                        <td>10/15</td>
+                        <td>56</td>
+                        <td>2.32</td>
+                    </tr>
+                    <tr>
+                        <td>Ms. Z</td>
+                        <td>10/15</td>
+                        <td>60</td>
+                        <td>2.34</td>
+                    </tr>
+                    <!-- Additional rows as needed -->
+                </table>
+            </div>
+        </div>
+
+        <div class="chart">
+            <div class="chart-item">
+                <h3>Score Distribution</h3>
+                <p>Score Distribution Chart Placeholder</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
