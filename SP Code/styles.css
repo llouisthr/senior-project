@@ -115,3 +115,25 @@ input[type="text"] {
     font-size: 1rem;
     margin-right: 10px;
 }
+
+.logout {
+    position: absolute;
+    bottom: 20px; /* Distance from the bottom of the sidebar */
+    right: 20px;  /* Distance from the right edge of the sidebar */
+    font-size: 24px; /* Adjust the size of the icon */
+    color: #fff; /* Default icon color */
+    transition: color 0.3s ease;
+}
+
+.sidebar {
+    position: relative; /* Makes the logout icon position relative to this container */
+}
+
+.logout a {
+    text-decoration: none;
+}
+
+.logout a:hover img {
+    filter: brightness(1.2); /* Brightens the icon when hovered */
+}
+
