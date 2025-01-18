@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div class="sidebar">
@@ -44,11 +45,11 @@
         <div class="cards">
             <div class="card">
                 <h3>Student Engagement</h3>
-                <p>Attendance Chart Placeholder</p>
+                <div id="attendance-chart"></div> <!-- Placeholder for Attendance Chart -->
             </div>
             <div class="card">
                 <h3>Assignment Submissions</h3>
-                <p>Submission Chart Placeholder</p>
+                <div id="submission-chart"></div> <!-- Placeholder for Assignment Chart -->
             </div>
         </div>
 
@@ -80,9 +81,11 @@
         <div class="single-chart">
             <div class="card">
                 <h3>Score Distribution</h3>
-                <p>Score Distribution Chart Placeholder</p>
+                <div id="score-distribution-chart"></div> <!-- Placeholder for Score Chart -->
             </div>
         </div>
     </div>
+
+    <script src="scripts.js"></script>
 </body>
 </html>
