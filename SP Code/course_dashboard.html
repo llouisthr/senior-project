@@ -10,10 +10,12 @@
 <body>
     <div class="sidebar">
         <h2>MUICT LEARNING</h2>
-        <div class="menu-heading">Dashboard</div>
         <div>
-            <a href="course_dashboard.html" id="course-overview" class="active">Course Overview</a>
-            <a href="student_profile.html" id="student-profile">Student Profile</a>
+            <!-- Adjusted Import Data button alignment -->
+            <a href="importdata.html">Import Data</a>
+            <div class="menu-heading">Dashboard</div>
+            <a href="course_dashboard.html" class="active">Course Overview</a>
+            <a href="student_profile.html">Student Profile</a>
         </div>
         <div class="logout">
             <a href="logout.html">
@@ -42,14 +44,15 @@
             </div>
         </div>
 
-        <div class="cards">
-            <div class="card">
+        <div class="chart-row">
+            <div class="chart" id="attendance-chart">
                 <h3>Student Engagement</h3>
-                <div id="attendance-chart"></div> <!-- Placeholder for Attendance Chart -->
             </div>
-            <div class="card">
+            <div class="chart" id="submission-chart">
                 <h3>Assignment Submissions</h3>
-                <div id="submission-chart"></div> <!-- Placeholder for Assignment Chart -->
+            </div>
+            <div class="chart" id="score-distribution-chart">
+                <h3>Score Distribution</h3>
             </div>
         </div>
 
@@ -77,15 +80,8 @@
                 </table>
             </div>
         </div>
-
-        <div class="single-chart">
-            <div class="card">
-                <h3>Score Distribution</h3>
-                <div id="score-distribution-chart"></div> <!-- Placeholder for Score Chart -->
-            </div>
-        </div>
     </div>
 
-    <script src="scripts.js"></script>
+    <script src="course_dashboard_scripts.js"></script>
 </body>
 </html>
