@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Profile - B</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +14,8 @@
             display: flex;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             margin: 0;
         }
@@ -45,10 +48,6 @@
             border-radius: 5px;
         }
 
-        .sub-menu {
-            margin-left: 15px;
-        }
-
         .sidebar a:hover {
             background-color: #00509E;
         }
@@ -77,7 +76,10 @@
             font-weight: bold;
         }
 
-        .student-info, .activities, .skills, .grade-trend, .assignment-status {
+        .student-info,
+        .activities,
+        .skills,
+        .grade-trend-container {
             background-color: white;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -85,7 +87,10 @@
             margin-top: 20px;
         }
 
-        .student-info h3, .activities h3, .skills h3, .grade-trend h3, .assignment-status h3 {
+        .student-info h3,
+        .activities h3,
+        .skills h3,
+        .grade-trend-container h3 {
             margin-bottom: 15px;
         }
 
@@ -104,29 +109,63 @@
             margin-bottom: 10px;
         }
 
-        .grade-trend, .assignment-status {
+        .grade-trend-container {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 20px;
+            /* Space between charts */
         }
 
         .chart {
-            width: 45%;
+            flex: 1;
+            max-width: 32%;
+            /* Adjust width of each chart */
         }
 
-        .chart img {
-            width: 100%;
-            border-radius: 5px;
+        svg {
+            display: block;
+            margin: 0 auto;
+            /* Center-align SVG */
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #fff;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar {
+            position: relative;
+        }
+
+        .logout a {
+            text-decoration: none;
+        }
+
+        .logout a:hover img {
+            filter: brightness(1.2);
+            /* Brightens the icon when hovered */
         }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <h2>MUICT LEARNING</h2>
-        <div class="menu-heading">Dashboard</div>
         <div>
-            <a href="course_dashboard.html" id="course-overview">Course Overview</a>
-            <a href="student_profile.html" id="student-profile" class="active">Student Profile</a>
+            <a href="importdata.html">Import Data</a>
+            <div class="menu-heading">Dashboard</div>
+            <a href="course_dashboard.html">Course Overview</a>
+            <a href="student_profile.html">Student Profile</a>
+        </div>
+        <div class="logout">
+            <a href="logout.html">
+                <img src="logout-icon.png" alt="Logout" style="width: 24px; height: 24px;">
+            </a>
         </div>
     </div>
     <div class="main-content">
@@ -142,22 +181,14 @@
                     <p><strong>ID:</strong> u6800002</p>
                     <p><strong>Email:</strong> th123456@gmail.com</p>
                     <p><strong>Contact number:</strong> 123-456-7890</p>
-                    <p><strong>Place of Residence:</strong> 123, Phuttamonthon Sai 4 Rd., Salaya, Nakhon Pathom</p>
-                </div>
-                <div>
-                    <p><strong>Mother Name:</strong> Ms.ABC DEF</p>
-                    <p><strong>Status:</strong> Married</p>
-                    <p><strong>Job:</strong> Seller</p>
-                    <p><strong>Father Name:</strong> Mr.GHI DEF</p>
-                    <p><strong>Status:</strong> Married</p>
-                    <p><strong>Job:</strong> Seller</p>
                 </div>
             </div>
         </div>
 
         <div class="activities">
             <h3>ICT Activities</h3>
-            <p>Orientation &rarr; Sairahus &rarr; Open House &rarr; Cable Management &rarr; SCB Seminar &rarr; German Internship</p>
+            <p>Orientation &rarr; Sairahus &rarr; Open House &rarr; Cable Management &rarr; SCB Seminar &rarr; German
+                Internship</p>
         </div>
 
         <div class="skills">
@@ -170,21 +201,82 @@
             </ul>
         </div>
 
-        <div class="grade-trend">
-            <div>
+        <div class="grade-trend-container">
+            <div class="chart">
                 <h3>Grade Trend</h3>
-                <img src="grade-trend-chart.png" alt="Grade Trend Chart" class="chart">
+                <svg id="gradeTrendChart" width="400" height="200"></svg>
             </div>
-            <div>
+            <div class="chart">
                 <h3>MyCourses Access Frequency</h3>
-                <img src="access-frequency-chart.png" alt="Access Frequency Chart" class="chart">
+                <svg id="accessFrequencyChart" width="400" height="200"></svg>
             </div>
-        </div>
-
-        <div class="assignment-status">
-            <h3>Assignment Submission</h3>
-            <img src="late-submission-chart.png" alt="Late Submission Chart" class="chart">
+            <div class="chart">
+                <h3>Assignment Submission</h3>
+                <svg id="assignmentSubmissionChart" width="200" height="200"></svg>
+            </div>
         </div>
     </div>
+
+    <script>
+        // Grade Trend Data (Bar Chart)
+        const gradeTrendData = [
+            { semester: "1yr 1st Sem", grade: 3.5 },
+            { semester: "1yr 2nd Sem", grade: 3.8 },
+            { semester: "2yr 1st Sem", grade: 2.9 },
+            { semester: "2yr 2nd Sem", grade: 3.7 },
+            { semester: "3yr 1st Sem", grade: 3.6 },
+            { semester: "3yr 2nd Sem", grade: 3.9 },
+        ];
+        const gradeSvg = d3.select("#gradeTrendChart");
+        const gradeMargin = { top: 20, right: 30, bottom: 30, left: 40 };
+        const gradeWidth = +gradeSvg.attr("width") - gradeMargin.left - gradeMargin.right;
+        const gradeHeight = +gradeSvg.attr("height") - gradeMargin.top - gradeMargin.bottom;
+        const xGrade = d3.scaleBand().domain(gradeTrendData.map(d => d.semester)).range([0, gradeWidth]).padding(0.1);
+        const yGrade = d3.scaleLinear().domain([2, 4]).range([gradeHeight, 0]);
+        const gradeG = gradeSvg.append("g").attr("transform", `translate(${gradeMargin.left},${gradeMargin.top})`);
+        gradeG.selectAll(".bar").data(gradeTrendData).enter().append("rect").attr("x", d => xGrade(d.semester)).attr("y", d => yGrade(d.grade)).attr("width", xGrade.bandwidth()).attr("height", d => gradeHeight - yGrade(d.grade)).attr("fill", "steelblue");
+        gradeG.append("g").call(d3.axisBottom(xGrade)).attr("transform", `translate(0,${gradeHeight})`);
+        gradeG.append("g").call(d3.axisLeft(yGrade));
+
+        // Access Frequency Data (Bar Chart)
+        const accessFrequencyData = [
+            { month: "Jan", frequency: 16 },
+            { month: "Feb", frequency: 17 },
+            { month: "Mar", frequency: 20 },
+            { month: "Apr", frequency: 18 },
+            { month: "May", frequency: 14 },
+            { month: "Jun", frequency: 11 },
+            { month: "Jul", frequency: 12 },
+            { month: "Aug", frequency: 17 },
+            { month: "Sep", frequency: 21 },
+            { month: "Oct", frequency: 19 },
+            { month: "Nov", frequency: 21 },
+            { month: "Dec", frequency: 15 },
+        ];
+        const accessSvg = d3.select("#accessFrequencyChart");
+        const accessMargin = { top: 20, right: 30, bottom: 30, left: 40 };
+        const accessWidth = +accessSvg.attr("width") - accessMargin.left - accessMargin.right;
+        const accessHeight = +accessSvg.attr("height") - accessMargin.top - accessMargin.bottom;
+        const xAccess = d3.scaleBand().domain(accessFrequencyData.map(d => d.month)).range([0, accessWidth]).padding(0.1);
+        const yAccess = d3.scaleLinear().domain([0, 25]).range([accessHeight, 0]); // Updated domain
+        const accessG = accessSvg.append("g").attr("transform", `translate(${accessMargin.left},${accessMargin.top})`);
+        accessG.selectAll(".bar").data(accessFrequencyData).enter().append("rect").attr("x", d => xAccess(d.month)).attr("y", d => yAccess(d.frequency)).attr("width", xAccess.bandwidth()).attr("height", d => accessHeight - yAccess(d.frequency)).attr("fill", "steelblue");
+        accessG.append("g").call(d3.axisBottom(xAccess)).attr("transform", `translate(0,${accessHeight})`);
+        accessG.append("g").call(d3.axisLeft(yAccess).ticks(6)); // Ticks for intervals of 5
+
+        // Assignment Submission Data (Pie Chart)
+        const assignmentData = [
+            { status: "On Time", percentage: 81 },
+            { status: "Late", percentage: 19 },
+        ];
+        const assignmentSvg = d3.select("#assignmentSubmissionChart");
+        const assignmentRadius = Math.min(+assignmentSvg.attr("width"), +assignmentSvg.attr("height")) / 2;
+        const assignmentGroup = assignmentSvg.append("g").attr("transform", `translate(${assignmentRadius},${assignmentRadius})`);
+        const assignmentPie = d3.pie().value(d => d.percentage);
+        const assignmentArc = d3.arc().innerRadius(0).outerRadius(assignmentRadius - 10);
+        assignmentGroup.selectAll("path").data(assignmentPie(assignmentData)).enter().append("path").attr("d", assignmentArc).attr("fill", (d, i) => (i === 0 ? "steelblue" : "orange"));
+        assignmentGroup.selectAll("text").data(assignmentPie(assignmentData)).enter().append("text").text(d => `${d.data.status}: ${d.data.percentage}%`).attr("transform", d => `translate(${assignmentArc.centroid(d)})`).attr("text-anchor", "middle").attr("fill", "white").style("font-size", "12px");
+    </script>
 </body>
+
 </html>
