@@ -52,6 +52,21 @@
             background-color: #00509E;
         }
 
+        .import-button-sidebar {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 5px 0;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .import-button-sidebar:hover {
+            background-color: #0056b3;
+        }
+
+
         .main-content {
             flex: 1;
             background-color: #f4f4f4;
@@ -100,16 +115,45 @@
             background-color: #003366;
             color: white;
         }
+
+        .logout {
+    position: absolute;
+    bottom: 20px; /* Distance from the bottom of the sidebar */
+    right: 20px;  /* Distance from the right edge of the sidebar */
+    font-size: 24px; /* Adjust the size of the icon */
+    color: #fff; /* Default icon color */
+    transition: color 0.3s ease;
+}
+
+.sidebar {
+    position: relative; /* Makes the logout icon position relative to this container */
+}
+
+.logout a {
+    text-decoration: none;
+}
+
+.logout a:hover img {
+    filter: brightness(1.2); /* Brightens the icon when hovered */
+}
+
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>MUICT LEARNING</h2>
-        <div class="menu-heading">Dashboard</div>
         <div>
-            <a href="course_dashboard.html" id="course-overview">Course Overview</a>
-            <a href="student_profile.html" id="student-profile" class="active">Student Profile</a>
+            <!-- Adjusted Import Data button alignment -->
+            <a href="importdata.html">Import Data</a>
+            <div class="menu-heading">Dashboard</div>
+            <a href="course_dashboard.html">Course Overview</a>
+            <a href="student_profile.html" class="active">Student Profile</a>
         </div>
+        <div class="logout">
+            <a href="logout.html">
+                <img src="logout-icon.png" alt="Logout" style="width: 24px; height: 24px;">
+            </a>
+        </div>    
     </div>
     <div class="main-content">
         <div class="header">
