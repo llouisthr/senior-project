@@ -14,18 +14,12 @@
             display: flex;
         }
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-        }
-
         .sidebar {
             width: 250px;
             background-color: #003366;
             color: white;
             padding: 20px;
-            height: 110%;
+            height: fixed;
         }
 
         .sidebar h2 {
@@ -79,7 +73,8 @@
         .student-info,
         .activities,
         .skills,
-        .grade-trend-container {
+        .grade-trend-container,
+        .activity-transcript {
             background-color: white;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -90,7 +85,8 @@
         .student-info h3,
         .activities h3,
         .skills h3,
-        .grade-trend-container h3 {
+        .grade-trend-container h3,
+        .activity-transcript h3 {
             margin-bottom: 15px;
         }
 
@@ -109,24 +105,51 @@
             margin-bottom: 10px;
         }
 
+        .skills-and-transcript {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .skills {
+            flex: 1;
+        }
+
+        .activity-transcript {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
         .grade-trend-container {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             gap: 20px;
-            /* Space between charts */
         }
 
         .chart {
             flex: 1;
             max-width: 32%;
-            /* Adjust width of each chart */
         }
 
         svg {
             display: block;
             margin: 0 auto;
-            /* Center-align SVG */
         }
 
         .logout {
@@ -148,7 +171,6 @@
 
         .logout a:hover img {
             filter: brightness(1.2);
-            /* Brightens the icon when hovered */
         }
     </style>
 </head>
@@ -187,18 +209,87 @@
 
         <div class="activities">
             <h3>ICT Activities</h3>
-            <p>Orientation &rarr; Sairahus &rarr; Open House &rarr; Cable Management &rarr; SCB Seminar &rarr; German
-                Internship</p>
+            <p>Orientation &rarr; Sairahus &rarr; Open House &rarr; Cable Management &rarr; SCB Seminar &rarr; German Internship</p>
         </div>
 
-        <div class="skills">
-            <h3>Skills</h3>
-            <ul>
-                <li>Good leadership</li>
-                <li>Good communication</li>
-                <li>Python</li>
-                <li>Java</li>
-            </ul>
+        <div class="skills-and-transcript">
+            <div class="skills">
+                <h3>Skills</h3>
+                <ul>
+                    <li>Good leadership</li>
+                    <li>Good communication</li>
+                    <li>Python</li>
+                    <li>Java</li>
+                </ul>
+            </div>
+
+            <div class="activity-transcript">
+                <h3>AT (Activity Transcript)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Health Literacy</td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <td>Internationalization</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>Digital Literacy</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td>Environmental Literacy</td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <td>Financial Literacy</td>
+                            <td>8</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="activity-transcript">
+                <h3>21st Century Skills</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Skills</th>
+                            <th>Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Critical Thinking & Problem Solving</td>
+                            <td>10</td>
+                        </tr>
+                        <tr>
+                            <td>Creativity & Innovation</td>
+                            <td>9</td>
+                        </tr>
+                        <tr>
+                            <td>Communication & Collaboration</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td>Leadership & Management Skills</td>
+                            <td>13</td>
+                        </tr>
+                        <tr>
+                            <td>Social Skill</td>
+                            <td>8</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="grade-trend-container">
@@ -258,11 +349,11 @@
         const accessWidth = +accessSvg.attr("width") - accessMargin.left - accessMargin.right;
         const accessHeight = +accessSvg.attr("height") - accessMargin.top - accessMargin.bottom;
         const xAccess = d3.scaleBand().domain(accessFrequencyData.map(d => d.month)).range([0, accessWidth]).padding(0.1);
-        const yAccess = d3.scaleLinear().domain([0, 25]).range([accessHeight, 0]); // Updated domain
+        const yAccess = d3.scaleLinear().domain([0, 25]).range([accessHeight, 0]);
         const accessG = accessSvg.append("g").attr("transform", `translate(${accessMargin.left},${accessMargin.top})`);
         accessG.selectAll(".bar").data(accessFrequencyData).enter().append("rect").attr("x", d => xAccess(d.month)).attr("y", d => yAccess(d.frequency)).attr("width", xAccess.bandwidth()).attr("height", d => accessHeight - yAccess(d.frequency)).attr("fill", "steelblue");
         accessG.append("g").call(d3.axisBottom(xAccess)).attr("transform", `translate(0,${accessHeight})`);
-        accessG.append("g").call(d3.axisLeft(yAccess).ticks(6)); // Ticks for intervals of 5
+        accessG.append("g").call(d3.axisLeft(yAccess).ticks(6));
 
         // Assignment Submission Data (Pie Chart)
         const assignmentData = [
