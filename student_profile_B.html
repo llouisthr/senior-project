@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - B</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #003366;
+            color: white;
+            padding: 20px;
+            height: fixed;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+        }
+
+        .menu-heading {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: white;
+            display: block;
+            margin: 5px 0;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #00509E;
+        }
+
+        .sidebar a.active {
+            background-color: #00509E;
+        }
+
+        .main-content {
+            flex: 1;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .student-info,
+        .activities,
+        .skills,
+        .grade-trend-container,
+        .activity-transcript {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .student-info h3,
+        .activities h3,
+        .skills h3,
+        .grade-trend-container h3,
+        .activity-transcript h3 {
+            margin-bottom: 15px;
+        }
+
+        .student-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .skills ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .skills ul li {
+            margin-bottom: 10px;
+        }
+
+        .skills-and-transcript {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .skills {
+            flex: 1;
+        }
+
+        .activity-transcript {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        .grade-trend-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .chart {
+            flex: 1;
+            max-width: 32%;
+        }
+
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #fff;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar {
+            position: relative;
+        }
+
+        .logout a {
+            text-decoration: none;
+        }
+
+        .logout a:hover img {
+            filter: brightness(1.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2>MUICT LEARNING</h2>
+        <div>
+            <a href="importdata.html">Import Data</a>
+            <div class="menu-heading">Dashboard</div>
+            <a href="course_dashboard.html">Course Overview</a>
+            <a href="student_profile.html">Student Profile</a>
+        </div>
+        <div class="logout">
+            <a href="logout.html">
+                <img src="logout-icon.png" alt="Logout" style="width: 24px; height: 24px;">
+            </a>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <div class="dashboard-title">Dashboard &gt; Student Profile &gt; u6xxxx02</div>
+        </div>
+
+        <div class="student-info">
+            <h3>Student Information</h3>
+            <div class="student-details">
+                <div>
+                    <p><strong>Student Name:</strong> Tharich Haeng</p>
+                    <p><strong>ID:</strong> u6800002</p>
+                    <p><strong>Email:</strong> th123456@gmail.com</p>
+                    <p><strong>Contact number:</strong> 123-456-7890</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="activities">
+            <h3>ICT Activities</h3>
+            <p>Orientation &rarr; Sairahus &rarr; Open House &rarr; Cable Management &rarr; SCB Seminar &rarr; German Internship</p>
+        </div>
+
+        <div class="skills-and-transcript">
+            <div class="skills">
+                <h3>Skills</h3>
+                <ul>
+                    <li>Good leadership</li>
+                    <li>Good communication</li>
+                    <li>Python</li>
+                    <li>Java</li>
+                </ul>
+            </div>
+
+            <div class="activity-transcript">
+                <h3>AT (Activity Transcript)</h3>
+                <svg id="activityTranscriptChart" width="300" height="300"></svg>
+                <div id="activityTranscriptLegend"></div>
+            </div>
+
+            <div class="activity-transcript">
+                <h3>21st Century Skills</h3>
+                <svg id="skillsChart" width="300" height="300"></svg>
+                <div id="skillsLegend"></div>
+            </div>
+        </div>
+
+        <div class="grade-trend-container">
+            <div class="chart">
+                <h3>Grade Trend</h3>
+                <svg id="gradeTrendChart" width="400" height="200"></svg>
+            </div>
+            <div class="chart">
+                <h3>MyCourses Access Frequency</h3>
+                <svg id="accessFrequencyChart" width="400" height="200"></svg>
+            </div>
+            <div class="chart">
+                <h3>Assignment Submission</h3>
+                <svg id="assignmentSubmissionChart" width="200" height="200"></svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Activity Transcript Data (Pie Chart)
+        const activityData = [
+            { category: "Health Literacy", hours: 10 },
+            { category: "Internationalization", hours: 5 },
+            { category: "Digital Literacy", hours: 12 },
+            { category: "Environmental Literacy", hours: 10 },
+            { category: "Financial Literacy", hours: 8 },
+        ];
+        const activitySvg = d3.select("#activityTranscriptChart");
+        const activityRadius = Math.min(+activitySvg.attr("width"), +activitySvg.attr("height")) / 2;
+        const activityGroup = activitySvg.append("g").attr("transform", `translate(${activityRadius},${activityRadius})`);
+        const activityPie = d3.pie().value(d => d.hours);
+        const activityArc = d3.arc().innerRadius(0).outerRadius(activityRadius - 10);
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+        activityGroup
+            .selectAll("path")
+            .data(activityPie(activityData))
+            .enter()
+            .append("path")
+            .attr("d", activityArc)
+            .attr("fill", (d, i) => color(i));
+        activityGroup
+            .selectAll("text")
+            .data(activityPie(activityData))
+            .enter()
+            .append("text")
+            .attr("transform", d => `translate(${activityArc.centroid(d)})`)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "12px")
+            .text(d => `${Math.round((d.data.hours / d3.sum(activityData, d => d.hours)) * 100)}%`);
+        d3.select("#activityTranscriptLegend").selectAll("div")
+            .data(activityData)
+            .enter()
+            .append("div")
+            .style("color", (d, i) => color(i))
+            .text(d => `${d.category}: ${d.hours} hrs`);
+
+        // 21st Century Skills Data (Pie Chart)
+        const skillsData = [
+            { skill: "Critical Thinking", hours: 10 },
+            { skill: "Creativity", hours: 9 },
+            { skill: "Communication", hours: 12 },
+            { skill: "Leadership", hours: 13 },
+            { skill: "Social Skills", hours: 8 },
+        ];
+        const skillsSvg = d3.select("#skillsChart");
+        const skillsRadius = Math.min(+skillsSvg.attr("width"), +skillsSvg.attr("height")) / 2;
+        const skillsGroup = skillsSvg.append("g").attr("transform", `translate(${skillsRadius},${skillsRadius})`);
+        const skillsPie = d3.pie().value(d => d.hours);
+        const skillsArc = d3.arc().innerRadius(0).outerRadius(skillsRadius - 10);
+        skillsGroup
+            .selectAll("path")
+            .data(skillsPie(skillsData))
+            .enter()
+            .append("path")
+            .attr("d", skillsArc)
+            .attr("fill", (d, i) => color(i));
+        skillsGroup
+            .selectAll("text")
+            .data(skillsPie(skillsData))
+            .enter()
+            .append("text")
+            .attr("transform", d => `translate(${skillsArc.centroid(d)})`)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "12px")
+            .text(d => `${Math.round((d.data.hours / d3.sum(skillsData, d => d.hours)) * 100)}%`);
+        d3.select("#skillsLegend").selectAll("div")
+            .data(skillsData)
+            .enter()
+            .append("div")
+            .style("color", (d, i) => color(i))
+            .text(d => `${d.skill}: ${d.hours} hrs`);
+
+        // Grade Trend Data (Bar Chart)
+        const gradeTrendData = [
+            { semester: "1yr 1st Sem", grade: 3.5 },
+            { semester: "1yr 2nd Sem", grade: 3.8 },
+            { semester: "2yr 1st Sem", grade: 2.9 },
+            { semester: "2yr 2nd Sem", grade: 3.7 },
+            { semester: "3yr 1st Sem", grade: 3.6 },
+            { semester: "3yr 2nd Sem", grade: 3.9 },
+        ];
+        const gradeSvg = d3.select("#gradeTrendChart");
+        const gradeMargin = { top: 20, right: 30, bottom: 30, left: 40 };
+        const gradeWidth = +gradeSvg.attr("width") - gradeMargin.left - gradeMargin.right;
+        const gradeHeight = +gradeSvg.attr("height") - gradeMargin.top - gradeMargin.bottom;
+        const xGrade = d3.scaleBand().domain(gradeTrendData.map(d => d.semester)).range([0, gradeWidth]).padding(0.1);
+        const yGrade = d3.scaleLinear().domain([2, 4]).range([gradeHeight, 0]);
+        const gradeG = gradeSvg.append("g").attr("transform", `translate(${gradeMargin.left},${gradeMargin.top})`);
+        gradeG.selectAll(".bar").data(gradeTrendData).enter().append("rect").attr("x", d => xGrade(d.semester)).attr("y", d => yGrade(d.grade)).attr("width", xGrade.bandwidth()).attr("height", d => gradeHeight - yGrade(d.grade)).attr("fill", "steelblue");
+        gradeG.append("g").call(d3.axisBottom(xGrade)).attr("transform", `translate(0,${gradeHeight})`);
+        gradeG.append("g").call(d3.axisLeft(yGrade));
+
+        // Access Frequency Data (Bar Chart)
+        const accessFrequencyData = [
+            { month: "Jan", frequency: 16 },
+            { month: "Feb", frequency: 17 },
+            { month: "Mar", frequency: 20 },
+            { month: "Apr", frequency: 18 },
+            { month: "May", frequency: 14 },
+            { month: "Jun", frequency: 11 },
+            { month: "Jul", frequency: 12 },
+            { month: "Aug", frequency: 17 },
+            { month: "Sep", frequency: 21 },
+            { month: "Oct", frequency: 19 },
+            { month: "Nov", frequency: 21 },
+            { month: "Dec", frequency: 15 },
+        ];
+        const accessSvg = d3.select("#accessFrequencyChart");
+        const accessMargin = { top: 20, right: 30, bottom: 30, left: 40 };
+        const accessWidth = +accessSvg.attr("width") - accessMargin.left - accessMargin.right;
+        const accessHeight = +accessSvg.attr("height") - accessMargin.top - accessMargin.bottom;
+        const xAccess = d3.scaleBand().domain(accessFrequencyData.map(d => d.month)).range([0, accessWidth]).padding(0.1);
+        const yAccess = d3.scaleLinear().domain([0, 25]).range([accessHeight, 0]);
+        const accessG = accessSvg.append("g").attr("transform", `translate(${accessMargin.left},${accessMargin.top})`);
+        accessG.selectAll(".bar").data(accessFrequencyData).enter().append("rect").attr("x", d => xAccess(d.month)).attr("y", d => yAccess(d.frequency)).attr("width", xAccess.bandwidth()).attr("height", d => accessHeight - yAccess(d.frequency)).attr("fill", "steelblue");
+        accessG.append("g").call(d3.axisBottom(xAccess)).attr("transform", `translate(0,${accessHeight})`);
+        accessG.append("g").call(d3.axisLeft(yAccess).ticks(6));
+
+        // Assignment Submission Data (Pie Chart)
+        const assignmentData = [
+            { status: "On Time", percentage: 81 },
+            { status: "Late", percentage: 19 },
+        ];
+        const assignmentSvg = d3.select("#assignmentSubmissionChart");
+        const assignmentRadius = Math.min(+assignmentSvg.attr("width"), +assignmentSvg.attr("height")) / 2;
+        const assignmentGroup = assignmentSvg.append("g").attr("transform", `translate(${assignmentRadius},${assignmentRadius})`);
+        const assignmentPie = d3.pie().value(d => d.percentage);
+        const assignmentArc = d3.arc().innerRadius(0).outerRadius(assignmentRadius - 10);
+        assignmentGroup.selectAll("path").data(assignmentPie(assignmentData)).enter().append("path").attr("d", assignmentArc).attr("fill", (d, i) => (i === 0 ? "steelblue" : "orange"));
+        assignmentGroup.selectAll("text").data(assignmentPie(assignmentData)).enter().append("text").text(d => `${d.data.status}: ${d.data.percentage}%`).attr("transform", d => `translate(${assignmentArc.centroid(d)})`).attr("text-anchor", "middle").attr("fill", "white").style("font-size", "12px");
+    </script>
+</body>
+
+</html>

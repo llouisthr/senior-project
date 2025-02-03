@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #003366;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+        }
+
+        .menu-heading {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: white;
+            display: block;
+            margin: 5px 0;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .sub-menu {
+            margin-left: 15px;
+        }
+
+        .sidebar a:hover {
+            background-color: #00509E;
+        }
+
+        .sidebar a.active {
+            background-color: #00509E;
+        }
+
+        .import-button-sidebar {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 5px 0;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .import-button-sidebar:hover {
+            background-color: #0056b3;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            text-align: center;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 60%;
+        }
+
+        .welcome-message {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .import-box {
+            padding: 20px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .import-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .import-button:hover {
+            background-color: #0056b3;
+        }
+
+        .logout {
+    position: absolute;
+    bottom: 20px; /* Distance from the bottom of the sidebar */
+    right: 20px;  /* Distance from the right edge of the sidebar */
+    font-size: 24px; /* Adjust the size of the icon */
+    color: #fff; /* Default icon color */
+    transition: color 0.3s ease;
+}
+
+.sidebar {
+    position: relative; /* Makes the logout icon position relative to this container */
+}
+
+.logout a {
+    text-decoration: none;
+}
+
+.logout a:hover img {
+    filter: brightness(1.2); /* Brightens the icon when hovered */
+}
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>MUICT LEARNING</h2>
+        <div>
+            <!-- Adjusted Import Data button alignment -->
+            <a href="importdata.html" class="active">Import Data</a>
+            <div class="menu-heading">Dashboard</div>
+            <a href="course_dashboard.html">Course Overview</a>
+            <a href="student_profile.html">Student Profile</a>
+        </div>
+        <div class="logout">
+            <a href="logout.html">
+                <img src="logout-icon.png" alt="Logout" style="width: 24px; height: 24px;">
+            </a>
+        </div> 
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="welcome-message">Welcome to the page!!</div>
+            <div class="import-box">
+                <p>Import your data as an Excel/CSV file</p>
+                <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" style="display: none;">
+                <button class="import-button" onclick="document.getElementById('fileInput').click();">Import File</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

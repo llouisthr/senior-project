@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>MUICT LEARNING</h2>
+        <div>
+            <!-- Adjusted Import Data button alignment -->
+            <a href="importdata.html">Import Data</a>
+            <div class="menu-heading">Dashboard</div>
+            <a href="course_dashboard.html" class="active">Course Overview</a>
+            <a href="student_profile.html">Student Profile</a>
+        </div>
+        <div class="logout">
+            <a href="logout.html">
+                <img src="logout-icon.png" alt="Logout" style="width: 24px; height: 24px;">
+            </a>
+        </div>              
+    </div>
+    
+
+    <div class="main-content">
+        <div class="header">
+            <div class="dashboard-title">Dashboard &gt; Course Overview</div>
+            <select class="dropdown">
+                <option>Object Oriented Programming</option>
+            </select>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Student Enrollment</h3>
+                <p><strong>200</strong> Students Enrolled</p>
+            </div>
+            <div class="card">
+                <h3>Class Average Score</h3>
+                <p><strong>67/100</strong></p>
+            </div>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart" id="attendance-chart">
+                <h3>Student Engagement</h3>
+            </div>
+            <div class="chart" id="submission-chart">
+                <h3>Assignment Submissions</h3>
+            </div>
+            <div class="chart" id="score-distribution-chart">
+                <h3>Score Distribution</h3>
+            </div>
+        </div>
+
+        <div class="double-cards">
+            <div class="table-card">
+                <h3>TOP 5 Scores</h3>
+                <table>
+                    <tr><th>Name</th><th>Attendance</th><th>Score</th><th>GPA</th></tr>
+                    <tr><td>Mr. A</td><td>15/15</td><td>100</td><td>3.91</td></tr>
+                    <tr><td>Mr. B</td><td>14/15</td><td>99</td><td>3.87</td></tr>
+                    <tr><td>Mr. C</td><td>13/15</td><td>98</td><td>3.84</td></tr>
+                    <tr><td>Mr. B</td><td>14/15</td><td>99</td><td>3.87</td></tr>
+                    <tr><td>Mr. C</td><td>13/15</td><td>98</td><td>3.84</td></tr>
+                </table>
+            </div>
+            <div class="table-card">
+                <h3>LEAST 5 Scores</h3>
+                <table>
+                    <tr><th>Name</th><th>Attendance</th><th>Score</th><th>GPA</th></tr>
+                    <tr><td>Ms. V</td><td>8/15</td><td>51</td><td>2.15</td></tr>
+                    <tr><td>Ms. W</td><td>9/15</td><td>53</td><td>2.25</td></tr>
+                    <tr><td>Ms. W</td><td>9/15</td><td>53</td><td>2.25</td></tr>
+                    <tr><td>Ms. W</td><td>9/15</td><td>53</td><td>2.25</td></tr>
+                    <tr><td>Ms. W</td><td>9/15</td><td>53</td><td>2.25</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="course_dashboard_scripts.js"></script>
+</body>
+</html>
