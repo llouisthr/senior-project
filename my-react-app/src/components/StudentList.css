@@ -11,16 +11,16 @@ html, body { /* Target both html and body */
   
   .student-profile-container {
     display: flex;
-    width: 165%; /* Take full width */
+    width: 171%; /* Take full width */
     flex-grow: 1; /* Key: Allow container to grow to fill available height */
   }
   
   .sidebar {
     width: 250px;
-    background-color: #003366;
+    background-color: #093BCD;
     color: white;
     padding: 20px;
-    /* Remove fixed height: height: 100vh;  This was the main problem! */
+    height: 100vh;
   }
   
   
@@ -47,11 +47,11 @@ html, body { /* Target both html and body */
   }
   
   .sidebar a:hover {
-    background-color: #00509E;
+    background-color: #207AD7;
   }
   
   .sidebar a.active {
-    background-color: #00509E;
+    background-color: #207AD7;
   }
   
   .logout {
@@ -90,14 +90,72 @@ html, body { /* Target both html and body */
     height: 100%; /* Ensure main content takes up available height */
   }
   
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: white;
-    padding: 15px;
-    border-bottom: 1px solid #ddd;
-  }
+/* Header */
+.header {
+  width: calc(100% - 250px); /* Adjust width to fit next to sidebar */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  padding: 15px 20px;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  z-index: 1000;
+}
+
+.student-list-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  margin-top: 0px;
+}
+
+.student-list-box span {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.student-list-box select {
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none;
+  cursor: pointer;
+}
+
+.red {
+  background-color: red;
+}
+
+.orange {
+  background-color: orange;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+
+.filter-box, .sort-box, .semester-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.filter-box span, .sort-box span, .semester-box span {
+  font-size: 14px;
+  font-weight: normal;
+  color: #333;
+}
   
   .dashboard-title {
     font-size: 1.5rem;

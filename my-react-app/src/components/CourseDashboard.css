@@ -1,183 +1,294 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
+    background-color: #f5f5f5;
+    display: flex; /* Ensure sidebar and content are side by side */
 }
 
-.container {
-    display: flex;
-    width: 116.5%;
-    height: fixed; /* Full viewport height */
-}
-
+/* Sidebar */
 .sidebar {
     width: 250px;
-    background-color: #003366;
+    background-color: #093BCD;
     color: white;
     padding: 20px;
-    height: fixed; /* Full height */
-    position: fixed;
-    left: 0;
-    top: 0;
-    overflow-y: auto;
-}
-
+    height: 100vh;
+  }
 
 .sidebar h2 {
+    font-size: 20px;
     margin-bottom: 30px;
 }
 
-.menu-heading {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
 .sidebar a {
-    text-decoration: none;
     color: white;
-    display: block;
-    margin: 5px 0;
-    padding: 8px 15px;
-    border-radius: 5px;
-}
-
-.sidebar a:hover, .sidebar a.active {
-    background-color: #00509E;
-}
-
-.import-button-sidebar {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin: 5px 0;
-    padding: 8px 15px;
-    border-radius: 5px;
     text-decoration: none;
-    display: block;
-}
-
-.import-button-sidebar:hover {
-    background-color: #0056b3;
-}
-
-.main-content {
-    flex-grow: 1;
-    background-color: #f4f4f4;
-    padding: 20px;
-    margin-left: 0px; /* Align with sidebar width */
-    width: calc(100% - 250px); /* Take up remaining space */
-    min-height: 100vh; /* Ensure it fills the height */
-}
-
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: white;
-    padding: 15px;
-    border-bottom: 1px solid #ddd;
-}
-
-.dashboard-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.dropdown {
-    padding: 5px;
-    font-size: 1rem;
-}
-
-.cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.chart-row {
-    display: flex;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.chart {
-    flex: 1;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
     padding: 10px;
-    min-height: 200px;
-}
-
-.double-cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.table-card {
-    background-color: white;
-    padding: 20px;
+    display: block;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+.sidebar a.active {
+    background-color: #207AD7;
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-th {
-    background-color: #f4f4f4;
-}
-
-.single-chart {
-    margin-top: 20px;
-}
-
-input[type="text"] {
-    padding: 5px;
-    font-size: 1rem;
-    margin-right: 10px;
+.sidebar a:hover {
+    background-color: #207AD7;
 }
 
 .logout {
+    margin-top: auto;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 0px; /* Ensure it starts after the sidebar */
+    width: calc(100% - 250px); /* Prevent overlap */
+    padding: 20px;
+    position: absolute; /* Ensure it respects layout */
+    left: 250px;
+    top: 0;
+}
+
+
+/* Box container styling */
+.box {
+    display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: -20px;
+  margin-top: 18px;
+}
+
+.box-left {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.box-right select {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Single Main Card */
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1630px;
+    margin-top: 31px;
+    height: 780px; /* Adjust the height as needed */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .section-dropdown {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  
+
+/* First Row in Card */
+.card .first-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -200px;
+    margin-bottom: 0px;
+}
+
+.card .first-row .enrollment {
+    display: flex;
+    align-items: flex-start; /* Align text to the left */
+    gap: 5px; /* Small spacing between elements */
+    margin-bottom: 200px;
+}
+
+
+.card .first-row .enrollment div {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    gap: 5px; /* Add spacing between them */
+}
+
+.enrollment-details {
+    display: flex;
+    flex-direction: column; /* Force items to stack vertically */
+    gap: 5px;
+    font-size: 18px; /* Adjust for better readability */
+    margin-top: 150px;
+    margin-left: -300px;
+    align-items: flex-start; /* Align text to the left */
+}
+
+.card .first-row, .second-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .card .first-row .student-engagement {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .card .first-row .engagement-percentage {
+    font-size: 48px;
+    font-weight: bold;
+    color: green;
+  }
+  
+  .card .first-row .engagement-text {
+    font-size: 12px;
+    text-align: center;
+  }
+
+.card .first-row .chart-container {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    margin-left: 150px;
+    height: 350px;
+    width: 600px;
+}
+
+.card .first-row .chart-container .chart {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    margin: 0 10px;
+    margin-top: 50px;
+}
+
+/* Second Row in Card */
+.card .second-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -40px;
+    margin-bottom: 80px;
+    gap: 100px; /* This will increase the space between items */
+}
+
+.card .second-row .student-detect {
+  flex: 1;
+  text-align: center;
+}
+
+.card .second-row .detect-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between boxes */
+}
+
+.card .second-row .detect-box {
+  height: 150px; 
+  width: 200px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.card .second-row .risk-student, .outstanding-student {
+  flex: 1;
+  padding: 20px;
+  text-align: center;
+  background: #f8f8f8;
+  border-radius: 10px;
+  
+}
+
+.card .second-row .detect-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: red;
+  text-align: center;
+}
+
+.card .second-row .detect-label {
+  font-size: 14px;
+  text-align: center;
+}
+
+.card .second-row .quiz-table {
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
+  }
+  
+  .card .second-row .quiz-header {
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .card .second-row .quiz-list p {
+    margin: 5px 0;
+  }
+
+  .card .second-row .score-distribution {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .card .second-row .gauge-container {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .card .second-row .gauge {
+    text-align: center;
+  }
+
+.tabs {
     position: absolute;
-    bottom: 20px; /* Distance from the bottom of the sidebar */
-    right: 20px;  /* Distance from the right edge of the sidebar */
-    font-size: 24px; /* Adjust the size of the icon */
-    color: #fff; /* Default icon color */
-    transition: color 0.3s ease;
-}
+    bottom: 5px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+  }
 
-.sidebar {
-    position: relative; /* Makes the logout icon position relative to this container */
-}
+  .tab {
+    padding: 8px 16px;
+    border: none;
+    background: #f1f1f1;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.2s, background 0.2s;
+  }
 
-.logout a {
-    text-decoration: none;
-}
+  .tab:hover {
+    transform: translateY(-3px);
+  }
 
-.logout a:hover img {
-    filter: brightness(1.2); /* Brightens the icon when hovered */
-}
+  .tab:active {
+    transform: translateY(3px);
+  }
 
+  .active {
+    background: lightblue;
+  }
