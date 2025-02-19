@@ -116,8 +116,8 @@ const StudentProfileB = () => {
         renderLineChart(chartRefs.frequencyLineChart, frequencyData);
         renderDonutChart(chartRefs.subjectDonut, subjectAssignmentData);
         renderTripleBarChart(chartRefs.subjectBar, subjectAttendanceData);
-        renderGaugeChart(chartRefs.studentScoreGauge, studentScore, 100, "Current Score");
-        renderGaugeChart(chartRefs.averageScoreGauge, averageScore, 100, "Average Score");
+        renderGaugeChart(chartRefs.studentScoreGauge, studentScore, 100, "Current Score", "green");
+        renderGaugeChart(chartRefs.averageScoreGauge, averageScore, 100, "Average Score", "red");
     }, [chartRefs]);
 
 
@@ -476,7 +476,7 @@ const StudentProfileB = () => {
             .attr("fill", (d, i) => color(i));  // Different colors for each bar
     };
 
-    const renderGaugeChart = (chartRef, value, max = 100, label = "") => {
+    const renderGaugeChart = (chartRef, value, max = 100, label = "", color = "green") => {
         const width = 200, height = 120;
         const minAngle = -90, maxAngle = 90;
 
@@ -512,7 +512,7 @@ const StudentProfileB = () => {
 
         gaugeGroup.append("path")
             .attr("d", arcValue())
-            .attr("fill", "green");
+            .attr("fill", color);
 
 
         // Display Value Text

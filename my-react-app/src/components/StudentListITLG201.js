@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import './StudentList.css'; // Import CSS file
+import './StudentListITLG201.css'; // Import CSS file
 
-const StudentList = () => {
+const StudentListITLG201 = () => {
   const navigate = useNavigate(); // Hook for navigation
   const location = useLocation();
   const [expandedMenu, setExpandedMenu] = useState(null);
@@ -30,63 +30,53 @@ const StudentList = () => {
   };
 
   const students = [
-    { id: 'u6800001', name: 'Ms. Mattie Khan', attendance: '9/9', score: '48/50', quiz: '10/10', gpa: '3.91' },
+    { id: 'u6800001', name: 'Ms. Mattie Khan', attendance: '9/9', score: '49/50', quiz: '10/10', gpa: '3.95' },
     { id: 'u6800002', name: 'Ms. Shania Fischer', attendance: '5/9', score: '27/50', quiz: '4/10', gpa: '2.70', link: '/student-profile-B' },
     { id: 'u6800003', name: 'Mr. Damian Burnett', attendance: '8/9', score: '44/50', quiz: '9/10', gpa: '3.80' },
     { id: 'u6800004', name: 'Mr. Clarence Welch', attendance: '8/9', score: '43/50', quiz: '9/10', gpa: '3.75' },
     { id: 'u6800005', name: 'Mr. Neil Pitts', attendance: '6/9', score: '32/50', quiz: '6/10', gpa: '3.01' },
     { id: 'u6800006', name: 'Mr. Albert Chang', attendance: '6/9', score: '34/50', quiz: '7/10', gpa: '3.05' },
-    { id: 'u6800007', name: 'Mr. Jayden Armstrong', attendance: '8/9', score: '45/50', quiz: '9/10', gpa: '3.84' },
+    { id: 'u6800007', name: 'Mr. Jayden Armstrong', attendance: '8/9', score: '45/50', quiz: '9/10', gpa: '3.64' },
     { id: 'u6800008', name: 'Mr. Georgie Sheppard', attendance: '8/9', score: '45/50', quiz: '9/10', gpa: '3.68' },
     { id: 'u6800009', name: 'Ms. Carol Marquez', attendance: '8/9', score: '41/50', quiz: '8/10', gpa: '3.61' },
     { id: 'u6800010', name: 'Mr. Jay Small', attendance: '8/9', score: '40/50', quiz: '7/10', gpa: '3.59' },
     { id: 'u6800011', name: 'Ms. Annie Andrade', attendance: '7/9', score: '38/50', quiz: '7/10', gpa: '3.28' },
     { id: 'u6800012', name: 'Ms. Amelie Long', attendance: '7/9', score: '36/50', quiz: '6/10', gpa: '3.25' },
     { id: 'u6800013', name: 'Mr. Harold Stewart', attendance: '8/9', score: '39/50', quiz: '8/10', gpa: '3.39' },
-    { id: 'u6800014', name: 'Mr. Erik Rivas', attendance: '8/9', score: '45/50', quiz: '9/10', gpa: '3.87' },
+    { id: 'u6800014', name: 'Mr. Erik Rivas', attendance: '8/9', score: '42/50', quiz: '9/10', gpa: '3.48' },
     { id: 'u6800015', name: 'Mr. Jacob Mcgowan', attendance: '5/9', score: '25/50', quiz: '5/10', gpa: '2.68' },
-    { id: 'u6800016', name: "Ms. Amber Lee", attendance: "3/9", score: "22/50", quiz: '5/10', gpa: "2.50" },
-    { id: 'u6800017', name: "Ms. Stephanie Harvey", attendance: "9/9", score: "49/50", quiz: '10/10', gpa: "3.96" },
-    { id: 'u6800018', name: "Mr. John Doe", attendance: "9/9", score: "49/50", quiz: '10/10', gpa: "3.95"},
-    { id: 'u6800019', name: "Mr. Mike Gouldie", attendance: "5/9", score: "26/50", quiz: '5/10', gpa: "3.10"},
-    { id: "u6800020", name: "Mr. Andy Wang", attendance: "4/9", score: "24/50", quiz: '4/10', gpa: "2.61"},
-    { id: "u6800021", name: "Mr. John Tyler", attendance: "9/9", score: "49/50", quiz: '10/10', gpa: "3.94"}
   ];
 
-      // Function to convert attendance, score, and quiz to a number for sorting purposes (percentage)
-  const getPercentageValue = (data) => {
-    if (!data) return 0;
-    const [obtained, total] = data.split('/').map(Number);
-    return obtained / total;
+  // Function to convert attendance to a number for sorting purposes (percentage)
+  const getAttendanceValue = (attendance) => {
+    const [present, total] = attendance.split('/').map(Number);
+    return present / total;
   };
 
   // Function to handle sorting based on selected filter and order
-  const sortStudents = (students, filterOption, sortOption) => {
+  const sortStudents = (students) => {
     return students.sort((a, b) => {
-      let valueA = 0, valueB = 0;
+      let valueA, valueB;
 
-      switch (filterOption) {
-        case "attendance":
-          valueA = getPercentageValue(a.attendance);
-          valueB = getPercentageValue(b.attendance);
-          break;
-        case "score":
-          valueA = getPercentageValue(a.score);
-          valueB = getPercentageValue(b.score);
-          break;
-        case "cumuGPA":
-          valueA = a.gpa || 0;
-          valueB = b.gpa || 0;
-          break;
-        case "quiz":
-          valueA = getPercentageValue(a.quiz);
-          valueB = getPercentageValue(b.quiz);
-          break;
-        default:
-          return 0;
+      if (filterOption === "attendance") {
+        valueA = getAttendanceValue(a.attendance);
+        valueB = getAttendanceValue(b.attendance);
+      } else if (filterOption === "score") {
+        valueA = a.score;
+        valueB = b.score;
+      } else if (filterOption === "cumuGPA") {
+        valueA = a.gpa;
+        valueB = b.gpa;
+      } else if (filterOption === "quiz") {
+        valueA = a.quiz;
+        valueB = b.quiz;
       }
 
-      return sortOption === "ascending" ? valueA - valueB : valueB - valueA;
+      if (sortOption === "ascending") {
+        return valueA - valueB;
+      } else {
+        return valueB - valueA;
+      }
     });
   };
 
@@ -94,11 +84,8 @@ const StudentList = () => {
     students.filter(student => {
       if (!searchTerm) return true;
       return student.name.toLowerCase().includes(searchTerm.toLowerCase());
-    }),
-    filterOption,
-    sortOption
+    })
   );
-  
 
   return (
     <div className="student-profile-container">
@@ -188,7 +175,7 @@ const StudentList = () => {
             </thead>
             <tbody>
               {filteredAndSortedStudents.map((student) => {
-                const attendanceValue = getPercentageValue(student.attendance);
+                const attendanceValue = getAttendanceValue(student.attendance);
                 let rowClass = '';
                 if (attendanceValue <= 0.56) rowClass = 'red'; // 5/9 or lower
                 else if (attendanceValue <= 0.67) rowClass = 'orange'; // 6/9
@@ -219,4 +206,4 @@ const StudentList = () => {
   );
 };
 
-export default StudentList;
+export default StudentListITLG201;

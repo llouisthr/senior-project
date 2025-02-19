@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import './CourseDashboard.css';
+import './CourseDashboardITLG201.css';
 import * as d3 from 'd3';
 
-const CourseDashboard = () => {
+const ITLG201CourseDashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [expandedMenu, setExpandedMenu] = useState(null);
@@ -41,41 +41,40 @@ const CourseDashboard = () => {
                 engagement: 78,
                 attendance: [
                     { week: "W1", students: 60 },
-                    { week: "W2", students: 56 },
-                    { week: "W3", students: 53 },
-                    { week: "W4", students: 51 },
-                    { week: "W5", students: 47 },
+                    { week: "W2", students: 59 },
+                    { week: "W3", students: 55 },
+                    { week: "W4", students: 54 },
+                    { week: "W5", students: 52 },
                     { week: "W6", students: 45 },
                     { week: "W7", students: 53 },
-                    { week: "W8", students: 60 },
+                    { week: "W8", students: 56 },
                     { week: "W9", students: 52 }
                 ],
                 submissions: [
-                    { assignment: "A1", late: 5, onTime: 55 },
+                    { assignment: "A1", late: 8, onTime: 52 },
                     { assignment: "A2", late: 10, onTime: 50 },
-                    { assignment: "A3", late: 13, onTime: 47 },
-                    { assignment: "A4", late: 8, onTime: 52 }
+                    { assignment: "A3", late: 3, onTime: 57 },
+                    { assignment: "A4", late: 15, onTime: 15 }
                 ],
-                riskStudents: 1,
+                riskStudents: 5,
                 outstandingStudents: 3,
-                lowScoringQuizzes: ["Quiz 5 → 3/12"],
+                lowScoringQuizzes: ["Quiz 3 → 4/12", "Quiz 5 → 3/12"],
                 maxScore: 50,
                 medianScore: 40,
                 averageScore: 35,
                 atRiskStudentsName: [
-                    
+                    { id: "6800015", name: "Mr. Jacob Mcgowan", attendance: "5/9", score: "25/50", gpa: "2.68", lateAssignment: "5/9" },
                     { id: "6800002", name: "Ms. Shania Fischer", attendance: "5/9", score: "27/50", gpa: "2.70", lateAssignment: "3/9" },
                     // ... other students ...
                 ],
                 outstandingStudentsName: [
                     { id: "6800001", name: "Ms. Mattie Khan", attendance: "9/9", score: "48/50", gpa: "3.91", lateAssignment: "0/9" },
                     { id: "6800014", name: "Mr. Erik Rivas", attendance: "8/9", score: "45/50", gpa: "3.87", lateAssignment: "1/9" },
-                    { id: "6800013", name: "Mr. Harold Stewart", attendance: "8/9", score: "46/50", gpa: "3.89", lateAssignment: "0/9" },
                     // ... other students ...
                 ],
             },
             section2: {
-                enrollment: 70,
+                enrollment: 90,
                 engagement: 75,
                 attendance: [
                     { week: "W1", students: 50 },
@@ -89,31 +88,29 @@ const CourseDashboard = () => {
                     { week: "W9", students: 49 }
                 ],
                 submissions: [
-                    { assignment: "A1", late: 9, onTime: 61 },
-                    { assignment: "A2", late: 10, onTime: 60 },
-                    { assignment: "A3", late: 12, onTime: 58 },
-                    { assignment: "A4", late: 10, onTime: 60 }
+                    { assignment: "A1", late: 8, onTime: 50 },
+                    { assignment: "A2", late: 15, onTime: 45 },
+                    { assignment: "A3", late: 12, onTime: 48 },
+                    { assignment: "A4", late: 9, onTime: 51 }
                 ],
-                riskStudents: 2,
-                outstandingStudents: 2,
+                riskStudents: 5,
+                outstandingStudents: 3,
                 lowScoringQuizzes: ["Quiz 1 → 3/12", "Quiz 6 → 2/12"],
                 maxScore: 48,
                 medianScore: 37,
                 averageScore: 36,
                 atRiskStudentsName: [
-                    { id: "6800016", name: "Ms. Amber Lee", attendance: "3/9", score: "22/50", gpa: "2.50", lateAssignment: "6/9" },
-                    { id: "6800020", name: "Mr. Andy Wang", attendance: "4/9", score: "24/50", gpa: "2.68", lateAssignment: "6/9" },
+                    { id: "6800016", name: "Ms. Amber Lee", attendance: "4/9", score: "22/50", gpa: "2.50", lateAssignment: "6/9" },
                     // ... other students ...
                 ],
                 outstandingStudentsName: [
-                    { id: "6800017", name: "Ms. Stephanie Harvey", attendance: "9/9", score: "49/50", gpa: "3.96", lateAssignment: "0/9" },
-                    { id: "6800021", name: "Mr. John Tyler", attendance: "9/9", score: "49/50", gpa: "3.95", lateAssignment: "0/9" },
+                    { id: "6800017", name: "Mr. John Doe", attendance: "9/9", score: "49/50", gpa: "3.95", lateAssignment: "0/9" },
                     // ... other students ...
                 ],
             },
             section3: {
-                enrollment: 70,
-                engagement: 73,
+                enrollment: 90,
+                engagement: 78,
                 attendance: [
                     { week: "W1", students: 50 },
                     { week: "W2", students: 52 },
@@ -126,24 +123,23 @@ const CourseDashboard = () => {
                     { week: "W9", students: 49 }
                 ],
                 submissions: [
-                    { assignment: "A1", late: 10, onTime: 60 },
-                    { assignment: "A2", late: 15, onTime: 55 },
-                    { assignment: "A3", late: 13, onTime: 57 },
-                    { assignment: "A4", late: 12, onTime: 58 }
+                    { assignment: "A1", late: 8, onTime: 50 },
+                    { assignment: "A2", late: 15, onTime: 45 },
+                    { assignment: "A3", late: 12, onTime: 48 },
+                    { assignment: "A4", late: 9, onTime: 51 }
                 ],
-                riskStudents: 1,
-                outstandingStudents: 2,
+                riskStudents: 2,
+                outstandingStudents: 6,
                 lowScoringQuizzes: ["Quiz 2 → 5/12", "Quiz 4 → 6/12"],
                 maxScore: 45,
                 medianScore: 36,
                 averageScore: 34,
                 atRiskStudentsName: [
-                    { id: '6800019', name: "Mr. Mike Gouldie", attendance: "5/9", score: "26/50", gpa: "3.10", lateAssignment: "5/9" },
+                    { id: "6800016", name: "Ms. Amber Lee", attendance: "4/9", score: "22/50", gpa: "2.50", lateAssignment: "6/9" },
                     // ... other students ...
                 ],
                 outstandingStudentsName: [
-                    { id: "6800018", name: "Mr. John Doe", attendance: "9/9", score: "49/50", gpa: "3.95", lateAssignment: "0/9" },
-                    { id: "6800007", name: "Mr. Jayden Armstrong", attendance: "8/9", score: "45/50", gpa: "3.84", lateAssignment: "0/9" }
+                    { id: "6800017", name: "Mr. John Doe", attendance: "9/9", score: "49/50", gpa: "3.95", lateAssignment: "0/9" },
                     // ... other students ...
                 ],
             }
@@ -399,7 +395,7 @@ const CourseDashboard = () => {
                 </div>
             </div>
             <div className="main-content">
-                <h3>{selectedCourse ? `${selectedCourse} > Dashboard > Course Overview` : "Select a Course"}</h3>
+                <h3>{`ITLG201 > Dashboard > Course Overview`}</h3>
                 <div class="box">
                     <div class="box-left">
                         Course Dashboard
@@ -618,4 +614,4 @@ const CourseDashboard = () => {
     );
 };
 
-export default CourseDashboard;
+export default ITLG201CourseDashboard;
