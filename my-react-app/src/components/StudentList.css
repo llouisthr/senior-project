@@ -176,6 +176,26 @@ html, body { /* Target both html and body */
     border-radius: 5px;
   }
   
+  .risk-legend {
+    margin-bottom: 15px; /* Adds space below the legend */
+    display: flex;
+    gap: 20px; /* Adds gap between the two labels */
+    font-weight: bold;
+  }
+
+  .risk-filter-container {
+    display: flex;
+    justify-content: space-between; /* Pushes filter section to the right */
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .filter-section {
+    display: flex;
+    gap: 10px; /* Adds spacing between dropdown and button */
+  }
+  
+  
   .student-table {
     margin-top: 20px;
     background-color: white;

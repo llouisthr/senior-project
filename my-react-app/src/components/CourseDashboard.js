@@ -19,6 +19,18 @@ const CourseDashboard = () => {
     const [outstandingStudents, setOutstandingStudents] = useState(0);
     const [atRiskStudentsName, setAtRiskStudentsName] = useState([]);
     const [outstandingStudentsName, setOutstandingStudentsName] = useState([]);
+    const rawScores = [20, 40, 60, 80, 100, 40, 20]; // Example with duplicates
+    const scoreData = [...new Set(rawScores)]; // Removes duplicates
+
+    const rawStats = [
+        { label: "Max", value: 95 },
+        { label: "Mean", value: 75 },
+        { label: "Median", value: 65 },
+        { label: "Mean", value: 75 } // Duplicate for testing
+    ];
+    const statsData = Array.from(new Map(rawStats.map(item => [item.label, item])).values()); // Removes duplicates
+
+
 
     const toggleMenu = (menu) => {
         setExpandedMenu(expandedMenu === menu ? null : menu);
@@ -63,7 +75,7 @@ const CourseDashboard = () => {
                 medianScore: 40,
                 averageScore: 35,
                 atRiskStudentsName: [
-                    
+
                     { id: "6800002", name: "Ms. Shania Fischer", attendance: "5/9", score: "27/50", gpa: "2.70", lateAssignment: "3/9" },
                     // ... other students ...
                 ],
@@ -156,13 +168,8 @@ const CourseDashboard = () => {
 
     const attendanceChartRef = useRef(null);
     const submissionChartRef = useRef(null);
-    const maxScoreRef = useRef(null);
-    const medianScoreRef = useRef(null);
-    const averageScoreRef = useRef(null);
-
-    const maxScore = 69;
-    const medianScore = 47;
-    const averageScore = 43;
+    const scoreChartRef = useRef(null);
+    const statsChartRef = useRef(null);
 
 
     useEffect(() => {
@@ -173,14 +180,13 @@ const CourseDashboard = () => {
 
         renderAttendanceChart(attendanceChartRef, newData.attendance);
         renderSubmissionChart(submissionChartRef, newData.submissions);
-        renderGaugeChart(maxScoreRef, newData.maxScore, 100, "Max Score", "green");
-        renderGaugeChart(medianScoreRef, newData.medianScore, 100, "Median Score", "blue");
-        renderGaugeChart(averageScoreRef, newData.averageScore, 100, "Average Score", "orange");
 
         const pathParts = location.pathname.split("/").filter(Boolean); // Remove empty strings
         if (pathParts.length > 1) {
             setSelectedCourse(pathParts[0].toUpperCase()); // Set course name
         }
+
+        
 
         setEnrollment(newData.enrollment || 0);
         setEngagement(newData.engagement || 0);
@@ -189,7 +195,9 @@ const CourseDashboard = () => {
         setOutstandingStudents(newData.outstandingStudents || 0);
         setAtRiskStudentsName(newData.atRiskStudentsName || []);
         setOutstandingStudentsName(newData.outstandingStudentsName || []);
-    }, [maxScore, medianScore, averageScore, location.pathname, selectedSection]);
+        drawScoreChart();
+        drawStatsChart();
+    }, [location.pathname, selectedSection]);
 
 
     const renderAttendanceChart = (ref, data) => {
@@ -313,62 +321,110 @@ const CourseDashboard = () => {
     };
 
 
-    const renderGaugeChart = (ref, data, max = 100, label = "", color = "green") => {
-        const width = 250, height = 150;
-        const minAngle = -90, maxAngle = 90;
-
-        d3.select(ref.current).select("svg").remove();
-
-        const svg = d3.select(ref.current)
+    const drawScoreChart = () => {
+        // Clear existing chart before redrawing
+        d3.select(scoreChartRef.current).selectAll("*").remove();
+    
+        const width = 300, height = 200, margin = { top: 20, right: 20, bottom: 40, left: 40 };
+    
+        const svg = d3.select(scoreChartRef.current)
             .append("svg")
-            .attr("width", width)
-            .attr("height", height);
-
-        const gaugeGroup = svg.append("g")
-            .attr("transform", `translate(${width / 2}, ${height - 15})`);
-
-        const scale = d3.scaleLinear().domain([0, max]).range([minAngle, maxAngle]);
-
-        // Background Arc
-        const arc = d3.arc()
-            .innerRadius(40)
-            .outerRadius(50)
-            .startAngle((minAngle * Math.PI) / 180)
-            .endAngle((maxAngle * Math.PI) / 180);
-
-        gaugeGroup.append("path")
-            .attr("d", arc())
-            .attr("fill", "#ddd");
-
-        // Foreground Arc (Value Indicator)
-        const arcValue = d3.arc()
-            .innerRadius(40)
-            .outerRadius(50)
-            .startAngle((minAngle * Math.PI) / 180)
-            .endAngle((scale(data) * Math.PI) / 180);
-
-        gaugeGroup.append("path")
-            .attr("d", arcValue())
-            .attr("fill", color);
-
-        // Display Value Text
-        gaugeGroup.append("text")
-            .attr("x", 0)
-            .attr("y", -20)  // Adjusted for better visibility
-            .attr("text-anchor", "middle")
-            .style("font-size", "16px")
-            .attr("font-weight", "bold")
-            .text(`${data}`);
-
-        // Label Text
-        svg.append("text")
-            .attr("x", width / 2)
-            .attr("y", height - 2)  // Positioned below the gauge
-            .attr("text-anchor", "middle")
-            .style("font-size", "14px")
-            .text(label);
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    
+        const rawScores = [20, 40, 60, 80, 100, 40, 20]; // Example with duplicates
+        const uniqueScores = [...new Set(rawScores)]; // Remove duplicates
+    
+        const data = uniqueScores.map(score => ({
+            score,
+            students: Math.floor(Math.random() * 100),
+        }));
+    
+        const xScale = d3.scaleBand()
+            .domain(data.map(d => d.score))
+            .range([0, width])
+            .padding(0.1);
+    
+        const yScale = d3.scaleLinear()
+            .domain([0, 100])
+            .range([height, 0]);
+    
+        // Draw bars
+        svg.selectAll("rect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", d => xScale(d.score))
+            .attr("y", d => yScale(d.students))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.students))
+            .attr("fill", "steelblue");
+    
+        // Add X-axis
+        svg.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(xScale));
+    
+        // Add Y-axis
+        svg.append("g")
+            .call(d3.axisLeft(yScale));
     };
-
+    
+    const drawStatsChart = () => {
+        // Clear existing chart before redrawing
+        d3.select(statsChartRef.current).selectAll("*").remove();
+    
+        const width = 300, height = 200, margin = { top: 20, right: 20, bottom: 40, left: 40 };
+    
+        const svg = d3.select(statsChartRef.current)
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    
+        const rawStats = [
+            { label: "Max", value: 95 },
+            { label: "Mean", value: 75 },
+            { label: "Median", value: 65 },
+            { label: "Mean", value: 75 } // Duplicate for testing
+        ];
+    
+        const uniqueStats = Array.from(new Map(rawStats.map(item => [item.label, item])).values());
+    
+        const xScale = d3.scaleBand()
+            .domain(uniqueStats.map(d => d.label))
+            .range([0, width])
+            .padding(0.1);
+    
+        const yScale = d3.scaleLinear()
+            .domain([0, 100])
+            .range([height, 0]);
+    
+        // Draw bars
+        svg.selectAll("rect")
+            .data(uniqueStats)
+            .enter()
+            .append("rect")
+            .attr("x", d => xScale(d.label))
+            .attr("y", d => yScale(d.value))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.value))
+            .attr("fill", "orange");
+    
+        // Add X-axis
+        svg.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(xScale));
+    
+        // Add Y-axis
+        svg.append("g")
+            .call(d3.axisLeft(yScale));
+    };
+    
+    
 
     return (
         <div className="container">
@@ -376,17 +432,24 @@ const CourseDashboard = () => {
                 <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
                     MUICT LEARNING
                 </h2>
+
                 <div>
-                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>Course</div>
+                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
+                        Course
+                    </div>
                     {expandedMenu === "course" && (
                         <div className="submenu" style={{ cursor: "pointer" }}>
                             {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
                                 <div key={course}>
                                     <a onClick={() => toggleSubmenu(course)}>{course}</a>
                                     {expandedSubmenu === course && (
-                                        <div className="nested-submenu">
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ cursor: "pointer" }}>Dashboard</a>
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ cursor: "pointer" }}>Student List</a>
+                                        <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
+                                            <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                                                Dashboard
+                                            </a>
+                                            <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
+                                                Student List
+                                            </a>
                                         </div>
                                     )}
                                 </div>
@@ -395,7 +458,9 @@ const CourseDashboard = () => {
                     )}
                 </div>
                 <div>
-                    <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>Power BI</div>
+                    <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
+                        Power BI
+                    </div>
                 </div>
             </div>
             <div className="main-content">
@@ -404,7 +469,14 @@ const CourseDashboard = () => {
                     <div class="box-left">
                         Course Dashboard
                     </div>
-                    <div class="box-right">
+                    <div class="box-right" style={{ display: 'flex', gap: '10px' }}>
+
+                        <select className="dropdown" value={selectedSection} onChange={e => setSelectedSection(e.target.value)}>
+                            <option value="all">All Sections</option>
+                            <option value="section1">Section 1</option>
+                            <option value="section2">Section 2</option>
+                            <option value="section3">Section 3</option>
+                        </select>
                         <select class="dropdown">
                             <option>Semester 1 - 2025</option>
                             <option>Semester 2 - 2025</option>
@@ -421,26 +493,13 @@ const CourseDashboard = () => {
                                         {enrollment} Students Enrolled
                                     </span>
                                 </div>
-
-                                <select
-                                    value={selectedSection}
-                                    onChange={handleSectionChange}
-                                    className="section-dropdown"
-                                >
-                                    <option value="section1">Section 1</option>
-                                    <option value="section2">Section 2</option>
-                                    <option value="section3">Section 3</option>
-                                </select>
                             </div>
 
                             {/* Student Engagement */}
                             <div className="first-row">
                                 <div className="student-engagement">
-                                    <h3>Student Engagement</h3>
-                                    <p className="engagement-percentage">{engagement}</p>
-                                    <p className="engagement-text">
-                                        From Attendance + Exit Ticket + Assignment Submissions
-                                    </p>
+                                    <h3>Student Engagement in Attendance</h3>
+                                    <p className="engagement-percentage">{engagement}%</p>
                                 </div>
 
                                 {/* Attendance Chart */}
@@ -458,138 +517,90 @@ const CourseDashboard = () => {
                                 </div>
                             </div>
                             <div className="second-row">
-                                {/* Student Detect */}
-                                <div className="student-detect">
-                                    <h3>Student Detect</h3>
-                                    <div className="detect-container">
+                                {/* At-Risk & Student Detect */}
+                                <div className="at-risk-detect-container" style={{ display: "flex", gap: "20px" }}>
+                                    {/* Student Detect */}
+                                    <div className="student-detect" onClick={() => setActiveTab("at-risk")} style={{ cursor: "pointer", flex: "1" }}>
+                                        <h3>Student Detect</h3>
                                         <div className="detect-box risk-student">
                                             <p className="detect-number">{riskStudents}</p>
                                             <p className="detect-label">At-Risk Students</p>
                                         </div>
-                                        <div className="detect-box outstanding-student">
-                                            <p className="detect-number" style={{ color: 'green' }}>{outstandingStudents}</p>
-                                            <p className="detect-label">Outstanding Students</p>
+                                    </div>
+
+                                    {/* Low Scoring Quiz */}
+                                    <div className="low-scoring-quiz" style={{ flex: "1" }}>
+                                        <h4>Low Scoring Quizzes</h4>
+                                        <div className="quiz-table">
+                                            <div className="quiz-list">
+                                                {Array.isArray(lowScoringQuizzes) ? (
+                                                    lowScoringQuizzes.map((quiz, index) => (
+                                                        <p key={index}>{quiz}</p>
+                                                    ))
+                                                ) : (
+                                                    <p>No quizzes available</p> // Fallback if data is not an array
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Low Scoring Quiz */}
-                                <div className="low-scoring-quiz">
-                                    <h4>Low Scoring Quizzes</h4>
-                                    <div className="quiz-table">
-                                        <div className="quiz-list">
-                                            {Array.isArray(lowScoringQuizzes) ? (
-                                                lowScoringQuizzes.map((quiz, index) => (
-                                                    <p key={index}>{quiz}</p>
-                                                ))
-                                            ) : (
-                                                <p>No quizzes available</p> // Fallback if data is not an array
-                                            )}
-                                        </div>
-
-
-                                    </div>
-                                </div>
-
+                                {/* Score Distribution */}
                                 <div className="score-distribution">
-                                    <h4>Score Distribution</h4>
-
-                                    <div className="gauge-container">
-                                        <div ref={maxScoreRef}></div>
-                                        <div ref={medianScoreRef}></div>
-                                        <div ref={averageScoreRef}></div>
+                                    <h4 style={{ marginBottom: "20px" }}>Score Distribution</h4>
+                                    <div className="charts-container" style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
+                                        {scoreData.length > 0 && <div className="chart small-chart" ref={scoreChartRef}></div>}
+                                        {statsData.length > 0 && <div className="chart small-chart" ref={statsChartRef}></div>}
                                     </div>
                                 </div>
+
+
                             </div>
+
                         </>
                     )}
 
 
                     {activeTab === "at-risk" && (
-                        <div className="content" style={{ display: "flex", flexDirection: "column", alignItems: "center", height: "900px" }}>
-
-                            {/* Card Header with Enrollment and Section Dropdown */}
-                            <div className="card-header" style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 20px", backgroundColor: "#f8f8f8" }}>
-                                <div className="enrollment">
-                                    <span className="enrollment-icon">📚</span>
-                                    <span style={{ fontWeight: 'bold', fontSize: '24px' }}>
-                                        {enrollment} Students Enrolled
-                                    </span>
-                                </div>
-
-                                <select
-                                    value={selectedSection}
-                                    onChange={handleSectionChange}
-                                    className="section-dropdown"
-                                >
-                                    <option value="section1">Section 1</option>
-                                    <option value="section2">Section 2</option>
-                                    <option value="section3">Section 3</option>
-                                </select>
-                            </div>
-
-                            {/* At-Risk and Outstanding Students Tables */}
-                            <div style={{ display: "flex", justifyContent: "center", gap: "50px", width: "100%", flexGrow: 1 }}>
-
-                                {/* At-Risk Students Table */}
-                                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                    <h3 style={{ color: "red", textAlign: "center" }}>At-risk Students</h3>
-                                    <table border="1" width="80%" style={{ textAlign: "center" }}>
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Name</th>
-                                                <th>Attendance</th>
-                                                <th>Score</th>
-                                                <th>GPA</th>
-                                                <th>Late Assignment</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {atRiskStudentsName.map(student => (
-                                                <tr key={student.id}>
-                                                    <td>{student.id}</td>
-                                                    <td>{student.name}</td>
-                                                    <td>{student.attendance}</td>
-                                                    <td>{student.score}</td>
-                                                    <td>{student.gpa}</td>
-                                                    <td>{student.lateAssignment}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {/* Outstanding Students Table */}
-                                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                    <h3 style={{ color: "green", textAlign: "center" }}>Outstanding Students</h3>
-                                    <table border="1" width="80%" style={{ textAlign: "center" }}>
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Name</th>
-                                                <th>Attendance</th>
-                                                <th>Score</th>
-                                                <th>GPA</th>
-                                                <th>Late Assignment</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {outstandingStudentsName.map(student => (
-                                                <tr key={student.id}>
-                                                    <td>{student.id}</td>
-                                                    <td>{student.name}</td>
-                                                    <td>{student.attendance}</td>
-                                                    <td>{student.score}</td>
-                                                    <td>{student.gpa}</td>
-                                                    <td>{student.lateAssignment}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        <div className="content" style={{ display: "flex", flexDirection: "column", alignItems: "center", height: "900px", width: "100%" }}>
+                        {/* At-Risk Students Table */}
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%", padding: "20px" }}>
+                            <h3 style={{ color: "red", textAlign: "center" }}>At-risk Students</h3>
+                            <table border="1" width="90%" style={{ textAlign: "center" }}>
+                                <thead>
+                                    <tr>
+                                        <th>Profile</th>
+                                        <th>Status</th>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Attendance (9)</th>
+                                        <th>Score (50)</th>
+                                        <th>Missing Quiz (10)</th>
+                                        <th>Advisor</th>
+                                        <th>Staff</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {atRiskStudentsName.map(student => (
+                                        <tr key={student.id}>
+                                            <td>
+                                                <img src={student.profilePhoto} alt="Profile" width="40" height="40" style={{ borderRadius: "50%" }} />
+                                            </td>
+                                            <td style={{ color: student.status === 'red' ? 'red' : 'yellow' }}>
+                                                ●
+                                            </td>
+                                            <td>{student.id}</td>
+                                            <td>{student.name}</td>
+                                            <td>{student.attendance}</td>
+                                            <td>{student.score}</td>
+                                            <td>{student.missingQuiz}</td>
+                                            <td>{student.advisor}</td>
+                                            <td>{student.staff}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
                     )}
 
 

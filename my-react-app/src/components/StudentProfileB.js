@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as d3 from 'd3';
+import personIcon from "./person.jpg";
 import './StudentProfileB.css';
 
 const StudentProfileB = () => {
@@ -24,18 +25,10 @@ const StudentProfileB = () => {
         assignmentDonut: useRef(null),
         attendanceChart: useRef(null),
         frequencyLineChart: useRef(null),
+        attendanceLineChart: useRef(null),
         subjectDonut: useRef(null),
         subjectBar: useRef(null),
-        studentScoreGauge: useRef(null),
-        averageScoreGauge: useRef(null)
     };
-
-    const gradeTrendData = [
-        { label: '1st year 1st sem', value: 4.00 },
-        { label: '1st year 2nd sem', value: 3.56 },
-        { label: '2nd year 1st sem', value: 3.72 },
-        { label: '2nd year 2nd sem', value: 3.41 }
-    ];
 
     const subjectScoreData = [
         { label: 'W1', value: 5 },
@@ -69,13 +62,14 @@ const StudentProfileB = () => {
 
     const assignmentData = [
         { label: 'On Time', value: 80 },
-        { label: 'Late', value: 20 }
+        { label: 'Late', value: 20 },
+        { label: 'No submission', value: 10 }
     ];
 
     const attendanceData = [
-        { category: 'January', value1: 30, value2: 80, value3: 55 },
-        { category: 'February', value1: 60, value2: 40, value3: 90 },
-        { category: 'March', value1: 70, value2: 60, value3: 45 }
+        { label: 'Absent', value: 20 },
+        { label: 'Late', value: 25 },
+        { label: 'Present', value: 55 }
     ];
 
     const frequencyData = [
@@ -87,21 +81,25 @@ const StudentProfileB = () => {
 
     const subjectAssignmentData = [
         { label: 'On Time', value: 55 },
-        { label: 'Late', value: 45 }
+        { label: 'Late', value: 35 },
+        { label: 'No submission', value: 10 }
     ];
 
     const subjectAttendanceData = [
-        { category: 'January', value1: 30, value2: 80, value3: 55 },
-        { category: 'February', value1: 60, value2: 40, value3: 90 },
-        { category: 'March', value1: 70, value2: 60, value3: 45 }
+        { label: "W1", value: 1 },
+        { label: "W2", value: 1 },
+        { label: "W3", value: 1 },
+        { label: "W4", value: 0 },
+        { label: "W5", value: 0 },
+        { label: "W6", value: 1 },
+        { label: "W7", value: 0 },
+        { label: "W8", value: 1 },
+        { label: "W9", value: 0 }
     ];
 
-    const studentScore = 44;
-    const averageScore = 46;
-
     useEffect(() => {
-        renderSecondLineChart(chartRefs.gradeChart, gradeTrendData);
-        renderThirdLineChart(chartRefs.subjectScoreChart, subjectScoreData); // Make sure to pass the correct ref here
+        renderThirdLineChart(chartRefs.subjectScoreChart, subjectScoreData);
+        renderSecondLineChart(chartRefs.attendanceLineChart, subjectAttendanceData)
 
         if (chartRefs.activityRadarChart.current && chartRefs.skillsRadarChart.current) {
             renderRadarChart(chartRefs.activityRadarChart, activityData,
@@ -112,12 +110,10 @@ const StudentProfileB = () => {
         }
 
         renderDonutChart(chartRefs.assignmentDonut, assignmentData);
-        renderTripleBarChart(chartRefs.attendanceChart, attendanceData);
+        renderSecondDonutChart(chartRefs.attendanceChart, attendanceData);
         renderLineChart(chartRefs.frequencyLineChart, frequencyData);
         renderDonutChart(chartRefs.subjectDonut, subjectAssignmentData);
         renderTripleBarChart(chartRefs.subjectBar, subjectAttendanceData);
-        renderGaugeChart(chartRefs.studentScoreGauge, studentScore, 100, "Current Score", "green");
-        renderGaugeChart(chartRefs.averageScoreGauge, averageScore, 100, "Average Score", "red");
     }, [chartRefs]);
 
 
@@ -149,6 +145,7 @@ const StudentProfileB = () => {
         svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y));
+            
 
         svg.append("path")
             .datum(data)
@@ -173,51 +170,60 @@ const StudentProfileB = () => {
     const renderSecondLineChart = (ref, data) => {
         const svg = d3.select(ref.current);
         svg.selectAll("*").remove();
-
-        const width = 500, height = 300;
-        const margin = { top: 10, right: -140, bottom: 150, left: 300 };
-
+    
+        const width = 250, height = 300;
+        const margin = { top: 60, right: -40, bottom: 50, left: 30 };
+    
+        // Create x scale (using the week labels as the domain)
         const x = d3.scalePoint()
-            .domain(data.map(d => d.label))
+            .domain(data.map(d => d.label))  // Using 'label' (e.g., W1, W2, W3, etc.)
             .range([margin.left, width - margin.right]);
-
+    
+        // Create y scale (domain is [0, 1] since values are binary)
         const y = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d.value)])
-            .nice()
+            .domain([0, 1])  // Only 0 and 1
             .range([height - margin.bottom, margin.top]);
-
+    
         const line = d3.line()
             .x(d => x(d.label))
             .y(d => y(d.value))
             .curve(d3.curveMonotoneX);
-
+    
+        // X axis with points for each week
         svg.append("g")
             .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x));
-
+    
+        // Y axis with ticks for 0 and 1, formatted as integers
         svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
-            .call(d3.axisLeft(y));
-
+            .call(d3.axisLeft(y)
+                .tickValues([0, 1])  // Show only 0 and 1 on the y-axis
+                .tickFormat(d3.format("d"))  // Format ticks as integers (d stands for integer format)
+            );
+    
+        // Line path
         svg.append("path")
             .datum(data)
             .attr("fill", "none")
             .attr("stroke", "steelblue")
             .attr("stroke-width", 2)
             .attr("d", line);
-
-        // Add circular markers (plots)
+    
+        // Add circular markers (dots) for each data point
         svg.selectAll(".dot")
             .data(data)
             .enter().append("circle")
             .attr("class", "dot")
             .attr("cx", d => x(d.label))
             .attr("cy", d => y(d.value))
-            .attr("r", 5) // Radius of the dots
+            .attr("r", 5)  // Radius of the dots
             .attr("fill", "red")
             .attr("stroke", "black")
             .attr("stroke-width", 1);
     };
+    
+
 
     const renderThirdLineChart = (ref, data) => {
         console.log(ref, data); // Log the ref and data
@@ -374,10 +380,19 @@ const StudentProfileB = () => {
 
         const radius = Math.min(width, height) / 2 - margin.top;
 
+
         // Create a color scale
         const color = d3.scaleOrdinal()
             .domain(data.map(d => d.label))
             .range(d3.schemeSet2);
+
+        // Modify the color of "No submission" specifically to red
+        const getColor = (label) => {
+            if (label === "No submission") {
+                return "red";
+            }
+            return color(label); // Return default color for other labels
+        };
 
         // Create a pie chart layout
         const pie = d3.pie()
@@ -407,14 +422,15 @@ const StudentProfileB = () => {
         // Draw the slices of the donut
         slices.append("path")
             .attr("d", arc)
-            .attr("fill", d => color(d.data.label));
+            .attr("fill", d => getColor(d.data.label));
 
         // Add labels to each slice
         slices.append("text")
             .attr("transform", d => `translate(${arcLabel.centroid(d)})`)
-            .attr("dy", ".35em")
+            .attr("dy", ".15em")
             .style("text-anchor", "middle")
-            .text(d => `${d.data.label} (${((d.data.value / total) * 100).toFixed(1)}%)`);
+            .style("font-size", "15px")
+            .text(d => `(${((d.data.value / total) * 100).toFixed(1)}%)`);
 
         // Add an optional outer circle (border for the donut)
         g.append("circle")
@@ -422,7 +438,128 @@ const StudentProfileB = () => {
             .style("fill", "none")
             .style("stroke", "black")
             .style("stroke-width", 2);
+
+        // Add legend in the middle of the donut
+        const legend = g.append("g")
+            .attr("transform", "translate(0, 0)")
+            .attr("text-anchor", "middle");
+
+        data.forEach((d, i) => {
+            const legendItem = legend.append("g")
+                .attr("transform", `translate(0, ${i * 15 - (data.length * 7.5)})`);
+
+            legendItem.append("rect")
+                .attr("x", -50)
+                .attr("y", -6)
+                .attr("width", 12)
+                .attr("height", 12)
+                .style("fill", getColor(d.label));
+
+            legendItem.append("text")
+                .attr("x", 10)
+                .attr("y", 0)
+                .attr("dy", "0.3em")
+                .style("font-size", "12px")
+                .text(d.label);
+        });
     };
+
+    const renderSecondDonutChart = (ref, data) => {
+        const svg = d3.select(ref.current);
+        svg.selectAll("*").remove();
+
+        const width = 300, height = 300;
+        const margin = { top: 30, right: 10, bottom: 50, left: 10 };
+
+        const radius = Math.min(width, height) / 2 - margin.top;
+
+
+        // Create a color scale
+        const color = d3.scaleOrdinal()
+            .domain(data.map(d => d.label))
+            .range(d3.schemeSet2);
+
+        // Modify the color of "No submission" specifically to red
+        const getColor = (label) => {
+            if (label === "Absent") {
+                return "red";
+            }
+            if (label === "Present") {
+                return "green";
+            }
+            return color(label); // Return default color for other labels
+        };
+
+        // Create a pie chart layout
+        const pie = d3.pie()
+            .value(d => d.value)
+            .sort(null);
+
+        const arc = d3.arc()
+            .innerRadius(radius - 50)  // Set the inner radius to create the "hole"
+            .outerRadius(radius);
+
+        const arcLabel = d3.arc()
+            .innerRadius(radius - 40)
+            .outerRadius(radius - 40);
+
+        const total = d3.sum(data, d => d.value);
+
+        // Append a group element to the SVG to center the donut chart
+        const g = svg.append("g")
+            .attr("transform", `translate(${width / 2},${height / 2})`);
+
+        // Create the pie chart slices
+        const slices = g.selectAll(".slice")
+            .data(pie(data))
+            .enter().append("g")
+            .attr("class", "slice");
+
+        // Draw the slices of the donut
+        slices.append("path")
+            .attr("d", arc)
+            .attr("fill", d => getColor(d.data.label));
+
+        // Add labels to each slice
+        slices.append("text")
+            .attr("transform", d => `translate(${arcLabel.centroid(d)})`)
+            .attr("dy", ".15em")
+            .style("text-anchor", "middle")
+            .style("font-size", "15px")
+            .text(d => `(${((d.data.value / total) * 100).toFixed(1)}%)`);
+
+        // Add an optional outer circle (border for the donut)
+        g.append("circle")
+            .attr("r", radius)
+            .style("fill", "none")
+            .style("stroke", "black")
+            .style("stroke-width", 2);
+
+        // Add legend in the middle of the donut
+        const legend = g.append("g")
+            .attr("transform", "translate(0, 0)")
+            .attr("text-anchor", "middle");
+
+        data.forEach((d, i) => {
+            const legendItem = legend.append("g")
+                .attr("transform", `translate(0, ${i * 15 - (data.length * 7.5)})`);
+
+            legendItem.append("rect")
+                .attr("x", -50)
+                .attr("y", -6)
+                .attr("width", 12)
+                .attr("height", 12)
+                .style("fill", getColor(d.label));
+
+            legendItem.append("text")
+                .attr("x", 10)
+                .attr("y", 0)
+                .attr("dy", "0.3em")
+                .style("font-size", "12px")
+                .text(d.label);
+        });
+    };
+
 
     const renderTripleBarChart = (ref, data) => {
         const svg = d3.select(ref.current);
@@ -476,81 +613,30 @@ const StudentProfileB = () => {
             .attr("fill", (d, i) => color(i));  // Different colors for each bar
     };
 
-    const renderGaugeChart = (chartRef, value, max = 100, label = "", color = "green") => {
-        const width = 200, height = 120;
-        const minAngle = -90, maxAngle = 90;
-
-        d3.select(chartRef.current).select("svg").remove();
-
-        const svg = d3.select(chartRef.current)
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height);
-
-        const gaugeGroup = svg.append("g")
-            .attr("transform", `translate(${width / 2}, ${height - 10})`);
-
-        const scale = d3.scaleLinear().domain([0, max]).range([minAngle, maxAngle]);
-
-        // Background Arc
-        const arc = d3.arc()
-            .innerRadius(40)
-            .outerRadius(50)
-            .startAngle((minAngle * Math.PI) / 180)
-            .endAngle((maxAngle * Math.PI) / 180);
-
-        gaugeGroup.append("path")
-            .attr("d", arc())
-            .attr("fill", "#ddd");
-
-        // Foreground Arc (Value Indicator)
-        const arcValue = d3.arc()
-            .innerRadius(40)
-            .outerRadius(50)
-            .startAngle((minAngle * Math.PI) / 180)
-            .endAngle((scale(value) * Math.PI) / 180);
-
-        gaugeGroup.append("path")
-            .attr("d", arcValue())
-            .attr("fill", color);
-
-
-        // Display Value Text
-        gaugeGroup.append("text")
-            .attr("x", 0)
-            .attr("y", -18)  // Adjusted for better visibility
-            .attr("text-anchor", "middle")
-            .style("font-size", "16px")
-            .attr("font-weight", "bold")
-            .text(`${value}`);
-
-        // Label Text
-        svg.append("text")
-            .attr("x", width / 2)
-            .attr("y", height - 2)  // Positioned below the gauge
-            .attr("text-anchor", "middle")
-            .style("font-size", "12px")
-            .text(label);
-    };
-
-
     return (
         <div className="student-profile-page-b-container">
             <div className="sidebar">
                 <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
                     MUICT LEARNING
                 </h2>
+
                 <div>
-                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>Course</div>
+                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
+                        Course
+                    </div>
                     {expandedMenu === "course" && (
-                        <div className="submenu">
+                        <div className="submenu" style={{ cursor: "pointer" }}>
                             {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
                                 <div key={course}>
                                     <a onClick={() => toggleSubmenu(course)}>{course}</a>
                                     {expandedSubmenu === course && (
-                                        <div className="nested-submenu">
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ cursor: "pointer" }}>Dashboard</a>
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ cursor: "pointer" }}>Student List</a>
+                                        <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
+                                            <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                                                Dashboard
+                                            </a>
+                                            <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
+                                                Student List
+                                            </a>
                                         </div>
                                     )}
                                 </div>
@@ -559,7 +645,9 @@ const StudentProfileB = () => {
                     )}
                 </div>
                 <div>
-                    <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>Power BI</div>
+                    <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
+                        Power BI
+                    </div>
                 </div>
             </div>
 
@@ -576,108 +664,27 @@ const StudentProfileB = () => {
                     </select>
                 </div>
 
-                {infoOption === "thisSubject" && (
-                    <div>
-                        <div className="info-container">
-                            {/* Student Information */}
-                            <div className="student-info">
-                                <h2>Student Information</h2>
-                                <p><strong>Name:</strong> Ms. Shania Fischer</p>
-                                <p><strong>ID:</strong> u6800002</p>
-                                <p><strong>Cumulative GPA:</strong> 3.37</p>
-                                <p><strong>Email:</strong> shania@email.com</p>
-                                <p><strong>Contact:</strong> +66 1234 5678</p>
-                                <p><strong>High School:</strong> --- </p>
-                                <p><strong>Final High School GPA:</strong> 3.68</p>
-                            </div>
-
-                            {/* Grade Trend */}
-                            <div className="grade-trend">
-                                <h2>Grade Trend</h2>
-                                <svg ref={chartRefs.subjectScoreChart} width={500} height={190}></svg>
-
-                            </div>
-                        </div>
-                        {/* First Row */}
-                        <div className="chart-row">
-                            <div className="chart-box">
-                                <h3>Mycourse Access Frequency</h3>
-                                <svg ref={chartRefs.frequencyLineChart} width={400} height={250}></svg>
-                            </div>
-
-                            <div className="chart-box">
-                                <h3>Assignment Submission</h3>
-                                <svg ref={chartRefs.subjectDonut} width={300} height={300}></svg>
-                            </div>
-                            <div className="chart-box">
-                                <h3>Attendance</h3>
-                                <svg ref={chartRefs.subjectBar} width={300} height={300}></svg>
-                            </div>
-                        </div>
-
-                        {/* Second Row */}
-                        <div className="chart-row">
-                            {/* Left Box: Low-Scoring Quiz and Missing Assignment */}
-                            <div className="chart-box">
-                                <h3>Low-Scoring Quiz</h3>
-                                <table ref={chartRefs.quizTable}>
-                                    {/* Table data here */}
-                                    <tr><td>Quiz 1</td><td>45%</td></tr>
-                                    <tr><td>Quiz 2</td><td>50%</td></tr>
-                                </table>
-                            </div>
-                            <div className="chart-box">
-                                <h3>Missing Assignment</h3>
-                                <table ref={chartRefs.missingAssignments}>
-                                    {/* Table data here */}
-                                    <tr><td>Assignment 1</td><td>Missing</td></tr>
-                                    <tr><td>Assignment 2</td><td>Missing</td></tr>
-                                </table>
-                            </div>
-
-                            {/* Middle Box: Current Score vs Class Average */}
-                            <div className="chart-box">
-                                <h3>Current Score VS Class Average</h3>
-                                <div style={{ textAlign: "center" }}>
-                                    <svg ref={chartRefs.studentScoreGauge} width={200} height={200}></svg>
-                                    <p>compare with</p>
-                                    <svg ref={chartRefs.averageScoreGauge} width={200} height={200}></svg>
-                                </div>
-                            </div>
-
-                            {/* Right Box: Average Exit Ticket Score */}
-                            <div className="chart-box">
-                                <h3>Average Exit Ticket Score</h3>
-                                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "200px", flexDirection: "column" }}>
-                                    <div style={{ fontSize: "60px", fontWeight: "bold" }}>3</div>
-                                    <div style={{ fontSize: "16px" }}>out of 5</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-
                 {infoOption === "overall" && (
                     <div>
                         <div className="info-container">
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
+                                <img
+                                    src={personIcon}
+                                    alt="Profile"
+                                    style={{ width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover" }}
+                                />
+                            </div>
                             {/* Student Information */}
                             <div className="student-info">
                                 <h2>Student Information</h2>
                                 <p><strong>Name:</strong> Ms. Shania Fischer</p>
                                 <p><strong>ID:</strong> u6800002</p>
-                                <p><strong>Cumulative GPA:</strong> 3.37</p>
                                 <p><strong>Email:</strong> shania@email.com</p>
-                                <p><strong>Contact:</strong> +66 1234 5678</p>
-                                <p><strong>High School:</strong> --- </p>
-                                <p><strong>Final High School GPA:</strong> 3.68</p>
+                                <p><strong>Advisor:</strong> Ms. Chanida (chanida.sae@mahidol.ac.th)</p>
+                                <p><strong>Staff:</strong> Mr. Peter (peter.fal@mahidol.ac.th)</p>
+                                <p><strong>Probation:</strong> ----</p>
                             </div>
 
-                            {/* Grade Trend */}
-                            <div className="grade-trend">
-                                <h2>Grade Trend</h2>
-                                <svg ref={chartRefs.gradeChart} width={700} height={190}></svg>
-                            </div>
                         </div>
                         <div className="timeline-box">
                             <h3>ICT Activity</h3>
@@ -745,6 +752,78 @@ const StudentProfileB = () => {
                                     <svg ref={chartRefs.attendanceChart} width={300} height={300}></svg>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {infoOption === "thisSubject" && (
+                    <div>
+                        <div className="info-container">
+                            {/* Student Information */}
+                            <div className="student-info">
+                                <h2>Student Information</h2>
+                                <p><strong>Name:</strong> Ms. Shania Fischer</p>
+                                <p><strong>ID:</strong> u6800002</p>
+                                <p><strong>Cumulative GPA:</strong> 3.37</p>
+                                <p><strong>Email:</strong> shania@email.com</p>
+                                <p><strong>Contact:</strong> +66 1234 5678</p>
+                                <p><strong>High School:</strong> --- </p>
+                                <p><strong>Final High School GPA:</strong> 3.68</p>
+                            </div>
+
+                            {/* Grade Trend */}
+                            <div className="grade-trend">
+                                <h2>Grade Trend</h2>
+                                <svg ref={chartRefs.subjectScoreChart} width={500} height={190}></svg>
+
+                            </div>
+                        </div>
+                        {/* First Row */}
+                        <div className="chart-row">
+                            <div className="chart-box">
+                                <h3>Mycourse Access Frequency</h3>
+                                <svg ref={chartRefs.frequencyLineChart} width={400} height={250}></svg>
+                            </div>
+
+                            <div className="chart-box">
+                                <h3>Assignment Submission</h3>
+                                <svg ref={chartRefs.subjectDonut} width={300} height={300}></svg>
+                            </div>
+                            <div className="chart-box">
+                                <h3>Attendance</h3>
+                                <svg ref={chartRefs.attendanceLineChart} width={300} height={300}></svg>
+                            </div>
+                        </div>
+
+                        {/* Second Row */}
+                        <div className="chart-row">
+                            {/* Left Box: Low-Scoring Quiz and Missing Assignment */}
+                            <div className="chart-box">
+                                <h3>Low-Scoring Quiz</h3>
+                                <table ref={chartRefs.quizTable}>
+                                    {/* Table data here */}
+                                    <tr><td>Quiz 1</td><td>45%</td></tr>
+                                    <tr><td>Quiz 2</td><td>50%</td></tr>
+                                </table>
+                            </div>
+                            <div className="chart-box">
+                                <h3>Missing Assignment</h3>
+                                <table ref={chartRefs.missingAssignments}>
+                                    {/* Table data here */}
+                                    <tr><td>Assignment 1</td><td>Missing</td></tr>
+                                    <tr><td>Assignment 2</td><td>Missing</td></tr>
+                                </table>
+                            </div>
+
+                            {/* Current Score */}
+                            <div className="chart-box" style={{ height: "150px" }}>
+                                <h3>Current Score</h3>
+                                <div style={{ textAlign: "center" }}>
+                                    <p style={{ fontSize: "36px", color: "green", fontWeight: "bold" }}>43</p>  {/* Large green text */}
+                                    <p>Average is 45</p>  {/* Average text */}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 )}

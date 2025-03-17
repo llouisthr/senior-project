@@ -28,16 +28,22 @@ const PowerBI = () => {
         </h2>
 
         <div>
-          <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>Course</div>
+          <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
+            Course
+          </div>
           {expandedMenu === "course" && (
             <div className="submenu" style={{ cursor: "pointer" }}>
               {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
                 <div key={course}>
                   <a onClick={() => toggleSubmenu(course)}>{course}</a>
                   {expandedSubmenu === course && (
-                    <div className="nested-submenu">
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ cursor: "pointer" }}>Dashboard</a>
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ cursor: "pointer" }}>Student List</a>
+                    <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
+                      <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                        Dashboard
+                      </a>
+                      <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
+                        Student List
+                      </a>
                     </div>
                   )}
                 </div>
@@ -46,7 +52,9 @@ const PowerBI = () => {
           )}
         </div>
         <div>
-          <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>Power BI</div>
+          <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
+            Power BI
+          </div>
         </div>
       </div>
 

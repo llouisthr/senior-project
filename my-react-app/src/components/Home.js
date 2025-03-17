@@ -53,16 +53,22 @@ const Home = () => {
         </h2>
 
         <div>
-          <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>Course</div>
+          <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
+            Course
+          </div>
           {expandedMenu === "course" && (
             <div className="submenu" style={{ cursor: "pointer" }}>
               {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
                 <div key={course}>
                   <a onClick={() => toggleSubmenu(course)}>{course}</a>
                   {expandedSubmenu === course && (
-                    <div className="nested-submenu">
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ cursor: "pointer" }}>Dashboard</a>
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ cursor: "pointer" }}>Student List</a>
+                    <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
+                      <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                        Dashboard
+                      </a>
+                      <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
+                        Student List
+                      </a>
                     </div>
                   )}
                 </div>
@@ -71,25 +77,27 @@ const Home = () => {
           )}
         </div>
         <div>
-          <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>Power BI</div>
+          <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
+            Power BI
+          </div>
         </div>
       </div>
 
-          
+
 
       {/* Main Content */}
       <div className="main-content">
         <h3>Courses</h3>
         {/* Top Right Search Box */}
-      <div className="search-bar">
-        <label>Search via Name:</label>
-        <input 
-          type="text" 
-          value={searchTerm} 
-          onChange={(e) => setSearchTerm(e.target.value)} 
-          placeholder="Enter course name..." 
-        />
-      </div>
+        <div className="search-bar">
+          <label>Search via Name:</label>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter course name..."
+          />
+        </div>
         {/* Registered Courses Box */}
         <div className="registered-courses-box">
           <span>Registered Courses</span>

@@ -64,12 +64,12 @@ const ITCS125CourseDashboard = () => {
                 averageScore: 35,
                 atRiskStudentsName: [
                     { id: "6800015", name: "Mr. Jacob Mcgowan", attendance: "5/9", score: "25/50", gpa: "2.68", lateAssignment: "5/9" },
-                    
+
                     // ... other students ...
                 ],
                 outstandingStudentsName: [
                     { id: "6800001", name: "Ms. Mattie Khan", attendance: "9/9", score: "48/50", gpa: "3.91", lateAssignment: "0/9" },
-                    
+
                     // ... other students ...
                 ],
             },
@@ -375,17 +375,24 @@ const ITCS125CourseDashboard = () => {
                 <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
                     MUICT LEARNING
                 </h2>
+
                 <div>
-                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>Course</div>
+                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
+                        Course
+                    </div>
                     {expandedMenu === "course" && (
                         <div className="submenu" style={{ cursor: "pointer" }}>
                             {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
                                 <div key={course}>
                                     <a onClick={() => toggleSubmenu(course)}>{course}</a>
                                     {expandedSubmenu === course && (
-                                        <div className="nested-submenu">
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ cursor: "pointer" }}>Dashboard</a>
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ cursor: "pointer" }}>Student List</a>
+                                        <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
+                                            <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                                                Dashboard
+                                            </a>
+                                            <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
+                                                Student List
+                                            </a>
                                         </div>
                                     )}
                                 </div>
@@ -394,7 +401,9 @@ const ITCS125CourseDashboard = () => {
                     )}
                 </div>
                 <div>
-                    <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>Power BI</div>
+                    <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
+                        Power BI
+                    </div>
                 </div>
             </div>
             <div className="main-content">
