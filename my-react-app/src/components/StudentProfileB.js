@@ -233,7 +233,7 @@ const StudentProfileB = () => {
         svg.selectAll("*").remove();  // Clear previous elements (including axes)
 
         const width = 500, height = 300;
-        const margin = { top: 10, right: 10, bottom: 150, left: 200 }; // Adjusted margins
+        const margin = { top: 10, right: 130, bottom: 80, left: 20 }; // Adjusted margins
 
         const x = d3.scalePoint()
             .domain(data.map(d => d.label))
@@ -770,19 +770,12 @@ const StudentProfileB = () => {
                                 <p><strong>High School:</strong> --- </p>
                                 <p><strong>Final High School GPA:</strong> 3.68</p>
                             </div>
-
-                            {/* Grade Trend */}
-                            <div className="grade-trend">
-                                <h2>Grade Trend</h2>
-                                <svg ref={chartRefs.subjectScoreChart} width={500} height={190}></svg>
-
-                            </div>
                         </div>
                         {/* First Row */}
                         <div className="chart-row">
                             <div className="chart-box">
-                                <h3>Mycourse Access Frequency</h3>
-                                <svg ref={chartRefs.frequencyLineChart} width={400} height={250}></svg>
+                                <h3>Score Trend</h3>
+                                <svg ref={chartRefs.subjectScoreChart} width={400} height={250}></svg>
                             </div>
 
                             <div className="chart-box">
