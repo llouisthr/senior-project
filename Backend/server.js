@@ -2,10 +2,20 @@ require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
-app.use(cors());
-app.use(express.json()); // Enable JSON body parsing
+
+// Configure CORS with specific options
+app.use(cors({
+    origin: 'http://localhost:3000',  // Your frontend URL
+    credentials: true,                // Allow credentials
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());    // Enable JSON body parsing
 
 // MySQL Connection
 const db = mysql.createConnection({
@@ -24,11 +34,108 @@ db.connect((err) => {
     console.log('Connected to MySQL database');
 });
 
-// API Route Example: Fetch All Students
-app.get('/students', (req, res) => {
-    db.query('SELECT * FROM Student', (err, results) => {
+//API Handling login
+app.post("/login", (req, res) => {
+    const { instructorId, password } = req.body; 
+
+    console.log("Received login attempt:", { instructorId, password }); // Debug
+
+    if (!instructorId || !password) {
+        return res.status(400).json({ error: "Instructor ID and password are required" });
+    }
+
+    const query = "SELECT * FROM instructor WHERE instructor_id = ?";
+    db.query(query, [instructorId], (err, result) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        
+        if (result.length === 0) {
+            console.log("No instructor found with ID:", instructorId);
+            return res.status(401).json({ error: "Invalid ID" });
+        }
+
+        const instructor = result[0];
+        console.log("Found instructor:", instructor);
+
+        bcrypt.compare(password, instructor.hashed_password, (err, isMatch) => {
+            if (err) {
+                console.error("Password comparison error:", err);
+                return res.status(500).json({ error: "Error comparing passwords" });
+            }
+            
+            if (!isMatch) {
+                console.log("Password mismatch for instructor:", instructorId);
+                return res.status(401).json({ error: "Invalid password" });
+            }
+
+            const token = jwt.sign(
+                { instructorId: instructor.instructor_id },
+                "your_secret_key",
+                { expiresIn: "1h" }
+            );
+
+            console.log("Login successful for instructor:", instructorId);
+            res.json({
+                message: "Login successful",
+                instructorId: instructor.instructor_id,
+                token
+            });
+        });
+    });
+});
+
+// API Route Example: Fetch total student in a course and section
+app.get('/course/:courseId/:sectionId/:semesterId/enroll', (req, res) => {
+    const { courseId, sectionId, semesterId } = req.params;
+    const query = `
+            SELECT COUNT(student_id) FROM Course_Section WHERE course_id = ? AND section = ? AND semester_id = ?
+    `;
+    db.query(query, [courseId, sectionId, semesterId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results[0]);
+    });
+});
+
+// API to get instructor details
+app.get('/instructor/:instructorId', (req, res) => {
+    const { instructorId } = req.params;
+    const query = "SELECT fname FROM instructor WHERE instructor_id = ?";
+    
+    db.query(query, [instructorId], (err, result) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        res.json({ instructorName: result[0].fname });
+    });
+});
+
+// server.js or routes/instructor.js
+app.get("/home/:instructorId/courses", (req, res) => {
+    const { instructorId } = req.params;
+    const query = `
+    SELECT DISTINCT 
+        cs.course_id,
+        c.course_name,
+        c.course_desc,
+        c.credit,
+        cs.section,
+        co.semester_id,
+        co.grade_type,
+        CONCAT(inst.fname, ' ', inst.lname) AS Instructor
+    FROM Course_Section cs
+    JOIN Course c ON cs.course_id = c.course_id
+    JOIN Course_Offering co ON cs.offer_id = co.offer_id
+    JOIN Instructor inst ON cs.instructor_id = inst.instructor_id
+    WHERE cs.instructor_id = ?;
+    `;
+
+    db.query(query, [instructorId], (err, results) => {
+        if (err) {
+            console.error("Error fetching instructor courses:", err);
+            return res.status(500).json({ error: "Database error" });
         }
         res.json(results);
     });

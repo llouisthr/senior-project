@@ -1,32 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./Home.css";
-
-import oopImage from "./java.png";
-import statsImage from "./stat.png";
-import readingImage from "./read.png";
-
-
-const courses = [
-  {
-    title: "ITCS209_Object Oriented Programming",
-    description: "The course will involve problem solving, designing algorithms, and developing programs in the Java language",
-    image: oopImage, // Replace with actual image URL
-    route: "/itcs209/dashboard",
-  },
-  {
-    title: "ITCS125_Applied Statistics For Computing",
-    description: "Applying statistical techniques for solving computing problem using statistical packages.",
-    image: statsImage, // Replace with actual image URL
-    route: "/itcs125/dashboard"
-  },
-  {
-    title: "ITLG201_Reading Skills",
-    description: "Reading Skills is an EAP course that aims to improve students’ abilities to analyze English readings within a learning environment that utilizes the five areas of language acquisition in order to enable MUICT students to be more effective readers, writers, and researchers (CEFR B1). ",
-    image: readingImage, // Replace with actual image URL
-    route: "/itlg201/dashboard"
-  },
-];
+import { LogOut } from "lucide-react";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -34,6 +10,49 @@ const Home = () => {
   const [expandedSubmenu, setExpandedSubmenu] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("name");
+  const [courses, setCourses] = useState([]);
+  const [instructorName, setInstructorName] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("instructorId");
+    navigate("/login");
+  };
+
+  useEffect(() => {
+    const instructorId = localStorage.getItem("instructorId");
+    if (!instructorId) {
+      navigate("/login");
+      return;
+    }
+
+    setIsLoading(true);
+    // Fetch instructor data related to courses
+    axios.get(`http://localhost:5000/home/${instructorId}/courses`)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setCourses(response.data);
+          console.log("Courses:", response.data);
+          // Get instructor name from the first course if available
+          if (response.data.length > 0) {
+            setInstructorName(response.data[0].Instructor);
+          }
+        } else {
+          setError("Invalid data format received");
+          setCourses([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setError("Failed to load courses");
+        setCourses([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [navigate]);
 
   const toggleMenu = (menu) => {
     setExpandedMenu(expandedMenu === menu ? null : menu);
@@ -42,7 +61,6 @@ const Home = () => {
   const toggleSubmenu = (submenu) => {
     setExpandedSubmenu(expandedSubmenu === submenu ? null : submenu);
   };
-
 
   return (
     <div className="home-container">
@@ -58,15 +76,15 @@ const Home = () => {
           </div>
           {expandedMenu === "course" && (
             <div className="submenu" style={{ cursor: "pointer" }}>
-              {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
-                <div key={course}>
-                  <a onClick={() => toggleSubmenu(course)}>{course}</a>
-                  {expandedSubmenu === course && (
+              {courses.map((course) => (
+                <div key={course.course_id}>
+                  <a onClick={() => toggleSubmenu(course.course_id)}>{course.course_id}</a>
+                  {expandedSubmenu === course.course_id && (
                     <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                      <a onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
                         Dashboard
                       </a>
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
+                      <a onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/student-list`)} style={{ display: "block" }}>
                         Student List
                       </a>
                     </div>
@@ -81,9 +99,15 @@ const Home = () => {
             Power BI
           </div>
         </div>
+
+        {/* Instructor Name and Logout Section */}
+        <div className="sidebar-footer">
+          <span className="instructor-name">{instructorName}</span>
+          <button className="logout-button" onClick={handleLogout}>
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
-
-
 
       {/* Main Content */}
       <div className="main-content">
@@ -106,19 +130,25 @@ const Home = () => {
             <option value="date">Sort by Date</option>
           </select>
         </div>
-        <div className="courses">
-          {courses.map((course, index) => (
-            <div
-              key={index}
-              className={`course-card ${course.route ? "clickable" : ""}`}
-              onClick={() => course.route && navigate(course.route)} // Navigate if route exists
-              style={{ cursor: "pointer" }}>
-              <img src={course.image} alt={course.title} />
-              <h4>{course.title}</h4>
-              <p>{course.description}</p>
-            </div>
-          ))}
-        </div>
+        
+        {isLoading ? (
+          <div className="loading-message">Loading courses...</div>
+        ) : error ? (
+          <div className="error-message">{error}</div>
+        ) : (
+          <div className="courses">
+            {courses.map((course, index) => (
+              <div
+                key={index}
+                className="course-card clickable"
+                onClick={() => navigate(`/${course.course_name.toLowerCase().replace(/\s+/g, "")}/dashboard`)}
+                style={{ cursor: "pointer" }}>
+                <h4>{course.course_id}</h4>
+                <p>{course.course_name}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
