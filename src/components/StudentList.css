@@ -1,0 +1,339 @@
+/* StudentProfile.css */
+
+html,
+body {
+  /* Target both html and body */
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  /* Crucial: Ensure both html and body take full width */
+  height: 100%;
+  /* Crucial: Ensure both html and body take full height */
+  display: flex;
+  /* Enable flexbox on the body */
+}
+
+.student-profile-container {
+  display: flex;
+  width: 171%;
+  /* Take full width */
+  flex-grow: 1;
+  /* Key: Allow container to grow to fill available height */
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #093BCD;
+  color: white;
+  padding: 20px;
+  height: 100vh;
+}
+
+
+.sidebar h2 {
+  margin-bottom: 30px;
+  text-align: center;
+  /* Center the title */
+}
+
+.menu-heading {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: white;
+  display: block;
+  margin: 5px 0;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  /* Smooth transition for hover effect */
+}
+
+.sidebar a:hover {
+  background-color: #207AD7;
+}
+
+.sidebar a.active {
+  background-color: #207AD7;
+}
+
+.logout {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  /* Position from the left instead of right */
+  display: flex;
+  /* Use flexbox for icon and text if needed */
+  align-items: center;
+  /* Vertically align icon and text */
+}
+
+.logout a {
+  text-decoration: none;
+  color: white;
+  display: flex;
+  /* Use flexbox for icon and text if needed */
+  align-items: center;
+  /* Vertically align icon and text */
+
+}
+
+.logout img {
+  width: 24px;
+  height: 24px;
+  margin-right: 5px;
+  /* Add some spacing between icon and text */
+  transition: filter 0.3s ease;
+  /* Smooth transition for hover effect */
+}
+
+.logout a:hover img {
+  filter: brightness(1.2);
+}
+
+
+.main-content {
+  flex: 1;
+  /* Takes up remaining space */
+  background-color: #f4f4f4;
+  padding: 20px;
+  overflow-y: auto;
+  /* Scrollbar if content overflows */
+  height: 100%;
+  /* Ensure main content takes up available height */
+}
+
+/* Header */
+.header {
+  width: calc(100% - 250px);
+  /* Adjust width to fit next to sidebar */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  padding: 15px 20px;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  z-index: 1000;
+}
+
+.student-list-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  margin-top: 0px;
+}
+
+.student-list-box span {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.student-list-box select {
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none;
+  cursor: pointer;
+}
+
+.red {
+  background-color: red;
+}
+
+.orange {
+  background-color: orange;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+
+.filter-box,
+.sort-box,
+.semester-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.filter-box span,
+.sort-box span,
+.semester-box span {
+  font-size: 14px;
+  font-weight: normal;
+  color: #333;
+}
+
+.dashboard-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header input[type="text"] {
+  /* Style the search input */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+  /* Add some space between input and select */
+}
+
+.dropdown {
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.risk-legend {
+  margin-bottom: 15px;
+  /* Adds space below the legend */
+  display: flex;
+  gap: 20px;
+  /* Adds gap between the two labels */
+  font-weight: bold;
+}
+
+.risk-filter-container {
+  display: flex;
+  justify-content: space-between;
+  /* Pushes filter section to the right */
+  align-items: center;
+  margin-top: 20px;
+}
+
+.filter-section {
+  display: flex;
+  gap: 10px;
+  /* Adds spacing between dropdown and button */
+}
+
+.range-container {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+/* Base styles for both range inputs */
+.range-container input[type="range"] {
+  position: absolute;
+  width: 100%;
+  appearance: none;
+  background: none;
+  pointer-events: none;
+}
+
+/* Track styling */
+.range-container input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #ddd;
+  border-radius: 5px;
+}
+
+/* Thumbs styling */
+.range-container input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background: steelblue;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  margin-top: -6px; /* Aligns with track */
+  position: relative;
+  z-index: 3; /* Ensure thumbs appear in front */
+}
+
+
+/* Bring the lower thumb (start point) to the front */
+.range-container input[type="range"].min {
+  z-index: 4; /* Higher than track */
+}
+
+.range-container input[type="range"].max {
+  z-index: 3;
+}
+
+/* Adjust positioning to ensure the left thumb stays in front */
+.range-container input[type="range"].min::-webkit-slider-thumb {
+  transform: translateX(-5px); /* Move slightly left to be in front */
+}
+
+.range-container input[type="range"].max::-webkit-slider-thumb {
+  transform: translateX(5px); /* Move slightly right to avoid overlap */
+}
+
+/* Colored line between thumbs */
+.range-container .range-line {
+  position: absolute;
+  height: 6px;
+  background: steelblue;
+  border-radius: 5px;
+  z-index: 2; /* Behind thumbs but in front of track */
+}
+
+
+
+.student-table {
+  margin-top: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #003366;
+  color: white;
+  font-weight: bold;
+  /* Make header text bolder */
+}
+
+/* Style the table rows on hover */
+tr:hover {
+  background-color: #f0f0f0;
+}
+
+/* Make the student name links a different color */
+td a {
+  color: #0056b3;
+  /* Example link color */
+  text-decoration: none;
+  /* Remove underlines from links */
+}
+
+td a:hover {
+  text-decoration: underline;
+  /* Add underline on hover */
+}

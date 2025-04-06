@@ -1,0 +1,308 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    display: flex; /* Ensure sidebar and content are side by side */
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #093BCD;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+  }
+
+.sidebar h2 {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+    border-radius: 5px;
+}
+
+.sidebar a.active {
+    background-color: #207AD7;
+}
+
+.sidebar a:hover {
+    background-color: #207AD7;
+}
+
+.logout {
+    margin-top: auto;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 0px; /* Ensure it starts after the sidebar */
+    width: calc(100% - 250px); /* Prevent overlap */
+    padding: 20px;
+    position: absolute; /* Ensure it respects layout */
+    left: 250px;
+    top: 0;
+}
+
+
+/* Box container styling */
+.box {
+    display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: -20px;
+  margin-top: 18px;
+}
+
+.box-left {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.box-right select {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Single Main Card */
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 1630px;
+    margin-top: 31px;
+    height: 780px; /* Adjust the height as needed */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Aligns items vertically */
+  flex-wrap: nowrap; /* Prevents wrapping */
+  padding: 10px 20px;
+  background-color: #f8f8f8;
+}
+
+
+.section-dropdown {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+  z-index: 10; /* Ensures it appears above other elements */
+  position: relative; /* Ensures it's positioned properly */
+}
+
+
+  
+
+/* First Row in Card */
+.card .first-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap; /* Ensures elements don't wrap if there is space */
+  gap: 20px;
+  width: 100%; /* Ensure it takes full width */
+}
+
+.card .first-row .enrollment {
+    display: flex;
+    align-items: flex-start; /* Align text to the left */
+    gap: 5px; /* Small spacing between elements */
+    margin-bottom: 200px;
+}
+
+
+.card .first-row .enrollment div {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    gap: 5px; /* Add spacing between them */
+}
+
+.enrollment-details {
+    display: flex;
+    flex-direction: column; /* Force items to stack vertically */
+    gap: 5px;
+    font-size: 18px; /* Adjust for better readability */
+    margin-top: 150px;
+    margin-left: -300px;
+    align-items: flex-start; /* Align text to the left */
+}
+
+.card .first-row, .second-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+.student-engagement {
+    flex: 1;
+    text-align: center;
+    margin-top: 50px;
+}
+  
+  .card .first-row .engagement-percentage {
+    font-size: 48px;
+    font-weight: bold;
+    color: green;
+  }
+  
+  .card .first-row .engagement-text {
+    font-size: 12px;
+    text-align: center;
+  }
+
+.card .chart-container {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    margin-left: 150px;
+    margin-bottom: 50px;
+    height: 300px;
+    width: 600px;
+}
+
+.chart {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    margin: 0 10px;
+    margin-top: 0px;
+}
+
+/* Second Row in Card */
+.card .second-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -40px;
+    margin-bottom: 80px;
+    gap: 100px; /* This will increase the space between items */
+}
+
+.card .second-row .student-detect {
+  flex: 1;
+  text-align: center;
+}
+
+.card .second-row .detect-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between boxes */
+}
+
+.card .second-row .detect-box {
+  height: 150px; 
+  width: 200px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.card .second-row .risk-student, .outstanding-student {
+  flex: 1;
+  padding: 20px;
+  text-align: center;
+  background: #f8f8f8;
+  border-radius: 10px;
+  
+}
+
+.card .second-row .detect-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: red;
+  text-align: center;
+}
+
+.card .second-row .detect-label {
+  font-size: 14px;
+  text-align: center;
+}
+
+.card .second-row .quiz-table {
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
+  }
+  
+  .card .second-row .quiz-header {
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .card .second-row .quiz-list p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+
+  .card .second-row .score-distribution {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .card .second-row .gauge-container {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .card .second-row .gauge {
+    text-align: center;
+  }
+
+.tabs {
+    position: absolute;
+    bottom: 5px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    border: none;
+    background: #f1f1f1;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .tab:hover {
+    transform: translateY(-3px);
+  }
+
+  .tab:active {
+    transform: translateY(3px);
+  }
+
+  .active {
+    background: lightblue;
+  }
