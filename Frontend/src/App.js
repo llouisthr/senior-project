@@ -1,40 +1,35 @@
-// import logo from './logo.svg';
+import React, { useState } from "react"; // Add useState import here
 import './App.css';
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import CourseDashboard from "./components/CourseDashboard";
-import CourseDashboardITCS125 from "./components/coursedashboardtest1";
-import CourseDashboardITLG201 from "./components/CourseDashboardITLG201";
-import CourseDashboardTest1 from "./components/coursedashboardtest1";
 import StudentList from "./components/StudentList";
-import StudentListITCS125 from "./components/StudentListITCS125";
-import StudentListITLG201 from "./components/StudentListITLG201";
-import StudentProfileB from "./components/StudentProfileB";
+import StudentProfile from "./components/StudentProfile";
+import AtRiskSettingTest from "./components/atrisksettingtest";
 import Home from "./components/Home";
-import PowerBI from "./components/powerbi";
-import Login from './components/login';
+import Login from "./components/login";
 
 function App() {
+  const [criteria, setCriteria] = useState({
+      severeAttendance: "",
+      severeScore: "",
+      slightlyAttendance: "",
+      slightlyScore: "",
+  });
 
   return (
-    <Router>
-      <div className="app">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/powerbi" element={<PowerBI />} />
-          <Route path="/:courseId/:section_id/dashboard" element={<CourseDashboardTest1 />} />
-          <Route path="/itcs209/student-list" element={<StudentList />} />
-          <Route path="/itcs125/dashboard" element={<CourseDashboardTest1 />} />
-          <Route path="/itcs125/student-list" element={<StudentListITCS125 />} />
-          <Route path="/itlg201/dashboard" element={<CourseDashboardTest1 />} />
-          <Route path="/itlg201/student-list" element={<StudentListITLG201 />} />
-          <Route path="/student-profile-b" element={<StudentProfileB />} />
-        </Routes>
-      </div>
-    </Router>
+      <Router>
+          <div className="app">
+              <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/course/:course/:section/:semester/dashboard" element={<CourseDashboard criteria={criteria} />}  />
+                  <Route path="/course/:course/:section/:semester/student-list" element={<StudentList criteria={criteria}/>}    />
+                  <Route path="/:course/at-risk-setting" element={<AtRiskSettingTest onSaveCriteria={setCriteria} />}           />
+                  <Route path="/student-profile-b" element={<StudentProfile />} />
+              </Routes>
+          </div>
+      </Router>
   );
-  // );
 }
 
 export default App;

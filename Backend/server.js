@@ -86,14 +86,34 @@ app.post("/login", (req, res) => {
     });
 });
 
-// API Route Example: Fetch total student in a course and section
-app.get('/course/:courseId/:sectionId/:semesterId/enroll', (req, res) => {
+// API Route Example: Fetch total student in a course, section, semester
+app.get('/course/:courseId/:sectionId/:semesterId/dashboard/enroll', (req, res) => {
     const { courseId, sectionId, semesterId } = req.params;
-    const query = `
-            SELECT COUNT(student_id) FROM Course_Section WHERE course_id = ? AND section = ? AND semester_id = ?
-    `;
-    db.query(query, [courseId, sectionId, semesterId], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+
+    let query;
+    let queryParams;
+
+    if (sectionId === "all") {
+        query = `
+            SELECT COUNT(student_id) AS total 
+            FROM Course_Section 
+            WHERE course_id = ? AND semester_id = ?
+        `;
+        queryParams = [courseId, semesterId];
+    } else {
+        query = `
+            SELECT COUNT(student_id) AS total 
+            FROM Course_Section 
+            WHERE course_id = ? AND section = ? AND semester_id = ?
+        `;
+        queryParams = [courseId, sectionId, semesterId];
+    }
+
+    db.query(query, queryParams, (err, results) => {
+        if (err) {
+            console.error("Error fetching enrollment count:", err);
+            return res.status(500).json({ error: err.message });
+        }
         res.json(results[0]);
     });
 });
@@ -119,7 +139,6 @@ app.get("/home/:instructorId/courses", (req, res) => {
     SELECT DISTINCT 
         cs.course_id,
         c.course_name,
-        c.course_desc,
         c.credit,
         cs.section,
         co.semester_id,

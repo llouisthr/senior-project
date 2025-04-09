@@ -74,6 +74,7 @@ const Home = () => {
           <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
             Course
           </div>
+          {/*Nested menu side bar*/}
           {expandedMenu === "course" && (
             <div className="submenu" style={{ cursor: "pointer" }}>
               {courses.map((course) => (
@@ -81,7 +82,7 @@ const Home = () => {
                   <a onClick={() => toggleSubmenu(course.course_id)}>{course.course_id}</a>
                   {expandedSubmenu === course.course_id && (
                     <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
-                      <a onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                      <a onClick={() => navigate(`/course/${course.course_id.toLowerCase().replace(/\s+/g, "")}/:section/:semester/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
                         Dashboard
                       </a>
                       <a onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/student-list`)} style={{ display: "block" }}>
@@ -93,11 +94,6 @@ const Home = () => {
               ))}
             </div>
           )}
-        </div>
-        <div>
-          <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
-            Power BI
-          </div>
         </div>
 
         {/* Instructor Name and Logout Section */}
@@ -141,10 +137,9 @@ const Home = () => {
               <div
                 key={index}
                 className="course-card clickable"
-                onClick={() => navigate(`/${course.course_name.toLowerCase().replace(/\s+/g, "")}/dashboard`)}
+                onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/dashboard`)}
                 style={{ cursor: "pointer" }}>
-                <h4>{course.course_id}</h4>
-                <p>{course.course_name}</p>
+                <div className="course-info">{course.course_id} {course.course_name}</div>
               </div>
             ))}
           </div>

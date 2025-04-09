@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as d3 from 'd3';
 import personIcon from "./person.jpg";
-import './StudentProfileB.css';
+// import CalendarHeatmap from "react-calendar-heatmap";
+// import "react-calendar-heatmap/dist/styles.css";
+import './StudentProfile.css';
 
 const StudentProfileB = () => {
     const navigate = useNavigate();
@@ -97,6 +99,17 @@ const StudentProfileB = () => {
         { label: "W9", value: 0 }
     ];
 
+    // Example data: replace this with actual GitHub API data
+    const today = new Date();
+    const values = [
+        { date: "2025-02-28", count: 4 },
+        { date: "2025-03-01", count: 3 },
+        { date: "2025-03-02", count: 5 },
+        { date: "2025-03-03", count: 2 },
+        { date: "2025-03-04", count: 1 },
+        // Add more data points
+    ];
+
     useEffect(() => {
         renderThirdLineChart(chartRefs.subjectScoreChart, subjectScoreData);
         renderSecondLineChart(chartRefs.attendanceLineChart, subjectAttendanceData)
@@ -145,7 +158,7 @@ const StudentProfileB = () => {
         svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y));
-            
+
 
         svg.append("path")
             .datum(data)
@@ -170,30 +183,30 @@ const StudentProfileB = () => {
     const renderSecondLineChart = (ref, data) => {
         const svg = d3.select(ref.current);
         svg.selectAll("*").remove();
-    
+
         const width = 250, height = 300;
-        const margin = { top: 60, right: -40, bottom: 50, left: 30 };
-    
+        const margin = { top: 20, right: -40, bottom: 120, left: 30 };
+
         // Create x scale (using the week labels as the domain)
         const x = d3.scalePoint()
             .domain(data.map(d => d.label))  // Using 'label' (e.g., W1, W2, W3, etc.)
             .range([margin.left, width - margin.right]);
-    
+
         // Create y scale (domain is [0, 1] since values are binary)
         const y = d3.scaleLinear()
             .domain([0, 1])  // Only 0 and 1
             .range([height - margin.bottom, margin.top]);
-    
+
         const line = d3.line()
             .x(d => x(d.label))
             .y(d => y(d.value))
             .curve(d3.curveMonotoneX);
-    
+
         // X axis with points for each week
         svg.append("g")
             .attr("transform", `translate(0,${height - margin.bottom})`)
             .call(d3.axisBottom(x));
-    
+
         // Y axis with ticks for 0 and 1, formatted as integers
         svg.append("g")
             .attr("transform", `translate(${margin.left},0)`)
@@ -201,7 +214,7 @@ const StudentProfileB = () => {
                 .tickValues([0, 1])  // Show only 0 and 1 on the y-axis
                 .tickFormat(d3.format("d"))  // Format ticks as integers (d stands for integer format)
             );
-    
+
         // Line path
         svg.append("path")
             .datum(data)
@@ -209,7 +222,7 @@ const StudentProfileB = () => {
             .attr("stroke", "steelblue")
             .attr("stroke-width", 2)
             .attr("d", line);
-    
+
         // Add circular markers (dots) for each data point
         svg.selectAll(".dot")
             .data(data)
@@ -222,7 +235,7 @@ const StudentProfileB = () => {
             .attr("stroke", "black")
             .attr("stroke-width", 1);
     };
-    
+
 
 
     const renderThirdLineChart = (ref, data) => {
@@ -233,7 +246,7 @@ const StudentProfileB = () => {
         svg.selectAll("*").remove();  // Clear previous elements (including axes)
 
         const width = 500, height = 300;
-        const margin = { top: 10, right: 10, bottom: 150, left: 200 }; // Adjusted margins
+        const margin = { top: 10, right: 130, bottom: 80, left: 20 }; // Adjusted margins
 
         const x = d3.scalePoint()
             .domain(data.map(d => d.label))
@@ -637,6 +650,9 @@ const StudentProfileB = () => {
                                             <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
                                                 Student List
                                             </a>
+                                            <a onClick={() => navigate(`/${course.toLowerCase()}/at-risk-setting`)} style={{ display: "block" }}>
+                                                Criteria Setting
+                                            </a>
                                         </div>
                                     )}
                                 </div>
@@ -759,77 +775,82 @@ const StudentProfileB = () => {
                 {infoOption === "thisSubject" && (
                     <div>
                         <div className="info-container">
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
+                                <img
+                                    src={personIcon}
+                                    alt="Profile"
+                                    style={{ width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover" }}
+                                />
+                            </div>
                             {/* Student Information */}
                             <div className="student-info">
                                 <h2>Student Information</h2>
                                 <p><strong>Name:</strong> Ms. Shania Fischer</p>
                                 <p><strong>ID:</strong> u6800002</p>
-                                <p><strong>Cumulative GPA:</strong> 3.37</p>
                                 <p><strong>Email:</strong> shania@email.com</p>
-                                <p><strong>Contact:</strong> +66 1234 5678</p>
-                                <p><strong>High School:</strong> --- </p>
-                                <p><strong>Final High School GPA:</strong> 3.68</p>
-                            </div>
-
-                            {/* Grade Trend */}
-                            <div className="grade-trend">
-                                <h2>Grade Trend</h2>
-                                <svg ref={chartRefs.subjectScoreChart} width={500} height={190}></svg>
-
+                                <p><strong>Advisor:</strong> Ms. Chanida (chanida.sae@mahidol.ac.th)</p>
+                                <p><strong>Staff:</strong> Mr. Peter (peter.fal@mahidol.ac.th)</p>
+                                <p><strong>Probation:</strong> ----</p>
                             </div>
                         </div>
-                        {/* First Row */}
-                        <div className="chart-row">
-                            <div className="chart-box">
-                                <h3>Mycourse Access Frequency</h3>
-                                <svg ref={chartRefs.frequencyLineChart} width={400} height={250}></svg>
-                            </div>
+                        {/* Main Chart Container */}
+                        <div className="chart-container" style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(4, 1fr)",
+                            gap: "20px",
+                            alignItems: "start"
+                        }}>
 
-                            <div className="chart-box">
-                                <h3>Assignment Submission</h3>
-                                <svg ref={chartRefs.subjectDonut} width={300} height={300}></svg>
-                            </div>
-                            <div className="chart-box">
-                                <h3>Attendance</h3>
-                                <svg ref={chartRefs.attendanceLineChart} width={300} height={300}></svg>
-                            </div>
-                        </div>
-
-                        {/* Second Row */}
-                        <div className="chart-row">
-                            {/* Left Box: Low-Scoring Quiz and Missing Assignment */}
-                            <div className="chart-box">
-                                <h3>Low-Scoring Quiz</h3>
-                                <table ref={chartRefs.quizTable}>
-                                    {/* Table data here */}
-                                    <tr><td>Quiz 1</td><td>45%</td></tr>
-                                    <tr><td>Quiz 2</td><td>50%</td></tr>
+                            {/* Column 1: Quiz Table */}
+                            <div className="chart-box" style={{ flex: 1, minHeight: "550px" }}>
+                                <h3>Quiz (10)</h3>
+                                <table ref={chartRefs.quizTable} style={{ width: "100%", border: "1px solid #ddd" }}>
+                                    <tr><td>Quiz 1</td><td>9</td></tr>
+                                    <tr><td>Quiz 2</td><td>8</td></tr>
+                                    <tr><td>Quiz 3</td><td>7</td></tr>
+                                    <tr><td>Quiz 4</td><td>6</td></tr>
                                 </table>
                             </div>
-                            <div className="chart-box">
+
+                            {/* Column 2: Missing Assignment Table */}
+                            <div className="chart-box" style={{ flex: 1, minHeight: "550px" }}>
                                 <h3>Missing Assignment</h3>
-                                <table ref={chartRefs.missingAssignments}>
-                                    {/* Table data here */}
+                                <table ref={chartRefs.missingAssignments} style={{ width: "100%", border: "1px solid #ddd" }}>
                                     <tr><td>Assignment 1</td><td>Missing</td></tr>
                                     <tr><td>Assignment 2</td><td>Missing</td></tr>
+                                    <tr><td>Assignment 3</td><td>Missing</td></tr>
                                 </table>
                             </div>
 
-                            {/* Current Score */}
-                            <div className="chart-box" style={{ height: "150px" }}>
-                                <h3>Current Score</h3>
-                                <div style={{ textAlign: "center" }}>
-                                    <p style={{ fontSize: "36px", color: "green", fontWeight: "bold" }}>43</p>  {/* Large green text */}
-                                    <p>Average is 45</p>  {/* Average text */}
+                            {/* Column 3: Attendance (Top) & Current Score (Bottom) */}
+                            <div className="chart-column" style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div className="chart-box" style={{ minHeight: "300px" }}>
+                                    <h3>Attendance</h3>
+                                    <svg ref={chartRefs.attendanceLineChart} width={300} height={200}></svg>
                                 </div>
+
+                                <div className="chart-box" style={{ minHeight: "200px" }}>
+                                    <h3>Current Score</h3>
+                                    <div style={{ textAlign: "center" }}>
+                                        <p style={{ fontSize: "36px", color: "green", fontWeight: "bold" }}>43</p>
+                                        <p>Average is 45</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Column 4: Assignment Submission Donut Chart */}
+                            <div className="chart-box" style={{ minHeight: "550px" }}>
+                                <h3>Assignment Submission</h3>
+                                <svg ref={chartRefs.subjectDonut} width={300} height={300}></svg>
                             </div>
 
                         </div>
                     </div>
+
                 )}
 
             </div>
-        </div>
+        </div >
     );
 };
 
