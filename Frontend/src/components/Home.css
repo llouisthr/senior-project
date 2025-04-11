@@ -115,7 +115,8 @@
 .course-info {
   padding: 0px;
   padding-top: 100px; /* Create space below the gradient */
-  padding-left: 5px; /* Space from the left*/
+  padding-left: 10px; /* Space from the left*/
+  padding-bottom: 15px;
   text-align: left;
   font-size: 1rem;
   font-weight: 600;

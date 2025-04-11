@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./login.css";
 
 const Login = () => {
   const [instructorId, setId] = useState("");
@@ -34,17 +35,30 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <h2>Instructor Login</h2>
-      <form onSubmit={handleLogin}>
-        <input type="text" placeholder="Instructor ID" value={instructorId} 
-        onChange={(e) => setId(e.target.value)} required/>
-        <input type="password" placeholder="Password" value={password} 
-        onChange={(e) => setPassword(e.target.value)} required/>
-        <button type="submit">Login</button>
-      </form>
-      {error && <p className="error-message">{error}</p>}
-    </div>
+    <div className="login-wrapper">
+            <div className="login-container">
+                <h1 className="login-title">MUICT LEARNING</h1>
+                <h2>Instructor Login</h2>
+                <form onSubmit={handleLogin}>
+                    <input
+                        type="text"
+                        placeholder="Instructor ID"
+                        value={instructorId}
+                        onChange={(e) => setId(e.target.value)}
+                        required
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <button type="submit">Login</button>
+                </form>
+                {error && <p className="error-message">{error}</p>}
+            </div>
+        </div>
   );
 };
 

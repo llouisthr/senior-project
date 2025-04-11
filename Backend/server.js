@@ -86,77 +86,208 @@ app.post("/login", (req, res) => {
     });
 });
 
-// API Route Example: Fetch total student in a course, section, semester
-app.get('/course/:courseId/:sectionId/:semesterId/dashboard/enroll', (req, res) => {
+// Sidebar APIs
+app.get('/sidebar/:instructorId', (req, res) => {
+    const { instructorId } = req.params;
+    const query = `
+        SELECT DISTINCT 
+			concat(i.fname, ' ', i.lname) as Instructor,
+            c.course_id, 
+            c.course_name 
+        FROM Course_Section cs
+        JOIN Course c ON cs.course_id = c.course_id
+        JOIN instructor i ON i.instructor_id = cs.instructor_id
+        WHERE cs.instructor_id = ?;
+    `;
+
+    db.query(query, [instructorId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+//fetching max semester
+app.get('/sidebar/:courseId/:instructorId/findmaxsem', (req, res) => {
+    const { courseId, instructorId } = req.params;
+
+    const query = `
+        SELECT MAX(co.semester_id) AS latest_semester
+        FROM Course_Section cs
+        JOIN Course_Offering co ON cs.offer_id = co.offer_id
+        WHERE cs.course_id = ? AND cs.instructor_id = ?
+    `;
+
+    db.query(query, [courseId, instructorId], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        const semester_id = result[0].latest_semester;
+        res.json({ section: 'all', semester_id });
+    });
+});
+
+// Dashboard APIs
+// 1. Get enrollment count
+app.get('/dashboard/:courseId/:sectionId/:semesterId/enrollment', (req, res) => {
     const { courseId, sectionId, semesterId } = req.params;
 
-    let query;
-    let queryParams;
+    const query = sectionId === "all"
+        ? `SELECT COUNT(*) AS enrollment FROM Class_List WHERE course_id = ? AND semester_id = ?`
+        : `SELECT COUNT(*) AS enrollment FROM Class_List WHERE course_id = ? AND semester_id = ? AND section = ?`;
 
-    if (sectionId === "all") {
-        query = `
-            SELECT COUNT(student_id) AS total 
-            FROM Course_Section 
-            WHERE course_id = ? AND semester_id = ?
-        `;
-        queryParams = [courseId, semesterId];
-    } else {
-        query = `
-            SELECT COUNT(student_id) AS total 
-            FROM Course_Section 
-            WHERE course_id = ? AND section = ? AND semester_id = ?
-        `;
-        queryParams = [courseId, sectionId, semesterId];
-    }
+    const params = sectionId === "all" ? [courseId, semesterId] : [courseId, semesterId, sectionId];
 
-    db.query(query, queryParams, (err, results) => {
-        if (err) {
-            console.error("Error fetching enrollment count:", err);
-            return res.status(500).json({ error: err.message });
-        }
+    db.query(query, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(results[0]);
     });
 });
 
-// API to get instructor details
-app.get('/instructor/:instructorId', (req, res) => {
-    const { instructorId } = req.params;
-    const query = "SELECT fname FROM instructor WHERE instructor_id = ?";
-    
-    db.query(query, [instructorId], (err, result) => {
-        if (err) {
-            console.error("Database error:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-        res.json({ instructorName: result[0].fname });
+// 2. Attendance data by week
+app.get('/dashboard/:courseId/:sectionId/:semesterId/attendance', (req, res) => {
+    const { courseId, sectionId, semesterId } = req.params;
+    const query = `
+        SELECT A.attendance_week AS week, COUNT(*) AS students
+        FROM Attendance A
+        JOIN Class_List CL ON A.class_list_id = CL.class_list_id
+        WHERE CL.course_id = ? AND CL.semester_id = ?
+        ${sectionId !== "all" ? "AND CL.section = ?" : ""}
+        GROUP BY A.attendance_week
+        ORDER BY A.attendance_week;
+    `;
+    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
+
+    db.query(query, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
     });
 });
 
-// server.js or routes/instructor.js
-app.get("/home/:instructorId/courses", (req, res) => {
-    const { instructorId } = req.params;
+// 3. Submission breakdown (onTime, late, noSubmission)
+app.get('/dashboard/:courseId/:sectionId/:semesterId/submissions', (req, res) => {
+    const { courseId, sectionId, semesterId } = req.params;
     const query = `
-    SELECT DISTINCT 
-        cs.course_id,
-        c.course_name,
-        c.credit,
-        cs.section,
-        co.semester_id,
-        co.grade_type,
-        CONCAT(inst.fname, ' ', inst.lname) AS Instructor
-    FROM Course_Section cs
-    JOIN Course c ON cs.course_id = c.course_id
-    JOIN Course_Offering co ON cs.offer_id = co.offer_id
-    JOIN Instructor inst ON cs.instructor_id = inst.instructor_id
-    WHERE cs.instructor_id = ?;
+        SELECT
+            assignment.assess_name AS assignment,
+            SUM(CASE WHEN submit_date IS NULL THEN 1 ELSE 0 END) AS nosub,
+            SUM(CASE WHEN submit_date IS NOT NULL AND submit_date <= due_date THEN 1 ELSE 0 END) AS onTime,
+            SUM(CASE WHEN submit_date IS NOT NULL AND submit_date > due_date THEN 1 ELSE 0 END) AS late
+        FROM Assignment_Submit sub
+        JOIN Class_List cl ON sub.class_list_id = cl.class_list_id
+        JOIN Assessment assignment ON sub.assess_id = assignment.assessment_id
+        WHERE cl.course_id = ? AND cl.semester_id = ?
+        ${sectionId !== "all" ? "AND cl.section = ?" : ""}
+        GROUP BY assignment.assess_name;
     `;
+    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
 
-    db.query(query, [instructorId], (err, results) => {
-        if (err) {
-            console.error("Error fetching instructor courses:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
+    db.query(query, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(results);
+    });
+});
+
+// 4. Raw scores + statistics
+app.get('/dashboard/:courseId/:sectionId/:semesterId/raw-scores', (req, res) => {
+    const { courseId, sectionId, semesterId } = req.params;
+    const query = `
+        SELECT CAST(score AS UNSIGNED) AS score
+        FROM Assignment_Submit sub
+        JOIN Class_List cl ON sub.class_list_id = cl.class_list_id
+        WHERE cl.course_id = ? AND cl.semester_id = ?
+        ${sectionId !== "all" ? "AND cl.section = ?" : ""};
+    `;
+    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
+
+    db.query(query, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        const rawScores = results.map(r => r.score);
+        rawScores.sort((a, b) => a - b);
+
+        const mean = rawScores.reduce((a, b) => a + b, 0) / rawScores.length;
+        const median = rawScores.length % 2 === 0
+            ? (rawScores[rawScores.length/2 - 1] + rawScores[rawScores.length/2]) / 2
+            : rawScores[Math.floor(rawScores.length/2)];
+        const max = Math.max(...rawScores);
+
+        res.json({ rawScores, rawStats: [
+            { label: 'Max', value: max },
+            { label: 'Mean', value: Math.round(mean) },
+            { label: 'Median', value: Math.round(median) }
+        ] });
+    });
+});
+
+// 5. At-risk student list
+app.get('/dashboard/:courseId/:sectionId/:semesterId/at-risk', (req, res) => {
+    const { courseId, sectionId, semesterId } = req.params;
+    const query = `
+        SELECT s.student_id, s.fname, s.lname, cl.at_risk_status
+        FROM Class_List cl
+        JOIN Student s ON cl.student_id = s.student_id
+        WHERE cl.course_id = ? AND cl.semester_id = ?
+        ${sectionId !== "all" ? "AND cl.section = ?" : ""} AND cl.at_risk_status IN ('severe', 'slightly')
+    `;
+    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
+
+    db.query(query, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        res.json({
+            riskStudents: results.length,
+            atRiskStudentsName: results.map(r => ({ id: r.student_id, name: `${r.fname} ${r.lname}` }))
+        });
+    });
+});
+
+// 6. Low Scoring Quizzes (example threshold: score < 50%)
+app.get('/dashboard/:courseId/:sectionId/:semesterId/low-scoring-quizzes', (req, res) => {
+    const { courseId, sectionId, semesterId } = req.params;
+    const query = `
+        SELECT ai.assess_item_name, COUNT(*) AS lowScores
+        FROM Assignment_Submit sub
+        JOIN Class_List cl ON sub.class_list_id = cl.class_list_id
+        JOIN Assessment_Item ai ON ai.assess_item_id = sub.assess_id
+        WHERE cl.course_id = ? AND cl.semester_id = ?
+        ${sectionId !== "all" ? "AND cl.section = ?" : ""} AND CAST(sub.score AS UNSIGNED) < 50
+        GROUP BY ai.assess_item_name
+        ORDER BY lowScores DESC
+        LIMIT 5
+    `;
+    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
+
+    db.query(query, params, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const quizzes = results.map(r => `${r.assess_item_name} → ${r.lowScores}`);
+        res.json({ lowScoringQuizzes: quizzes });
+    });
+});
+
+// 7. Engagement Score (based on attendance + submission weights)
+app.get('/dashboard/:courseId/:sectionId/:semesterId/engagement', (req, res) => {
+    const { courseId, sectionId, semesterId } = req.params;
+    const query = `
+        SELECT
+            COUNT(CASE WHEN A.attendance_status = 'present' THEN 1 END) AS present,
+            COUNT(*) AS totalAttendance,
+            SUM(CASE WHEN sub.submit_date IS NOT NULL THEN 1 ELSE 0 END) AS submitted,
+            COUNT(sub.submit_id) AS totalSubmits
+        FROM Class_List cl
+        LEFT JOIN Attendance A ON cl.class_list_id = A.class_list_id
+        LEFT JOIN Assignment_Submit sub ON cl.class_list_id = sub.class_list_id
+        WHERE cl.course_id = ? AND cl.semester_id = ?
+        ${sectionId !== "all" ? "AND cl.section = ?" : ""};
+    `;
+    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
+
+    db.query(query, params, (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const { present, totalAttendance, submitted, totalSubmits } = result[0];
+
+        const attendanceRatio = totalAttendance ? present / totalAttendance : 0;
+        const submissionRatio = totalSubmits ? submitted / totalSubmits : 0;
+        const engagement = Math.round((attendanceRatio * 0.6 + submissionRatio * 0.4) * 100);
+
+        res.json({ engagement });
     });
 });
 

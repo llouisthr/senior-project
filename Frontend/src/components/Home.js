@@ -30,7 +30,7 @@ const Home = () => {
 
     setIsLoading(true);
     // Fetch instructor data related to courses
-    axios.get(`http://localhost:5000/home/${instructorId}/courses`)
+    axios.get(`http://localhost:5000/sidebar/${instructorId}`)
       .then((response) => {
         if (response.data && Array.isArray(response.data)) {
           setCourses(response.data);
@@ -82,9 +82,20 @@ const Home = () => {
                   <a onClick={() => toggleSubmenu(course.course_id)}>{course.course_id}</a>
                   {expandedSubmenu === course.course_id && (
                     <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
-                      <a onClick={() => navigate(`/course/${course.course_id.toLowerCase().replace(/\s+/g, "")}/:section/:semester/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
+                      <a onClick={async () => {
+                          try {
+                            const instructorId = localStorage.getItem("instructorId");
+                            const res = await axios.get(`http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`);
+                            const { section, semester_id } = res.data;
+                            navigate(`/course/${course.course_id.toLowerCase()}/${section}/${semester_id}/dashboard`);
+                          } catch (err) {
+                            console.error("Failed to fetch course details", err);
+                          }
+                        }}
+                        style={{ display: "block", marginBottom: "5px" }}>
                         Dashboard
                       </a>
+
                       <a onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/student-list`)} style={{ display: "block" }}>
                         Student List
                       </a>
@@ -137,7 +148,16 @@ const Home = () => {
               <div
                 key={index}
                 className="course-card clickable"
-                onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/dashboard`)}
+                onClick={async () => {
+                  try {
+                    const instructorId = localStorage.getItem("instructorId");
+                    const res = await axios.get(`http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`);
+                    const { section, semester_id } = res.data;
+                    navigate(`/course/${course.course_id}/${section}/${semester_id}/dashboard`);
+                  } catch (err) {
+                    console.error("Error fetching course details", err);
+                  }
+                }}                
                 style={{ cursor: "pointer" }}>
                 <div className="course-info">{course.course_id} {course.course_name}</div>
               </div>

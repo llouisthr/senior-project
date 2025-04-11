@@ -1,0 +1,92 @@
+/* login.css */
+/* Add this wrapper for centering */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #f0f2f5;
+    padding: 20px;
+  }
+  
+  /* Optional styling for the heading */
+  .login-title {
+    font-size: 26px;
+    color: #00468b;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }  
+
+.login-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: "Arial", sans-serif;
+    text-align: left;
+    background-color: #fff;
+  }
+  
+  .login-container h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #1a1a1a;
+  }
+  
+  .login-container form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .login-container input[type="text"],
+  .login-container input[type="password"] {
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border: 1px solid #c5c5c5;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #f2f5f7;
+  }
+  
+  .login-container button {
+    padding: 10px;
+    background-color: #00468b;
+    color: white;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .login-container button:hover {
+    background-color: #003366;
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+  
+  .login-container p {
+    font-size: 12px;
+    color: #555;
+    margin: 10px 0 0;
+    line-height: 1.4;
+  }
+  
+  .login-container a {
+    color: #0073e6;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 12px;
+  }
+  
+  .login-container a:hover {
+    text-decoration: underline;
+  }
+  
