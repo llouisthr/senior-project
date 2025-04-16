@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./components/CDashboard";
 import StudentList from "./components/StudentList";
 import StudentProfile from "./components/StudentProfile";
-import AtRiskSettingTest from "./components/atrisksettingtest";
 import Home from "./components/Home";
 import Login from "./components/login";
 import Layout from "./components/Layout"
@@ -26,7 +25,6 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/course/:course/:section/:semester/dashboard" element={<Dashboard criteria={criteria} />} />
           <Route path="/course/:course/student-list" element={<StudentList criteria={criteria} />} />
-          <Route path="/:course/at-risk-setting" element={<AtRiskSettingTest onSaveCriteria={setCriteria} />} />
           <Route path="/:studentId/student-profile" element={<StudentProfile />} />
         </Route>
       </Routes>

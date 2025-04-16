@@ -57,6 +57,8 @@ router.get("/:courseId/:sectionId/:semesterId/submissions", (req, res) => {
       JOIN class_list cl ON sub.class_list_id = cl.class_list_id
       JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
       WHERE cs.course_id = ? AND cs.semester_id = ?
+      AND ai.assess_item_name NOT LIKE '%Midterm%'
+      AND ai.assess_item_name NOT LIKE '%Final%'
       ${sectionId !== "all" ? "AND cs.section = ?" : ""}
       GROUP BY ai.assess_item_name
     `;
@@ -68,69 +70,121 @@ router.get("/:courseId/:sectionId/:semesterId/submissions", (req, res) => {
 });
 
 router.get("/:courseId/:sectionId/:semesterId/raw-scores", (req, res) => {
-    const { courseId, sectionId, semesterId } = req.params;
-    const query = `
-      WITH StudentTotalScores AS (
-        SELECT cs.course_id, cs.semester_id, cs.section,
-               SUM((CAST(asb.score AS DECIMAL) * ai.weight) * ass.weight) AS total_score
-        FROM class_list cl
-        JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
-        JOIN assignment_submit asb ON cl.class_list_id = asb.class_list_id
-        JOIN assessment_item ai ON asb.assess_item_id = ai.assess_item_id
-        JOIN assessment ass ON ai.assessment_id = ass.assessment_id
-        WHERE cs.course_id = ? AND cs.semester_id = ?
-        ${sectionId !== "all" ? "AND cs.section = ?" : ""}
-        GROUP BY cl.student_id, cs.course_id, cs.semester_id, cs.section
-      )
-      SELECT course_id, semester_id, section,
-             SUM(CASE WHEN total_score BETWEEN 0 AND 20 THEN 1 ELSE 0 END) AS range_0_20,
-             SUM(CASE WHEN total_score BETWEEN 21 AND 40 THEN 1 ELSE 0 END) AS range_21_40,
-             SUM(CASE WHEN total_score BETWEEN 41 AND 60 THEN 1 ELSE 0 END) AS range_41_60,
-             SUM(CASE WHEN total_score BETWEEN 61 AND 80 THEN 1 ELSE 0 END) AS range_61_80,
-             SUM(CASE WHEN total_score BETWEEN 81 AND 100 THEN 1 ELSE 0 END) AS range_81_100
-      FROM StudentTotalScores
-      GROUP BY course_id, semester_id, section
-    `;
-    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
-    db.query(query, params, (err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(results[0]);
-    });
+  const { courseId, sectionId, semesterId } = req.params;
+  const query = `
+    WITH StudentTotalScores AS (
+      SELECT cs.course_id, cs.semester_id, cs.section,
+             cl.student_id,
+             SUM(((asb.score / ai.max_score) * ai.weight) * ass.weight * 100) AS total_score
+      FROM class_list cl
+      JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
+      JOIN assignment_submit asb ON cl.class_list_id = asb.class_list_id
+      JOIN assessment_item ai ON asb.assess_item_id = ai.assess_item_id
+      JOIN assessment ass ON ai.assessment_id = ass.assessment_id
+      WHERE cs.course_id = ? AND cs.semester_id = ?
+      ${sectionId !== "all" ? "AND cs.section = ?" : ""}
+      GROUP BY cl.student_id, cs.course_id, cs.semester_id, cs.section
+    )
+    SELECT course_id, semester_id, section,
+           SUM(CASE WHEN total_score BETWEEN 0 AND 20 THEN 1 ELSE 0 END) AS range_0_20,
+           SUM(CASE WHEN total_score BETWEEN 21 AND 40 THEN 1 ELSE 0 END) AS range_21_40,
+           SUM(CASE WHEN total_score BETWEEN 41 AND 60 THEN 1 ELSE 0 END) AS range_41_60,
+           SUM(CASE WHEN total_score BETWEEN 61 AND 80 THEN 1 ELSE 0 END) AS range_61_80,
+           SUM(CASE WHEN total_score BETWEEN 81 AND 100 THEN 1 ELSE 0 END) AS range_81_100
+    FROM StudentTotalScores
+    GROUP BY course_id, semester_id, section
+  `;
+  const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
+  db.query(query, params, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results[0]);
+  });
 });
 
 router.get("/:courseId/:sectionId/:semesterId/raw-stats", (req, res) => {
-    const { courseId, sectionId, semesterId } = req.params;
-    const query = `
-      WITH RankedScores AS (
-        SELECT cs.course_id, cs.semester_id, cs.section,
-               CAST(asb.score AS DECIMAL) AS score,
-               ROW_NUMBER() OVER (PARTITION BY cs.course_id, cs.semester_id, cs.section ORDER BY CAST(asb.score AS DECIMAL)) AS row_num,
-               COUNT(*) OVER (PARTITION BY cs.course_id, cs.semester_id, cs.section) AS total_count
-        FROM class_list cl
-        JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
-        JOIN assignment_submit asb ON cl.class_list_id = asb.class_list_id
-        WHERE cs.course_id = ? AND cs.semester_id = ?
-        ${sectionId !== "all" ? "AND cs.section = ?" : ""}
-      )
-      SELECT course_id, semester_id, section,
-             MAX(score) AS max_score,
-             AVG(score) AS mean_score,
+  const { courseId, sectionId, semesterId } = req.params;
+
+  const isAllSections = sectionId === "all";
+
+  const singleSectionQuery = `
+    WITH StudentTotalScores AS (
+      SELECT cl.student_id,
+             SUM(((asb.score / ai.max_score) * ai.weight) * ass.weight * 100) AS total_score
+      FROM class_list cl
+      JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
+      JOIN assignment_submit asb ON cl.class_list_id = asb.class_list_id
+      JOIN assessment_item ai ON asb.assess_item_id = ai.assess_item_id
+      JOIN assessment ass ON ai.assessment_id = ass.assessment_id
+      WHERE cs.course_id = ? AND cs.semester_id = ? AND cs.section = ?
+      GROUP BY cl.student_id
+    ),
+    Ranked AS (
+      SELECT total_score,
+             ROW_NUMBER() OVER (ORDER BY total_score) AS row_num,
+             COUNT(*) OVER () AS total_count
+      FROM StudentTotalScores
+    )
+    SELECT 
+      MAX(total_score) AS max_score,
+      AVG(total_score) AS mean_score,
+      AVG(CASE
+        WHEN total_count % 2 = 1 AND row_num = FLOOR((total_count + 1) / 2) THEN total_score
+        WHEN total_count % 2 = 0 AND row_num IN (total_count / 2, total_count / 2 + 1) THEN total_score
+      END) AS median_score
+    FROM Ranked;
+  `;
+
+  const allSectionQuery = `
+    WITH StudentTotalScores AS (
+      SELECT cs.section,
+             cl.student_id,
+             SUM(((asb.score / ai.max_score) * ai.weight) * ass.weight * 100) AS total_score
+      FROM class_list cl
+      JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
+      JOIN assignment_submit asb ON cl.class_list_id = asb.class_list_id
+      JOIN assessment_item ai ON asb.assess_item_id = ai.assess_item_id
+      JOIN assessment ass ON ai.assessment_id = ass.assessment_id
+      WHERE cs.course_id = ? AND cs.semester_id = ?
+      GROUP BY cs.section, cl.student_id
+    ),
+    SectionStats AS (
+      SELECT section,
+             MAX(total_score) AS max_score,
+             AVG(total_score) AS mean_score,
              (
-               SELECT score
-               FROM RankedScores r2
-               WHERE r2.row_num = CEIL(r2.total_count / 2.0)
-                 AND r2.course_id = r1.course_id
-                 AND r2.semester_id = r1.semester_id
-                 AND r2.section = r1.section
+               SELECT AVG(score) FROM (
+                 SELECT s.total_score AS score,
+                        ROW_NUMBER() OVER (ORDER BY s.total_score) AS rn,
+                        COUNT(*) OVER () AS cnt
+                 FROM StudentTotalScores s
+                 WHERE s.section = sts.section
+               ) ranked
+               WHERE 
+                 (cnt % 2 = 1 AND rn = FLOOR((cnt + 1) / 2)) OR
+                 (cnt % 2 = 0 AND rn IN (cnt / 2, cnt / 2 + 1))
              ) AS median_score
-      FROM RankedScores r1
-      GROUP BY course_id, semester_id, section
-    `;
-    const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
-    db.query(query, params, (err, results) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(results[0]);
-    });
+      FROM StudentTotalScores sts
+      GROUP BY section
+    )
+    SELECT 
+      ROUND(AVG(max_score), 2) AS max_score,
+      ROUND(AVG(mean_score), 2) AS mean_score,
+      ROUND(AVG(median_score), 2) AS median_score
+    FROM SectionStats;
+  `;
+
+  const query = isAllSections ? allSectionQuery : singleSectionQuery;
+  const params = isAllSections
+    ? [courseId, semesterId]
+    : [courseId, semesterId, sectionId];
+
+  db.query(query, params, (err, results) => {
+    if (err) {
+      console.error("Error fetching raw score stats:", err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results[0]); // just return the 1 row of result
+  });
 });
 
 router.get("/:courseId/:sectionId/:semesterId/at-risk", (req, res) => {
@@ -193,6 +247,17 @@ router.get("/:courseId/:sectionId/:semesterId/engagement", (req, res) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json(results[0] || { engagement: 0 });
     });
+});
+
+router.get("/semesters", (req, res) => {
+  const query = "SELECT DISTINCT semester_id FROM semester ORDER BY semester_id DESC";
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Semester fetch error:", err);
+      return res.status(500).json({ error: "Failed to fetch semesters" });
+    }
+    res.json(results); // returns array of { semester_id }
+  });
 });
 
 module.exports = router;

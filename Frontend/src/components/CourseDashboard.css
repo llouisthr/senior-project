@@ -72,9 +72,9 @@
 .card .first-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap; /* Ensures elements don't wrap if there is space */
-  gap: 20px;
+  gap: 40px;
   width: 100%; /* Ensure it takes full width */
 }
 
@@ -108,11 +108,15 @@
     gap: 20px;
   }
 
-.student-engagement {
-    flex: 1;
+  .student-engagement {
+    flex: 1 1 30%;
+    max-width: 32%;
+    min-width: 200px;
     text-align: center;
-    margin-top: 50px;
-}
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   
   .card .first-row .engagement-percentage {
     font-size: 48px;
@@ -145,19 +149,46 @@
     margin-top: 0px;
 }
 
+.chart-container-svg {
+  width: 100%;
+  height: 300px;
+  display: block;
+  min-height: 300px;
+}
+
 /* Second Row in Card */
 .card .second-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-top: -40px;
     margin-bottom: 80px;
-    gap: 100px; /* This will increase the space between items */
+    gap: 40px; /* This will increase the space between items */
+}
+
+.card .at-risk-detect-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px; /* Reduce from 24px */
+  align-items: stretch;
+}
+
+.card .at-risk-detect-container .student-detect,
+.card .at-risk-detect-container .low-scoring-quiz {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 16px;
 }
 
 .card .second-row .student-detect {
   flex: 1;
   text-align: center;
+  box-sizing: border-box;
+  padding: 16px;
+  max-width: 100%;
 }
 
 .card .second-row .detect-container {
@@ -169,7 +200,9 @@
 .card .second-row .detect-box {
   height: 150px; 
   width: 200px;
-
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -180,7 +213,7 @@
   flex: 1;
   padding: 20px;
   text-align: center;
-  background: #f8f8f8;
+  background: white;
   border-radius: 10px;
   
 }
@@ -210,14 +243,21 @@
     justify-content: space-between;
   }
   
-  .card .second-row .quiz-list p {
+  .card .second-row .quiz-list {
+    background: white;
+    padding: 16px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin: 5px 0;
     font-size: 14px;
+    margin-top: -1px;
   }
 
   .card .second-row .score-distribution {
     flex: 1;
     text-align: center;
+    padding-top: 24px;
+    position: relative;
   }
   
   .card .second-row .gauge-container {
@@ -257,23 +297,18 @@
   .active {
     background: lightblue;
   }
-
-  .chart-row {
-    display: flex;
-    gap: 20px;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
   
   .chart-box {
     background-color: #fff;
     border-radius: 8px;
     padding: 16px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    flex: 1 1 45%;
-    max-width: 48%;
+    flex: 1 1 48%;
+    max-width: 100%;
     min-width: 300px;
     box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 1;
   }
   
