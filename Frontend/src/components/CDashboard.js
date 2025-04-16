@@ -14,8 +14,10 @@ const Dashboard = () => {
     const { course, section, semester } = useParams();
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState("");
-    const [selectedSection, setSelectedSection] = useState("all");
+    const [selectedSection, setSelectedSection] = useState(section);
     const [selectedSemester, setSelectedSemester] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const [data, setData] = useState({
         enrollment: 0,
@@ -24,7 +26,6 @@ const Dashboard = () => {
         riskStudents: 0,
         atRiskStudentsName: [],
         rawScores: [],
-        rawStats: [],
         attendance: [],
         submission: []
     });
@@ -50,17 +51,36 @@ const Dashboard = () => {
       
     useEffect(() => {
         const instructorId = localStorage.getItem("instructorId");
+        if (!instructorId) {
+          navigate("/login");
+          return;
+        }
+    
+        setIsLoading(true);
+        // Fetch instructor data related to courses
         axios.get(`http://localhost:5000/sidebar/${instructorId}`)
-        .then((response) => {
-            setCourses(response.data);
-            if (response.data.length > 0) {
+          .then((response) => {
+            if (response.data && Array.isArray(response.data)) {
+              setCourses(response.data);
+              console.log("Courses:", response.data);
+              // Get instructor name from the first course if available
+              if (response.data.length > 0) {
                 setInstructorName(response.data[0].Instructor);
+              }
+            } else {
+              setError("Invalid data format received");
+              setCourses([]);
             }
-        })
-        .catch((err) => {
-            console.error("Error fetching data:", err);
-        })
-    }, [navigate])
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+            setError("Failed to load courses");
+            setCourses([]);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }, [navigate]);
 
     useEffect(() => {
         if (!selectedCourse) return;
@@ -78,14 +98,18 @@ const Dashboard = () => {
                     axios.get(`${base}/at-risk`).then(res => res.data),
                     axios.get(`${base}/low-scoring-quizzes`).then(res => res.data),
                 ]);
-
+            console.log("Test API enroll", enr);
                 setData({
-                    enrollment: enr.enrollment || 0,
+                    enrollment: enr.total_students || 0,
                     engagement: eng.engagement || 0,
                     attendance: att,
                     submission: sub,
                     rawScores: raw.rawScores,
-                    rawStats: raw.rawStats,
+                    rawStats: [
+                        { label: "Max", value: raw.max_score },
+                        { label: "Mean", value: raw.mean_score },
+                        { label: "Median", value: raw.median_score }
+                    ],
                     riskStudents: risk.riskStudents,
                     atRiskStudentsName: risk.atRiskStudentsName,
                     lowScoringQuizzes: low.lowScoringQuizzes || []
@@ -98,54 +122,104 @@ const Dashboard = () => {
         fetchAll();
     }, [selectedCourse, selectedSection, selectedSemester]);
 
+    // Attendance Chart
     useEffect(() => {
-        // Attendance Chart
-        if (attendanceChartRef.current && data.attendance.length > 0) {
-            const container = d3.select(attendanceChartRef.current);
-            container.selectAll("svg").remove();
+        if (
+          attendanceChartRef.current &&
+          Array.isArray(data.attendance) &&
+          data.attendance.length > 0
+        ) {
+          const svg = d3.select(attendanceChartRef.current);
+          svg.selectAll("*").remove();
+      
+          const width = 500;
+          const height = 250;
+          const margin = { top: 30, right: 30, bottom: 40, left: 40 };
+      
+          const cleanedData = data.attendance
+            .filter(d => d.attendance_week !== null)
+            .map(d => ({
+                week: d.attendance_week.toString(),
+                students: +d.total_participated  // Use total_participated or total_present
+            }));
+      
+          const x = d3.scalePoint()
+            .domain(cleanedData.map(d => d.week))
+            .range([margin.left, width - margin.right])
+            .padding(0.5);
+      
+          const y = d3.scaleLinear()
+            .domain([0, d3.max(cleanedData, d => d.students) || 100])
+            .nice()
+            .range([height - margin.bottom, margin.top]);
+      
+          const line = d3.line()
+            .defined(d => d.students !== null && x(d.week) !== undefined)
+            .x(d => x(d.week))
+            .y(d => y(d.students));
 
-            const width = 400, height = 200;
-            const svg = container.append("svg").attr("width", width).attr("height", height);
-
-            const x = d3.scalePoint()
-                .domain(data.attendance.map(d => d.week))
-                .range([50, width - 50]);
-
-            const y = d3.scaleLinear()
-                .domain([0, d3.max(data.attendance, d => d.students)])
-                .range([height - 40, 20]);
-
-            const line = d3.line()
-                .x(d => x(d.week))
-                .y(d => y(d.students));
-
-            svg.append("g")
-                .attr("transform", `translate(0, ${height - 40})`)
-                .call(d3.axisBottom(x));
-
-            svg.append("g")
-                .attr("transform", `translate(50, 0)`)
-                .call(d3.axisLeft(y));
-
-            svg.append("path")
-                .datum(data.attendance)
-                .attr("d", line)
-                .attr("fill", "none")
-                .attr("stroke", "black")
-                .attr("stroke-width", 2);
-
-            svg.selectAll("circle")
-                .data(data.attendance)
-                .enter()
-                .append("circle")
-                .attr("cx", d => x(d.week))
-                .attr("cy", d => y(d.students))
-                .attr("r", 4)
-                .attr("fill", "red");
+          const tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "d3-tooltip")
+            .style("position", "absolute")
+            .style("background", "#fff")
+            .style("border", "1px solid #ccc")
+            .style("padding", "6px 10px")
+            .style("border-radius", "4px")
+            .style("font-size", "12px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+      
+          svg.append("path")
+            .datum(cleanedData)
+            .attr("fill", "none")
+            .attr("stroke", "#4f8dfd")
+            .attr("stroke-width", 2)
+            .attr("d", line);
+      
+          svg.selectAll("circle")
+            .data(cleanedData)
+            .enter()
+            .append("circle")
+            .attr("cx", d => x(d.week))
+            .attr("cy", d => y(d.students))
+            .attr("r", 3)
+            .attr("fill", "#4f8dfd")
+            .on("mouseover", function (event, d) {
+                tooltip
+                  .style("opacity", 1)
+                  .html(`Week ${d.week}<br/>Participants: ${d.students}`)
+                  .style("left", (event.pageX + 10) + "px")
+                  .style("top", (event.pageY - 28) + "px");
+              })
+              .on("mousemove", function (event) {
+                tooltip
+                  .style("left", (event.pageX + 10) + "px")
+                  .style("top", (event.pageY - 28) + "px");
+              })
+              .on("mouseout", function () {
+                tooltip.style("opacity", 0);
+              });
+      
+          svg.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(x))
+            .call(g =>
+              g.selectAll("text")
+                .attr("transform", "rotate(-30)")
+                .style("text-anchor", "end")
+            );
+      
+          svg.append("g")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(d3.axisLeft(y).ticks(5));
         }
-
+      }, [data.attendance]);
+         
+      
+    useEffect(() => {
         // Submission Chart
-        if (submissionChartRef.current && data.submission.length > 0) {
+        if (submissionChartRef.current && Array.isArray(data.submission) && data.submission.length > 0) {
             const container = d3.select(submissionChartRef.current);
             container.selectAll("svg").remove();
 
@@ -193,7 +267,7 @@ const Dashboard = () => {
         }
 
         // Score Chart
-        if (scoreChartRef.current && data.rawScores.length > 0) {
+        if (scoreChartRef.current && Array.isArray(data.rawScores) && data.rawScores.length > 0) {
             const container = d3.select(scoreChartRef.current);
             container.selectAll("svg").remove();
 
@@ -232,7 +306,7 @@ const Dashboard = () => {
 
         // Stats Chart with labels
         console.log("rawStats:", data.rawStats);
-        if (statsChartRef.current && data.rawStats.length > 0) {
+        if (statsChartRef.current && Array.isArray(data.rawStats) && data.rawStats.length > 0) {
             const container = d3.select(statsChartRef.current);
             container.selectAll("svg").remove();
 
@@ -284,51 +358,19 @@ const Dashboard = () => {
       };
       
     return (
-        <div className="container">
-            <div className="sidebar">
-                <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-                    MUICT LEARNING
-                </h2>
-                <div>
-                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
-                        Course
-                    </div>
-                    {/*Nested menu side bar*/}
-                    {expandedMenu === "course" && (
-                        <div className="submenu" style={{ cursor: "pointer" }}>
-                        {courses.map((course) => (
-                            <div key={course.course_id}>
-                            <a onClick={() => toggleSubmenu(course.course_id)}>{course.course_id}</a>
-                            {expandedSubmenu === course.course_id && (
-                                <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
-                                    <a onClick={() => navigate(`/course/${course.course_id.toLowerCase().replace(/\s+/g, "")}/all/202402/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
-                                        Dashboard
-                                    </a>
-                                    <a onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/student-list`)} style={{ display: "block" }}>
-                                        Student List
-                                    </a>
-                                </div>
-                            )}
-                            </div>
-                        ))}
-                        </div>
-                    )}
-                </div>
-                <div className="sidebar-footer">
-                    <span className="instructor-name">{instructorName}</span>
-                    <button className="logout-button" onClick={handleLogout}>
-                    <LogOut size={20} />
-                    </button>
-                </div>
-            </div>
-
-            <div className="main-content">
+            <div>
                 <h3>{selectedCourse ? `${selectedCourse} > Dashboard > Course Overview` : "Select a Course"}</h3>
 
                 <div className="box">
                     <div className="box-left">Course Dashboard</div>
                     <div className="box-right">
-                        <select className="dropdown" value={selectedSection} onChange={e => setSelectedSection(e.target.value)}>
+                    <select className="dropdown"
+                        value={selectedSection}
+                        onChange={e => {
+                            const newSection = e.target.value;
+                            setSelectedSection(newSection);
+                            navigate(`/course/${selectedCourse}/${newSection}/${selectedSemester}/dashboard`);
+                    }}>
                             <option value="all">All Sections</option>
                             <option value="1">Section 1</option>
                             <option value="2">Section 2</option>
@@ -354,12 +396,16 @@ const Dashboard = () => {
                             <p className="engagement-percentage">{data.engagement}%</p>
                         </div>
 
-                        <div className="chart-box" ref={attendanceChartRef}>
-                            <h4>Attendance</h4>
-                        </div>
+                        <div className="chart-row">
+                            <div className="chart-box">
+                                <h4>Attendance</h4>
+                                <svg ref={attendanceChartRef} width={450} height={250}></svg>
+                            </div>
 
-                        <div className="chart-box" ref={submissionChartRef}>
-                            <h4>Assignment Submissions</h4>
+                            <div className="chart-box">
+                                <h4>Assignment Submissions</h4>
+                                <svg ref={submissionChartRef} width={450} height={250}></svg>
+                            </div>
                         </div>
                     </div>
 
@@ -376,9 +422,13 @@ const Dashboard = () => {
                             <div className="low-scoring-quiz">
                                 <h4>Low Scoring Quizzes</h4>
                                 <div className="quiz-list">
-                                    {data.lowScoringQuizzes.map((quiz, i) => (
-                                        <p key={i}>{quiz}</p>
-                                    ))}
+                                {Array.isArray(data.lowScoringQuizzes) && data.lowScoringQuizzes.length > 0 ? (
+                                    data.lowScoringQuizzes.map((quiz, i) => (
+                                        <p key={i}>{quiz.assess_item_name}: {quiz.lowScores}</p>
+                                    ))
+                                    ) : (
+                                    <p>No low scoring quizzes found.</p>
+                                )}
                                 </div>
                             </div>
                         </div>
@@ -393,7 +443,6 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
-        </div>
     );
 };
 

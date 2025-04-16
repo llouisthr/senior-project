@@ -3,20 +3,58 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
+    overflow-x: hidden;
 }
 
 .student-profile-page-b-container {
     display: flex;
-    width: 115.3%;
+    width: 100%;
     min-height: 100vh;
+    overflow: hidden;
 }
 
 .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
     width: 250px;
-    background-color: #093CBD;
-    color: white;
-    padding: 20px;
+    background-color: #000fdf;
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
+  
+  .sidebar-content {
+    flex-grow: 1;
+    overflow-y: auto; /* Scrollable if content too tall */
+  }
+  
+  .sidebar-footer {
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .instructor-name {
+    font-weight: 500;
+    color: #e9ecef;
+  }
+  
+  .logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    color: #e9ecef;
+    transition: color 0.2s;
+  }
 
 .sidebar h2 {
     margin-bottom: 30px;
@@ -47,10 +85,13 @@ body {
 }
 
 .main-content {
-    flex: 1;
-    background-color: #f4f4f4;
     padding: 20px;
+    min-height: 100vh;
+    overflow-y: auto;
+    background-color: #f4f4f4;
+    box-sizing: border-box;
 }
+
 
 /* Header */
 .header {
@@ -265,7 +306,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background: white;
-    width: 250%;
+    width: 100%;
     height: 80%;
 }
 

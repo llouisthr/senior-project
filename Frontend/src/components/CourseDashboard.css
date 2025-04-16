@@ -1,60 +1,6 @@
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
-    display: flex; /* Ensure sidebar and content are side by side */
-}
-
-/* Sidebar */
-.sidebar {
-    width: 250px;
-    background-color: #093BCD;
-    color: white;
-    padding: 20px;
-    height: 100vh;
-  }
-
-.sidebar h2 {
-    font-size: 20px;
-    margin-bottom: 30px;
-}
-
-.sidebar a {
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-    display: block;
-    border-radius: 5px;
-}
-
-.sidebar a.active {
-    background-color: #207AD7;
-}
-
-.sidebar a:hover {
-    background-color: #207AD7;
-}
-
-.logout {
-    margin-top: auto;
-}
-
-/* Main Content */
-.main-content {
-    margin-left: 0px; /* Ensure it starts after the sidebar */
-    width: calc(100% - 250px); /* Prevent overlap */
-    padding: 20px;
-    position: absolute; /* Ensure it respects layout */
-    left: 250px;
-    top: 0;
-}
-
-
 /* Box container styling */
 .box {
-    display: flex;
+  display: flex;
   justify-content: space-between;
   align-items: center;
   background: white;
@@ -114,9 +60,14 @@ body {
   position: relative; /* Ensures it's positioned properly */
 }
 
-
+.main-content {
+  height: 100vh;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #f4f4f4;
+  box-sizing: border-box;
+}
   
-
 /* First Row in Card */
 .card .first-row {
   display: flex;
@@ -306,3 +257,23 @@ body {
   .active {
     background: lightblue;
   }
+
+  .chart-row {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .chart-box {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    flex: 1 1 45%;
+    max-width: 48%;
+    min-width: 300px;
+    box-sizing: border-box;
+  }
+  

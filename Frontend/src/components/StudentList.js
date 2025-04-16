@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import './StudentList.css'; // Import CSS file
 import personIcon from "./person.jpg";
+import { LogOut } from "lucide-react";
+import axios from "axios";
 
 const StudentList = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -10,6 +12,10 @@ const StudentList = () => {
   const [expandedSubmenu, setExpandedSubmenu] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [instructorName, setInstructorName] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [sortOption, setSortOption] = useState("ascending");
   const [semesterOption, setSemesterOption] = useState("name");
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -26,6 +32,12 @@ const StudentList = () => {
   const [slightlyAttendance, setSlightlyAttendance] = useState(6);
   const [slightlyScore, setSlightlyScore] = useState(35);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("instructorId");
+    navigate("/login");
+  };
+
   useEffect(() => {
     const pathParts = location.pathname.split("/").filter(Boolean);
     if (pathParts.length > 1) {
@@ -41,24 +53,61 @@ const StudentList = () => {
     setExpandedSubmenu(expandedSubmenu === course ? null : course);
   };
 
-  const students = [
-    { image: personIcon, id: 'u6800001', name: 'Ms. Mattie Khan', attendance: '9', score: '48', quiz: '0' },
-    { image: personIcon, id: 'u6800002', name: 'Ms. Shania Fischer', attendance: '5', score: '27', quiz: '7', link: '/student-profile-B' },
-    { image: personIcon, id: 'u6800003', name: 'Mr. Damian Burnett', attendance: '8', score: '44', quiz: '1' },
-    { image: personIcon, id: 'u6800004', name: 'Mr. Clarence Welch', attendance: '8', score: '43', quiz: '2' },
-    { image: personIcon, id: 'u6800005', name: 'Mr. Neil Pitts', attendance: '6', score: '32', quiz: '3' },
-    { image: personIcon, id: 'u6800006', name: 'Mr. Albert Chang', attendance: '6', score: '34', quiz: '3' },
-    { image: personIcon, id: 'u6800007', name: 'Mr. Jayden Armstrong', attendance: '8', score: '45', quiz: '2' },
-    { image: personIcon, id: 'u6800008', name: 'Mr. Georgie Sheppard', attendance: '8', score: '45', quiz: '1' },
-    { image: personIcon, id: 'u6800009', name: 'Ms. Carol Marquez', attendance: '8', score: '41', quiz: '2' },
-    { image: personIcon, id: 'u6800010', name: 'Mr. Jay Small', attendance: '8', score: '40', quiz: '3' },
-    { image: personIcon, id: 'u6800011', name: 'Ms. Annie Andrade', attendance: '7', score: '38', quiz: '3' },
-    { image: personIcon, id: 'u6800012', name: 'Ms. Amelie Long', attendance: '7', score: '36', quiz: '4' },
-    { image: personIcon, id: 'u6800013', name: 'Mr. Harold Stewart', attendance: '8', score: '39', quiz: '1' },
-    { image: personIcon, id: 'u6800014', name: 'Mr. Erik Rivas', attendance: '8', score: '45', quiz: '0' },
-    { image: personIcon, id: 'u6800015', name: 'Mr. Jacob Mcgowan', attendance: '5', score: '25', quiz: '5' },
-    { image: personIcon, id: 'u6800016', name: "Ms. Amber Lee", attendance: "3", score: "22", quiz: '8' },
-  ];
+  //Sidebar info fetching
+  useEffect(() => {
+    const instructorId = localStorage.getItem("instructorId");
+    if (!instructorId) {
+      navigate("/login");
+      return;
+    }
+    setIsLoading(true);
+    // Fetch instructor data related to courses
+    axios.get(`http://localhost:5000/sidebar/${instructorId}`)
+      .then((response) => {
+        if (response.data && Array.isArray(response.data)) {
+          setCourses(response.data);
+          console.log("Courses:", response.data);
+          // Get instructor name from the first course if available
+          if (response.data.length > 0) {
+            setInstructorName(response.data[0].Instructor);
+          }
+        } else {
+          setError("Invalid data format received");
+          setCourses([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setError("Failed to load courses");
+        setCourses([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [navigate]);
+
+  const [students, setStudents] = useState([]);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!selectedCourse) return;
+
+      try {
+        const res = await fetch(`http://localhost:5000/student-list?courseId=${selectedCourse}&section=all&semesterId=202401`);
+        const data = await res.json();
+        const enriched = data.map((student) => ({
+          ...student,
+          image: personIcon,
+        }));
+        setStudents(enriched);
+      } catch (err) {
+        console.error('Error fetching students:', err);
+      }
+    };
+
+  fetchStudents();
+}, [selectedCourse]);
+
 
   const getRiskStatus = (attendance, score) => {
     if (attendance <= severeAttendance && score < severeScore) {
@@ -98,41 +147,6 @@ const StudentList = () => {
 
   return (
     <div className="student-profile-container">
-      <div className="sidebar">
-        <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-          MUICT LEARNING
-        </h2>
-
-        <div>
-          <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
-            Course
-          </div>
-          {expandedMenu === "course" && (
-            <div className="submenu" style={{ cursor: "pointer" }}>
-              {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
-                <div key={course}>
-                  <a onClick={() => toggleSubmenu(course)}>{course}</a>
-                  {expandedSubmenu === course && (
-                    <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
-                        Dashboard
-                      </a>
-                      <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
-                        Student List
-                      </a>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div>
-          <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
-            Power BI
-          </div>
-        </div>
-      </div>
       <div className="main-content">
         <h3>{selectedCourse ? `${selectedCourse} > Student List` : "Select a Course"}</h3>
 
@@ -237,7 +251,6 @@ const StudentList = () => {
           </div>
         </div>
 
-
         <div className="student-table">
           <table>
             <thead>
@@ -271,7 +284,7 @@ const StudentList = () => {
                   <td>{student.id}</td>
                   <td style={{ textAlign: "left" }}>
                     {student.link ? (
-                      <a onClick={() => navigate(student.link)}>{student.name}</a>
+                      <a onClick={() => navigate(`/${student.id}/student-profile`)}>{student.name}</a>
                     ) : (
                       student.name
                     )}

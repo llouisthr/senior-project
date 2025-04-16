@@ -5,13 +5,24 @@ import personIcon from "./person.jpg";
 // import CalendarHeatmap from "react-calendar-heatmap";
 // import "react-calendar-heatmap/dist/styles.css";
 import './StudentProfile.css';
+import { LogOut } from "lucide-react";
+import axios from "axios";
 
-const StudentProfileB = () => {
+const StudentProfile = () => {
     const navigate = useNavigate();
     const [expandedMenu, setExpandedMenu] = useState(null);
     const [expandedSubmenu, setExpandedSubmenu] = useState(null);
+    const [courses, setCourses] = useState([]);
+    const [instructorName, setInstructorName] = useState("");
     const [infoOption, setInfoOption] = useState("overall");
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("instructorId");
+        navigate("/login");
+      };
     const toggleMenu = (menu) => {
         setExpandedMenu(expandedMenu === menu ? null : menu);
     };
@@ -109,7 +120,39 @@ const StudentProfileB = () => {
         { date: "2025-03-04", count: 1 },
         // Add more data points
     ];
-
+    //Sidebar info fetching
+    useEffect(() => {
+        const instructorId = localStorage.getItem("instructorId");
+        if (!instructorId) {
+          navigate("/login");
+          return;
+        }
+        setIsLoading(true);
+        // Fetch instructor data related to courses
+        axios.get(`http://localhost:5000/sidebar/${instructorId}`)
+          .then((response) => {
+            if (response.data && Array.isArray(response.data)) {
+              setCourses(response.data);
+              console.log("Courses:", response.data);
+              // Get instructor name from the first course if available
+              if (response.data.length > 0) {
+                setInstructorName(response.data[0].Instructor);
+              }
+            } else {
+              setError("Invalid data format received");
+              setCourses([]);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error);
+            setError("Failed to load courses");
+            setCourses([]);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }, [navigate]);
+    
     useEffect(() => {
         renderThirdLineChart(chartRefs.subjectScoreChart, subjectScoreData);
         renderSecondLineChart(chartRefs.attendanceLineChart, subjectAttendanceData)
@@ -628,46 +671,7 @@ const StudentProfileB = () => {
 
     return (
         <div className="student-profile-page-b-container">
-            <div className="sidebar">
-                <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-                    MUICT LEARNING
-                </h2>
-
-                <div>
-                    <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
-                        Course
-                    </div>
-                    {expandedMenu === "course" && (
-                        <div className="submenu" style={{ cursor: "pointer" }}>
-                            {["ITCS209", "ITCS125", "ITLG201"].map((course) => (
-                                <div key={course}>
-                                    <a onClick={() => toggleSubmenu(course)}>{course}</a>
-                                    {expandedSubmenu === course && (
-                                        <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/dashboard`)} style={{ display: "block", marginBottom: "5px" }}>
-                                                Dashboard
-                                            </a>
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/student-list`)} style={{ display: "block" }}>
-                                                Student List
-                                            </a>
-                                            <a onClick={() => navigate(`/${course.toLowerCase()}/at-risk-setting`)} style={{ display: "block" }}>
-                                                Criteria Setting
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                <div>
-                    <div className="menu-heading" onClick={() => navigate("/powerbi")} style={{ cursor: "pointer" }}>
-                        Power BI
-                    </div>
-                </div>
-            </div>
-
-            <div className="main-content">
+        <div className="main-content">
                 <h3>ITCS209 &gt; Student List &gt; u6800002</h3>
 
                 <div className="student-head-box">
@@ -854,4 +858,4 @@ const StudentProfileB = () => {
     );
 };
 
-export default StudentProfileB;
+export default StudentProfile;

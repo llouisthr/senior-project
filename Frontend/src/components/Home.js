@@ -63,61 +63,8 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container">
-      {/* Sidebar */}
-      <div className="sidebar">
-        <h2 onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-          MUICT LEARNING
-        </h2>
-
-        <div>
-          <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer" }}>
-            Course
-          </div>
-          {/*Nested menu side bar*/}
-          {expandedMenu === "course" && (
-            <div className="submenu" style={{ cursor: "pointer" }}>
-              {courses.map((course) => (
-                <div key={course.course_id}>
-                  <a onClick={() => toggleSubmenu(course.course_id)}>{course.course_id}</a>
-                  {expandedSubmenu === course.course_id && (
-                    <div className="nested-submenu" style={{ marginLeft: "20px", cursor: "pointer" }}>
-                      <a onClick={async () => {
-                          try {
-                            const instructorId = localStorage.getItem("instructorId");
-                            const res = await axios.get(`http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`);
-                            const { section, semester_id } = res.data;
-                            navigate(`/course/${course.course_id.toLowerCase()}/${section}/${semester_id}/dashboard`);
-                          } catch (err) {
-                            console.error("Failed to fetch course details", err);
-                          }
-                        }}
-                        style={{ display: "block", marginBottom: "5px" }}>
-                        Dashboard
-                      </a>
-
-                      <a onClick={() => navigate(`/${course.course_id.toLowerCase().replace(/\s+/g, "")}/student-list`)} style={{ display: "block" }}>
-                        Student List
-                      </a>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Instructor Name and Logout Section */}
-        <div className="sidebar-footer">
-          <span className="instructor-name">{instructorName}</span>
-          <button className="logout-button" onClick={handleLogout}>
-            <LogOut size={20} />
-          </button>
-        </div>
-      </div>
-
+    <div className="home-wrapper">
       {/* Main Content */}
-      <div className="main-content">
         <h3>Courses</h3>
         {/* Top Right Search Box */}
         <div className="search-bar">
@@ -152,8 +99,8 @@ const Home = () => {
                   try {
                     const instructorId = localStorage.getItem("instructorId");
                     const res = await axios.get(`http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`);
-                    const { section, semester_id } = res.data;
-                    navigate(`/course/${course.course_id}/${section}/${semester_id}/dashboard`);
+                    const { semester_id } = res.data;
+                    navigate(`/course/${course.course_id}/all/${semester_id}/dashboard`);
                   } catch (err) {
                     console.error("Error fetching course details", err);
                   }
@@ -164,7 +111,6 @@ const Home = () => {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 };
