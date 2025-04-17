@@ -127,30 +127,6 @@ const StudentProfile = () => {
           navigate("/login");
           return;
         }
-        setIsLoading(true);
-        // Fetch instructor data related to courses
-        axios.get(`http://localhost:5000/sidebar/${instructorId}`)
-          .then((response) => {
-            if (response.data && Array.isArray(response.data)) {
-              setCourses(response.data);
-              console.log("Courses:", response.data);
-              // Get instructor name from the first course if available
-              if (response.data.length > 0) {
-                setInstructorName(response.data[0].Instructor);
-              }
-            } else {
-              setError("Invalid data format received");
-              setCourses([]);
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-            setError("Failed to load courses");
-            setCourses([]);
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
       }, [navigate]);
     
     useEffect(() => {
