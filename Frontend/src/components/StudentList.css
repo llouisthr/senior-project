@@ -1,25 +1,17 @@
-/* StudentProfile.css */
-
-html,
-body {
-  /* Target both html and body */
-  font-family: Arial, sans-serif;
+/* Prevent content from overflowing */
+html, body {
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
-  width: 100%;
-  /* Crucial: Ensure both html and body take full width */
-  height: 100%;
-  /* Crucial: Ensure both html and body take full height */
-  display: flex;
-  /* Enable flexbox on the body */
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  font-family: Arial, sans-serif;
 }
 
+/* Flexbox container to hold sidebar and main content */
 .student-profile-container {
   display: flex;
-  width: 171%;
-  /* Take full width */
-  flex-grow: 1;
-  /* Key: Allow container to grow to fill available height */
+  flex-wrap: wrap; /* Allow content to wrap on smaller screens */
 }
 
 .sidebar {
@@ -28,20 +20,13 @@ body {
   color: white;
   padding: 20px;
   height: 100vh;
+  box-sizing: border-box; /* Prevent width overflow */
 }
-
 
 .sidebar h2 {
   margin-bottom: 30px;
   text-align: center;
-  /* Center the title */
-}
-
-.menu-heading {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-top: 20px;
-  margin-bottom: 10px;
+  font-size: 1.5rem;
 }
 
 .sidebar a {
@@ -52,7 +37,6 @@ body {
   padding: 8px 15px;
   border-radius: 5px;
   transition: background-color 0.3s ease;
-  /* Smooth transition for hover effect */
 }
 
 .sidebar a:hover {
@@ -63,56 +47,18 @@ body {
   background-color: #207AD7;
 }
 
-.logout {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  /* Position from the left instead of right */
-  display: flex;
-  /* Use flexbox for icon and text if needed */
-  align-items: center;
-  /* Vertically align icon and text */
-}
-
-.logout a {
-  text-decoration: none;
-  color: white;
-  display: flex;
-  /* Use flexbox for icon and text if needed */
-  align-items: center;
-  /* Vertically align icon and text */
-
-}
-
-.logout img {
-  width: 24px;
-  height: 24px;
-  margin-right: 5px;
-  /* Add some spacing between icon and text */
-  transition: filter 0.3s ease;
-  /* Smooth transition for hover effect */
-}
-
-.logout a:hover img {
-  filter: brightness(1.2);
-}
-
-
+/* Main content section */
 .main-content {
-  flex: 1;
-  /* Takes up remaining space */
+  flex-grow: 1; /* Take up remaining space */
   background-color: #f4f4f4;
   padding: 20px;
-  overflow-y: auto;
-  /* Scrollbar if content overflows */
+  overflow-x: auto; /* Allow horizontal scrolling if needed */
   height: 100%;
-  /* Ensure main content takes up available height */
+  box-sizing: border-box; /* Prevent width overflow */
 }
 
 /* Header */
 .header {
-  width: calc(100% - 250px);
-  /* Adjust width to fit next to sidebar */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -122,9 +68,16 @@ body {
   position: fixed;
   top: 0;
   left: 250px;
+  width: calc(100% - 250px);
   z-index: 1000;
 }
 
+.header h3 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+/* Student List Section */
 .student-list-box {
   display: flex;
   justify-content: space-between;
@@ -134,7 +87,6 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
-  margin-top: 0px;
 }
 
 .student-list-box span {
@@ -143,167 +95,65 @@ body {
   color: #333;
 }
 
-.student-list-box select {
-  padding: 5px 10px;
-  font-size: 14px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  outline: none;
-  cursor: pointer;
+/* Search Box */
+.search-bar {
+  margin-bottom: 20px;
 }
 
-.red {
-  background-color: red;
-}
-
-.orange {
-  background-color: orange;
-}
-
-.yellow {
-  background-color: yellow;
-}
-
-
-.filter-box,
-.sort-box,
-.semester-box {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.filter-box span,
-.sort-box span,
-.semester-box span {
-  font-size: 14px;
-  font-weight: normal;
-  color: #333;
-}
-
-.dashboard-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.header input[type="text"] {
-  /* Style the search input */
+.search-bar input[type="text"] {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 10px;
-  /* Add some space between input and select */
 }
 
-.dropdown {
-  padding: 8px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.risk-legend {
-  margin-bottom: 15px;
-  /* Adds space below the legend */
-  display: flex;
-  gap: 20px;
-  /* Adds gap between the two labels */
-  font-weight: bold;
-}
-
+/* Risk Filter Section */
 .risk-filter-container {
   display: flex;
   justify-content: space-between;
-  /* Pushes filter section to the right */
   align-items: center;
   margin-top: 20px;
+}
+
+.risk-legend {
+  display: flex;
+  gap: 20px;
+  font-weight: bold;
 }
 
 .filter-section {
   display: flex;
   gap: 10px;
-  /* Adds spacing between dropdown and button */
 }
 
-.range-container {
-  position: relative;
-  width: 100%;
-  height: 30px;
+.filter-box,
+.criteria-box {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  width: 250px;
 }
 
-/* Base styles for both range inputs */
-.range-container input[type="range"] {
-  position: absolute;
-  width: 100%;
-  appearance: none;
-  background: none;
-  pointer-events: none;
-}
-
-/* Track styling */
-.range-container input[type="range"]::-webkit-slider-runnable-track {
-  height: 6px;
-  background: #ddd;
-  border-radius: 5px;
-}
-
-/* Thumbs styling */
-.range-container input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 15px;
-  height: 15px;
-  background: steelblue;
-  border-radius: 50%;
-  cursor: pointer;
-  pointer-events: auto;
-  margin-top: -6px; /* Aligns with track */
-  position: relative;
-  z-index: 3; /* Ensure thumbs appear in front */
-}
-
-
-/* Bring the lower thumb (start point) to the front */
-.range-container input[type="range"].min {
-  z-index: 4; /* Higher than track */
-}
-
-.range-container input[type="range"].max {
-  z-index: 3;
-}
-
-/* Adjust positioning to ensure the left thumb stays in front */
-.range-container input[type="range"].min::-webkit-slider-thumb {
-  transform: translateX(-5px); /* Move slightly left to be in front */
-}
-
-.range-container input[type="range"].max::-webkit-slider-thumb {
-  transform: translateX(5px); /* Move slightly right to avoid overlap */
-}
-
-/* Colored line between thumbs */
-.range-container .range-line {
-  position: absolute;
-  height: 6px;
-  background: steelblue;
-  border-radius: 5px;
-  z-index: 2; /* Behind thumbs but in front of track */
-}
-
-
-
+/* Table */
 .student-table {
   margin-top: 20px;
   background-color: white;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  overflow-x: auto; /* Enable horizontal scroll for table */
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto; /* Allow columns to adjust based on content */
 }
 
 th,
@@ -317,23 +167,122 @@ th {
   background-color: #003366;
   color: white;
   font-weight: bold;
-  /* Make header text bolder */
 }
 
-/* Style the table rows on hover */
-tr:hover {
-  background-color: #f0f0f0;
-}
-
-/* Make the student name links a different color */
 td a {
   color: #0056b3;
-  /* Example link color */
   text-decoration: none;
-  /* Remove underlines from links */
 }
 
 td a:hover {
   text-decoration: underline;
-  /* Add underline on hover */
+}
+
+tr:hover {
+  background-color: #f0f0f0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px; /* Reduce sidebar width on smaller screens */
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .student-profile-container {
+    flex-direction: column; /* Stack content vertically on small screens */
+  }
+
+  .student-table th, .student-table td {
+    font-size: 12px; /* Adjust font size on smaller screens */
+  }
+
+  .search-bar input[type="text"] {
+    width: 100%; /* Make search input full width on small screens */
+  }
+
+  .filter-box,
+  .criteria-box {
+    width: 100%; /* Ensure filter boxes fit on smaller screens */
+  }
+
+  .student-list-box {
+    flex-direction: column; /* Stack elements vertically in student list */
+    align-items: flex-start;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    gap: 15px; /* Add space between filter options */
+  }
+}
+
+/* Range Slider Styling */
+.range-container {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.range-container input[type="range"] {
+  position: absolute;
+  width: 100%;
+  appearance: none;
+  background: none;
+  pointer-events: none;
+}
+
+.range-container input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #ddd;
+  border-radius: 5px;
+}
+
+.range-container input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background: steelblue;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  margin-top: -6px;
+  position: relative;
+  z-index: 3;
+}
+
+.range-container .range-line {
+  position: absolute;
+  height: 6px;
+  background: steelblue;
+  border-radius: 5px;
+  z-index: 2; /* Behind thumbs but in front of track */
+}
+
+/* Customize range slider thumb colors */
+.range-container input[type="range"].severe::-webkit-slider-thumb {
+  background-color: red;
+}
+
+.range-container input[type="range"].slightly::-webkit-slider-thumb {
+  background-color: yellow;
+}
+
+/* Button Styling */
+button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
 }

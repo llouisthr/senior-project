@@ -37,10 +37,14 @@ global.db = db;
 const loginRoutes = require("./api_routes/login.routes");
 const dashboardRoutes = require("./api_routes/dashboard.routes");
 const sidebarRoutes = require("./api_routes/sidebar.routes");
+const studentListRoutes = require("./api_routes/studentList.routes");
+const studentProfileRoutes = require("./api_routes/studentProfile.routes");
 
 app.use("/login", loginRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/sidebar", sidebarRoutes);
+app.use("/studentList", studentListRoutes);
+app.use("/studentProfile", studentProfileRoutes);
 
 // Root test
 app.get("/", (req, res) => {

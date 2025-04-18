@@ -26,17 +26,18 @@
 
 /* Single Main Card */
 .card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 1630px;
-    margin-top: 31px;
-    height: 780px; /* Adjust the height as needed */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1630px;
+  margin-top: 31px;
+  height: auto; /* Adjust the height dynamically */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 20px;
 }
 
 .card-header {
@@ -72,10 +73,11 @@
 .card .first-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   flex-wrap: wrap; /* Ensures elements don't wrap if there is space */
   gap: 40px;
   width: 100%; /* Ensure it takes full width */
+  margin-bottom: 20px;
 }
 
 .card .first-row .enrollment {
@@ -149,13 +151,22 @@
     margin-top: 0px;
 }
 
-.chart-container-svg {
+.chart-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
   width: 100%;
-  height: 300px;
-  display: block;
-  min-height: 300px;
 }
 
+.chart-container-svg {
+  width: 100%;
+  height: 100%;
+  margin-top: 15px; /* Space between the title and the chart */
+  display: block;
+  min-height: 300px;
+  max-width: 800px; /* Limit the width */
+  margin-top: 10px; /* Space between chart and title */
+}
 /* Second Row in Card */
 .card .second-row {
     display: flex;
@@ -299,16 +310,15 @@
   }
   
   .chart-box {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    flex: 1 1 48%;
-    max-width: 100%;
-    min-width: 300px;
-    box-sizing: border-box;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 2 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff; /* Ensure white background */
+    padding: 20px; /* Add padding around the chart */
+    margin-bottom: 20px; /* Add space between chart boxes */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: add shadow for better look */
+    width: 100%; /* Ensure it's responsive */
+    overflow: hidden; /* Prevent overflow */
   }
   

@@ -211,16 +211,30 @@ router.get("/:courseId/:sectionId/:semesterId/at-risk", (req, res) => {
 router.get("/:courseId/:sectionId/:semesterId/low-scoring-quizzes", (req, res) => {
     const { courseId, sectionId, semesterId } = req.params;
     const query = `
-      SELECT ai.assess_item_name,
-             COUNT(*) AS lowScores
-      FROM assignment_submit sub
-      JOIN class_list cl ON sub.class_list_id = cl.class_list_id
-      JOIN assessment_item ai ON sub.assess_item_id = ai.assess_item_id
-      JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
-      WHERE cs.course_id = ? AND cs.semester_id = ? AND CAST(sub.score AS UNSIGNED) < 50
-      ${sectionId !== "all" ? "AND cs.section = ?" : ""}
-      GROUP BY ai.assess_item_name
-      ORDER BY lowScores DESC
+    SELECT 
+    cs.course_id,
+    cs.semester_id,
+    cs.section,
+    ai.assess_item_name, 
+    ROUND(AVG(sub.score), 2) AS avg,
+    ai.max_score
+    FROM 
+        assignment_submit sub
+    JOIN 
+        class_list cl ON sub.class_list_id = cl.class_list_id
+    JOIN 
+        assessment_item ai ON sub.assess_item_id = ai.assess_item_id
+    JOIN 
+        course_section cs ON cl.course_sect_id = cs.course_sect_id
+    WHERE 
+        LOWER(ai.assess_item_name) LIKE '%quiz%' AND cs.course_id = ? AND cs.semester_id = ?
+        ${sectionId !== "all" ? "AND cs.section = ?" : ""}
+    GROUP BY 
+        cs.course_id, cs.semester_id, cs.section, ai.assess_item_name
+    HAVING 
+        AVG(sub.score) < (MAX(ai.max_score) * 0.5)
+    ORDER BY 
+    ai.assess_item_name ASC;
     `;
     const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
     db.query(query, params, (err, results) => {
@@ -259,5 +273,21 @@ router.get("/semesters", (req, res) => {
     res.json(results); // returns array of { semester_id }
   });
 });
+
+// Fetch available sections for a course and semester
+router.get("/:course/:semester/sections", (req, res) => {
+  const { course, semester } = req.params;
+  const query = `
+    SELECT DISTINCT section
+    FROM course_section
+    WHERE course_id = ? AND semester_id = ?
+  `;
+
+  db.query(query, [course, semester], (err, results) => {
+    if (err) return res.status(500).json({ error: "Failed to fetch sections" });
+    res.json(results.map(r => r.section));
+  });
+});
+
 
 module.exports = router;

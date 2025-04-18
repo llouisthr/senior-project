@@ -106,7 +106,38 @@ const Home = () => {
                   }
                 }}                
                 style={{ cursor: "pointer" }}>
-                <div className="course-info">{course.course_id} {course.course_name}</div>
+                <div className="course-info">
+                {course.course_id} {course.course_name}
+                <div className="icon-bottom-right">
+                  <svg
+                    width="27"
+                    height="27"
+                    viewBox="0 0 27 27"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g clipPath="url(#clip0_2593_1725)">
+                      <path
+                        d="M23.625 3.375H3.375V5.625H23.625V3.375Z"
+                        fill="black"
+                      />
+                      <path
+                        d="M23.625 21.375H3.375V23.625H23.625V21.375Z"
+                        fill="black"
+                      />
+                      <path
+                        d="M23.625 12.375H3.375V14.625H23.625V12.375Z"
+                        fill="black"
+                      />
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_2593_1725">
+                        <rect width="27" height="27" fill="white" />
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
               </div>
             ))}
           </div>

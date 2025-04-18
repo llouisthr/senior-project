@@ -14,6 +14,7 @@ const Dashboard = () => {
     const { course, section, semester } = useParams();
     const [courses, setCourses] = useState([]);
     const [availableSemesters, setAvailableSemesters] = useState([]);
+    const [availableSections, setAvailableSections] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState("");
     const [selectedSection, setSelectedSection] = useState(section);
     const [selectedSemester, setSelectedSemester] = useState("");
@@ -67,6 +68,22 @@ const Dashboard = () => {
           })
           .catch(err => console.error("Failed to fetch semesters:", err));
       }, []);
+
+      useEffect(() => {
+        if (!selectedCourse || !selectedSemester) return;
+        axios.get(`http://localhost:5000/dashboard/${selectedCourse}/${selectedSemester}/sections`)
+          .then(res => {
+            if (Array.isArray(res.data)) {
+              // Sort sections in ascending order
+              const sortedSections = res.data.sort((a, b) => {
+                // Check if they are numbers or strings and sort accordingly
+                return a.localeCompare(b, undefined, { numeric: true });
+              });
+              setAvailableSections(sortedSections);
+            }
+          })
+          .catch(err => console.error("Failed to fetch sections:", err));
+      }, [selectedCourse, selectedSemester]);
       
 
     useEffect(() => {
@@ -113,14 +130,15 @@ const Dashboard = () => {
     // Attendance Chart
     useEffect(() => {
         if (attendanceChartRef.current && Array.isArray(data.attendance) && data.attendance.length > 0) {
-            const width = 800;
-            const height = 400;
-            const svg = d3.select(attendanceChartRef.current)
-            .append("svg")
+            const width = attendanceChartRef.current.clientWidth;
+            const height = attendanceChartRef.current.clientHeight;
+            const svg = d3.select(attendanceChartRef.current);
+            svg.selectAll("*").remove();
+            svg.append("svg")
             .attr("viewBox", `0 0 ${width} ${height}`)
             .attr("preserveAspectRatio", "xMidYMid meet")
             .style("width", "100%")
-            .style("height", "auto");
+            .style("height", "auto");            
 
           const margin = { top: 30, right: 30, bottom: 40, left: 40 };
       
@@ -197,7 +215,7 @@ const Dashboard = () => {
               g.selectAll("text")
                 .attr("transform", "rotate(-30)")
                 .style("text-anchor", "end")
-                .style("font-size", "20px")
+                .style("font-size", "14px")
                 .style("font-weight", "normal")
             );
       
@@ -205,13 +223,12 @@ const Dashboard = () => {
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y).ticks(5))
             .selectAll("text")
-            .style("font-size", "20px")
+            .style("font-size", "14px")
             .style("font-weight", "normal")
             .style("fill", "#333"); 
         }
       }, [data.attendance]);
-         
-      
+
     useEffect(() => {
         // Submission Chart
         if (submissionChartRef.current && Array.isArray(data.submission) && data.submission.length > 0) {
@@ -302,7 +319,7 @@ const Dashboard = () => {
 
         // Score Chart
         if (scoreChartRef.current && data.rawScores && Object.keys(data.rawScores).length > 0) {
-            const width = 300;
+            const width = 400;
             const height = 220;
             const margin = { top: 20, right: 20, bottom: 40, left: 40 };
             const container = d3.select(scoreChartRef.current);
@@ -461,17 +478,17 @@ const Dashboard = () => {
                     <div className="box-right">
                     <select className="dropdown"
                         value={selectedSection}
-                        onChange={e => {
-                            const newSection = e.target.value;
-                            setSelectedSection(newSection);
-                            navigate(`/course/${selectedCourse}/${newSection}/${selectedSemester}/dashboard`);
-                    }}>
-                            <option value="all">All Sections</option>
-                            <option value="1">Section 1</option>
-                            <option value="2">Section 2</option>
-                            <option value="3">Section 3</option>
-                        </select>
-                        <select className="dropdown" value={selectedSemester}
+                        onChange={(e) => {
+                            setSelectedSection(e.target.value);
+                            navigate(`/course/${selectedCourse}/${e.target.value}/${selectedSemester}/dashboard`);
+                        }}
+                        >
+                        <option value="all">All Sections</option>
+                        {availableSections.map((section, i) => (
+                            <option key={i} value={section}>{section}</option>
+                        ))}
+                    </select>
+                    <select className="dropdown" value={selectedSemester}
                             onChange={(e) => {
                                 const newSemester = e.target.value;
                                 setSelectedSemester(newSemester);
@@ -481,7 +498,7 @@ const Dashboard = () => {
                                     Semester {sem.semester_id % 100} / {Math.floor(sem.semester_id / 100)}
                                 </option>
                             ))}
-                        </select>
+                    </select>
                     </div>
                 </div>
 
@@ -507,7 +524,7 @@ const Dashboard = () => {
                         <div className="chart-box">
                             <h4>Assignment Submissions</h4>
                             <svg ref={submissionChartRef} className="chart-container-svg"></svg>
-                            <div className="submission-legend" style={{ display: 'flex', gap: '16px', marginTop: '12px' }}>
+                            <div className="submission-legend" style={{ display: 'flex', gap: '16px', marginTop: '5px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <span style={{ width: '16px', height: '16px', backgroundColor: '#c3f7c0', marginRight: '6px', borderRadius: '3px' }}></span>
                                     <span>On Time</span>
@@ -539,7 +556,7 @@ const Dashboard = () => {
                                 <div className="quiz-list">
                                 {Array.isArray(data.lowScoringQuizzes) && data.lowScoringQuizzes.length > 0 ? (
                                     data.lowScoringQuizzes.map((quiz, i) => (
-                                        <p key={i}>{quiz.assess_item_name}: {quiz.lowScores}</p>
+                                        <p key={i}>{quiz.assess_item_name}: {quiz.avg} / {quiz.max_score}</p>
                                     ))
                                     ) : (
                                     <p>No low scoring quizzes found.</p>
@@ -548,12 +565,14 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        <div className="score-distribution">
+                        <div className="chart-box">
                             <h4>Score Distribution</h4>
-                            <div className="charts-container">
-                                <div className="chart" ref={scoreChartRef}></div>
-                                <div className="chart" ref={statsChartRef}></div>
-                            </div>
+                            <div ref={scoreChartRef}></div>
+                        </div>
+                        
+                        <div className="chart-box">
+                            <h4>Stats</h4>
+                            <div ref={statsChartRef}></div>
                         </div>
                     </div>
                 </div>

@@ -85,9 +85,6 @@ const Sidebar = () => {
                     <a onClick={() => navigate(`/course/${course.course_id}/student-list`)} style={{ display: "block" }}>
                       Student List
                     </a>
-                    <a onClick={() => navigate(`/${course.course_id}/at-risk-setting`)} style={{ display: "block" }}>
-                      Criteria Setting
-                    </a>
                   </div>
                 )}
               </div>
