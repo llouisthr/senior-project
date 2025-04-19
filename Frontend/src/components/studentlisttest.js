@@ -588,12 +588,10 @@ input[type="range"].slightly::-moz-range-thumb {
                           width: "100vw",
                           height: "100vh",
                           backgroundColor: "rgba(0, 0, 0, 0.1)", // soft transparent black tint
-                          backdropFilter: "blur(4px)",           // subtle blur effect
-                          WebkitBackdropFilter: "blur(4px)",
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
-                          zIndex: 2000,
+                          zIndex: 2,
                         }}
                         onClick={handleClose}
                       >

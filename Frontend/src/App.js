@@ -3,7 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./components/CDashboard";
 import StudentList from "./components/studentlisttest";
-import StudentProfile from "./components/StudentProfile";
+import StudentProfile from "./components/StudentProfileBtest";
 import Home from "./components/Home";
 import Login from "./components/login";
 import Layout from "./components/Layout"
@@ -25,7 +25,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/course/:course/:section/:semester/dashboard" element={<Dashboard criteria={criteria} />} />
           <Route path="/course/:courseId/student-list" element={<StudentList criteria={criteria} />} />
-          <Route path="/student-profile/:studentId" element={<StudentProfile />} />
+          <Route path="/student-profile/:studentId/:courseId" element={<StudentProfile />} />
         </Route>
       </Routes>
     </div>

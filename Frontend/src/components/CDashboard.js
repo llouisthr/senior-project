@@ -512,7 +512,7 @@ const Dashboard = () => {
 
                     <div className="first-row">
                         <div className="student-engagement">
-                            <h3>Student Engagement in Attendance</h3>
+                            <h3>Attendance</h3>
                             <p className="engagement-percentage">{data.engagement}%</p>
                         </div>
 

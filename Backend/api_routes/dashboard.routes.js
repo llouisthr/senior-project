@@ -231,8 +231,6 @@ router.get("/:courseId/:sectionId/:semesterId/low-scoring-quizzes", (req, res) =
         ${sectionId !== "all" ? "AND cs.section = ?" : ""}
     GROUP BY 
         cs.course_id, cs.semester_id, cs.section, ai.assess_item_name
-    HAVING 
-        AVG(sub.score) < (MAX(ai.max_score) * 0.5)
     ORDER BY 
     ai.assess_item_name ASC;
     `;

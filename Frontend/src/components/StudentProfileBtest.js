@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as d3 from 'd3';
 import personIcon from "./person.jpg";
-import CalendarHeatmap from "react-calendar-heatmap";
-import "react-calendar-heatmap/dist/styles.css";
-import './StudentProfileB.css';
+// import CalendarHeatmap from "react-calendar-heatmap";
+// import "react-calendar-heatmap/dist/styles.css";
+import './StudentProfile.css';
 
 const StudentProfileB = () => {
     const navigate = useNavigate();
