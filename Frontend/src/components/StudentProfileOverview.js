@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as d3 from 'd3';
 import personIcon from "./person.jpg";
-// import CalendarHeatmap from "react-calendar-heatmap";
-// import "react-calendar-heatmap/dist/styles.css";
+import axios from "axios";
 import './StudentProfile.css';
 
 const StudentProfileB = () => {
@@ -11,22 +10,15 @@ const StudentProfileB = () => {
     const [expandedMenu, setExpandedMenu] = useState(null);
     const [expandedSubmenu, setExpandedSubmenu] = useState(null);
     const [infoOption, setInfoOption] = useState("overall");
-    const [subjectData, setSubjectData] = useState({
-        quizzes: [],
-        missingAssignments: [],
-        attendance: [],
-        currentScore: null,
-        avgScore: null,
-        submissionStatus: {}, // e.g., { submitted: 5, late: 2, missing: 1 }
-    });
-
-    const [studentInfo, setStudentInfo] = useState({
-        student_id: '',
-        name: '',
-        email: '',
-        advisor: '',
-        staff: '',
-    });
+    const [skills, setSkills] = useState([]);
+    const [assignmentSummary, setAssignmentSummary] = useState(null);
+    const [attendanceSummary, setAttendanceSummary] = useState(null);
+    const [quizScores, setQuizScores] = useState([]);
+    const [missingAssignments, setMissingAssignments] = useState([]);
+    const [attendanceLine, setAttendanceLine] = useState([]);
+    const [currentScore, setCurrentScore] = useState(0);
+    const [avgScore, setAvgScore] = useState(0);
+    const [submissionSummary, setSubmissionSummary] = useState(null);
 
     const toggleMenu = (menu) => {
         setExpandedMenu(expandedMenu === menu ? null : menu);
@@ -48,107 +40,137 @@ const StudentProfileB = () => {
         subjectBar: useRef(null),
     };
 
-    useEffect(() => {
-        renderThirdLineChart(chartRefs.subjectScoreChart, subjectScoreData);
-        renderSecondLineChart(chartRefs.attendanceLineChart, subjectAttendanceData)
-
-        if (chartRefs.activityRadarChart.current && chartRefs.skillsRadarChart.current) {
-            renderRadarChart(chartRefs.activityRadarChart, activityData,
-                activityData.map(d => d.label), "Activities");
-
-            renderRadarChart(chartRefs.skillsRadarChart, skillsData,
-                skillsData.map(d => d.label), "Skills");
-        }
-
-        renderDonutChart(chartRefs.assignmentDonut, assignmentData);
-        renderSecondDonutChart(chartRefs.attendanceChart, attendanceData);
-        renderLineChart(chartRefs.frequencyLineChart, frequencyData);
-        renderDonutChart(chartRefs.subjectDonut, subjectAssignmentData);
-        renderTripleBarChart(chartRefs.subjectBar, subjectAttendanceData);
-    }, [chartRefs]);
-
-    // State to store data fetched from backend
-    const [chartData, setChartData] = useState(null);
+    const [studentInfo, setStudentInfo] = useState(null); // for name, email, advisor, etc.
+    const [activityTimeline, setActivityTimeline] = useState([]);
 
     // 🔹 Fetch MySQL data via API
     const { studentId, courseId } = useParams();
-    const fetchQuizzes = async () => {
-        try {
-          const res = await fetch(`http://localhost:5000/studentProfile/${studentId}/${courseId}/quizzes`);
-          const data = await res.json();
-          setSubjectData((prevData) => ({ ...prevData, quizzes: data }));
-        } catch (error) {
-          console.error("Error fetching quizzes:", error);
-        }
-      };
-    
-      // Fetch attendance data
-      const fetchAttendance = async () => {
-        try {
-          const res = await fetch(`http://localhost:5000/studentProfile/${studentId}/${courseId}/attendance`);
-          const data = await res.json();
-          setSubjectData((prevData) => ({ ...prevData, attendance: data }));
-        } catch (error) {
-          console.error("Error fetching attendance:", error);
-        }
-      };
-    
-      // Fetch missing assignments
-      const fetchMissingAssignments = async () => {
-        try {
-          const res = await fetch(`http://localhost:5000/studentProfile/${studentId}/${courseId}/missing-assignments`);
-          const data = await res.json();
-          setSubjectData((prevData) => ({ ...prevData, missingAssignments: data }));
-        } catch (error) {
-          console.error("Error fetching missing assignments:", error);
-        }
-      };
-    
-      // Fetch current score
-      const fetchCurrentScore = async () => {
-        try {
-          const res = await fetch(`http://localhost:5000/studentProfile/${studentId}/${courseId}/current-score`);
-          const data = await res.json();
-          setSubjectData((prevData) => ({ ...prevData, currentScore: data }));
-        } catch (error) {
-          console.error("Error fetching current score:", error);
-        }
-      };
 
     useEffect(() => {
-        const fetchStudentInfo = async () => {
-          try {
-            const res = await fetch(`http://localhost:5000/studentProfile/${studentId}`);
-            const data = await res.json();
-            // Assuming the query response is an array with a single object, as you're using LIMIT 1
-            if (data.length > 0) {
-              const student = data[0];
-              setStudentInfo({
-                student_id: student.student_id,
-                name: student.name,
-                email: student.email,
-                advisor: student.advisor,
-                staff: student.staff
-              });
+        if (!studentId) return;
+
+        const fetchOverview = async () => {
+            try {
+                const res = await axios.get(`http://localhost:5000/student-profile/${studentId}/overview`);
+                const { studentInfo, activityTimeline, skills, assignmentSummary, attendanceSummary } = res.data;
+
+                setStudentInfo(studentInfo);
+                setActivityTimeline(activityTimeline);
+                setSkills(skills);
+                setAssignmentSummary(assignmentSummary);
+                setAttendanceSummary(attendanceSummary);
+                // Add this if you fetched currentCourses
+                // setCurrentCourses(currentCourses); 
+            } catch (err) {
+                console.error("Failed to fetch overview:", err);
             }
-          } catch (error) {
-            console.error("Error fetching student info:", error);
-          }
         };
-      
-        if (studentId) {
-          fetchStudentInfo();
-        }
+
+        fetchOverview();
     }, [studentId]);
 
-      useEffect(() => {
-        if (studentId && courseId) {
-          fetchQuizzes();
-          fetchAttendance();
-          fetchMissingAssignments();
-          fetchCurrentScore();
+    useEffect(() => {
+        if (!studentId || !courseId) return;
+        const fetchCurrentCourseData = async () => {
+            try {
+                const res = await axios.get(`http://localhost:5000/student-profile/${studentId}/${courseId}/current-course`);
+                const {
+                    studentInfo,
+                    quizScores,
+                    missingAssignments,
+                    attendanceLine,
+                    currentScore,
+                    avgScore,
+                    submissionSummary
+                } = res.data;
+
+                setStudentInfo(studentInfo);
+                setQuizScores(quizScores);
+                setMissingAssignments(missingAssignments);
+                setAttendanceLine(attendanceLine);
+                setCurrentScore(currentScore);
+                setAvgScore(avgScore);
+                setSubmissionSummary(submissionSummary);
+
+            } catch (err) {
+                console.error("❌ Failed to fetch current course data:", err);
+            }
+        };
+
+        fetchCurrentCourseData();
+    }, [studentId, courseId]);
+
+    useEffect(() => {
+        if (!studentId) return;
+
+        const fetchActivities = async () => {
+            try {
+                const res = await axios.get(`http://localhost:5000/student-profile/${studentId}/activities`);
+                setActivityTimeline(res.data);
+            } catch (err) {
+                console.error("Failed to fetch activity timeline:", err);
+            }
+        };
+
+        fetchActivities();
+    }, [studentId]);
+
+
+    useEffect(() => {
+        if (skills.length && chartRefs.skillsRadarChart.current) {
+            renderRadarChart(
+                chartRefs.skillsRadarChart,
+                skills.map(s => ({ label: s.skill_name, value: s.total_hours })),
+                skills.map(s => s.skill_name),
+                "Skills"
+            );
         }
-      }, [studentId, courseId]);
+    }, [skills]);
+
+    useEffect(() => {
+        if (assignmentSummary) {
+            const data = [
+                { label: "On Time", value: assignmentSummary.on_time || 0 },
+                { label: "Late", value: assignmentSummary.late || 0 },
+                { label: "No submission", value: assignmentSummary.no_submission || 0 }
+            ];
+            renderDonutChart(chartRefs.assignmentDonut, data);
+        }
+    }, [assignmentSummary]);
+
+    useEffect(() => {
+        if (attendanceSummary) {
+            const data = [
+                { label: "Present", value: attendanceSummary.present || 0 },
+                { label: "Late", value: attendanceSummary.late || 0 },
+                { label: "Absent", value: attendanceSummary.absent || 0 }
+            ];
+            renderSecondDonutChart(chartRefs.attendanceChart, data);
+        }
+    }, [attendanceSummary]);
+
+    useEffect(() => {
+        console.log("submissionSummary", submissionSummary);
+        if (submissionSummary && chartRefs.subjectDonut.current) {
+            const data = [
+                { label: "On Time", value: submissionSummary.on_time || 0 },
+                { label: "Late", value: submissionSummary.late || 0 },
+                { label: "No submission", value: submissionSummary.no_submission || 0 }
+            ];
+            renderDonutChart(chartRefs.subjectDonut, data);
+        }
+    }, [submissionSummary]);
+
+
+    useEffect(() => {
+        if (attendanceLine?.length && chartRefs.attendanceLineChart.current) {
+            const formatted = attendanceLine.map(item => ({
+                label: `W${item.attendance_week}`,
+                value: item.attendance_status === "present" ? 1 : 0
+            }));
+            renderSecondLineChart(chartRefs.attendanceLineChart, formatted);
+        }
+    }, [attendanceLine]);
 
     const renderLineChart = (ref, data) => {
         const svg = d3.select(ref.current);
@@ -406,7 +428,10 @@ const StudentProfileB = () => {
 
     const renderDonutChart = (ref, data) => {
         const svg = d3.select(ref.current);
+        // Clear it
         svg.selectAll("*").remove();
+        // Then draw on it
+        svg.append("g")
 
         const width = 300, height = 300;
         const margin = { top: 30, right: 10, bottom: 50, left: 10 };
@@ -653,14 +678,26 @@ const StudentProfileB = () => {
                 <div className="student-head-box">
                     <span>Student Information</span>
 
-                    {/* Dropdown with options */}
-                    <select value={infoOption} onChange={(e) => setInfoOption(e.target.value)}>
-                        <option value="overall">Overall</option>
-                        <option value="thisSubject">This Subject</option>
-                    </select>
+                    <div className="flex gap-4">
+                    <select
+                        value={infoOption}
+                        onChange={(e) => {
+                            const selected = e.target.value;
+                            setInfoOption(selected);
+                            if (selected === "overall") {
+                            navigate(`/student-profile/${studentId}/${courseId}/overview`);
+                            } else if (selected === "current-course") {
+                            navigate(`/student-profile/${studentId}/${courseId}/current-course`);
+                            }
+                        }}
+                        className="px-4 py-2 rounded border border-gray-300">
+                        <option value="overall">Overview</option>
+                        <option value="current-course">Current Course</option>
+                        </select>
+                    </div>
+
                 </div>
 
-                {infoOption === "overall" && (
                     <div>
                         <div className="info-container">
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
@@ -673,57 +710,41 @@ const StudentProfileB = () => {
                             {/* Student Information */}
                             <div className="student-info">
                                 <h2>Student Information</h2>
-                                <p><strong>Name:</strong> {studentInfo.name}</p>
-                                <p><strong>ID:</strong> {studentInfo.student_id}</p>
-                                <p><strong>Email:</strong> {studentInfo.email}</p>
-                                <p><strong>Advisor:</strong> {studentInfo.advisor}</p>
-                                <p><strong>Staff:</strong> {studentInfo.staff}</p>
+                                {studentInfo && (
+                                    <>
+                                        <p><strong>Name:</strong> {studentInfo.fname} {studentInfo.lname}</p>
+                                        <p><strong>ID:</strong> {studentInfo.student_id}</p>
+                                        <p><strong>Email:</strong> {studentInfo.email}</p>
+                                        <p><strong>Advisor:</strong> {studentInfo.advisor || "Not assigned"}</p>
+                                        <p><strong>Staff:</strong> {studentInfo.staff || "Not assigned"}</p>
+                                    </>
+                                )}
+
                             </div>
 
                         </div>
                         <div className="timeline-box">
                             <h3>ICT Activity</h3>
                             <div className="timeline-container">
-                                <div className="timeline-line"></div> {/* Line for the timeline */}
+                                <div className="timeline-line"></div>
+                                {Array.isArray(activityTimeline) && activityTimeline.map((activity, index) => {
+                                    const percentage = (index / (activityTimeline.length - 1)) * 100;
+                                    const date = new Date(activity.date_start);
+                                    const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                                    const labelClass = index % 2 === 0 ? "event-label-1" : "event-label-2";
+                                    const dateClass = index % 2 === 0 ? "event-date-1" : "event-date-2";
 
-                                {/* Timeline events */}
-                                <div className="timeline-event" style={{ left: "0%" }}>
-                                    <div className="dot"></div>
-                                    <span className="event-label-2">Orientation</span>
-                                    <span className="event-date-2">August 2025</span>
-                                </div>
-
-                                <div className="timeline-event" style={{ left: "20%" }}>
-                                    <div className="dot"></div>
-                                    <span className="event-label-1">Sairahus</span>
-                                    <span className="event-date-1">August 2025</span>
-                                </div>
-
-                                <div className="timeline-event" style={{ left: "40%" }}>
-                                    <div className="dot"></div>
-                                    <span className="event-label-2">Open House</span>
-                                    <span className="event-date-2">September 2025</span>
-                                </div>
-
-                                <div className="timeline-event" style={{ left: "60%" }}>
-                                    <div className="dot"></div>
-                                    <span className="event-label-1">Cable Management</span>
-                                    <span className="event-date-1">August 2026</span>
-                                </div>
-
-                                <div className="timeline-event" style={{ left: "80%" }}>
-                                    <div className="dot"></div>
-                                    <span className="event-label-2">SCB Seminar</span>
-                                    <span className="event-date-2">September 2027</span>
-                                </div>
-
-                                <div className="timeline-event" style={{ left: "100%" }}>
-                                    <div className="dot"></div>
-                                    <span className="event-label-1">German Internship</span>
-                                    <span className="event-date-1">June-July 2028</span>
-                                </div>
+                                    return (
+                                        <div className="timeline-event" style={{ left: `${percentage}%` }} key={index}>
+                                            <div className="dot"></div>
+                                            <span className={labelClass}>{activity.actname}</span>
+                                            <span className={dateClass}>{monthYear}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
+
 
                         <div className="second-chart-row">
                             <div className="chart-box">
@@ -749,83 +770,6 @@ const StudentProfileB = () => {
                             </div>
                         </div>
                     </div>
-                )}
-
-                {infoOption === "thisSubject" && (
-                    <div>
-                        <div className="info-container">
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
-                                <img
-                                    src={personIcon}
-                                    alt="Profile"
-                                    style={{ width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover" }}
-                                />
-                            </div>
-                            {/* Student Information */}
-                            <div className="student-info">
-                                <h2>Student Information</h2>
-                                <p><strong>Name:</strong> {studentInfo.name}</p>
-                                <p><strong>ID:</strong> {studentInfo.student_id}</p>
-                                <p><strong>Email:</strong> {studentInfo.email}</p>
-                                <p><strong>Advisor:</strong> {studentInfo.advisor}</p>
-                                <p><strong>Staff:</strong> {studentInfo.staff}</p>
-                            </div>
-                        </div>
-                        {/* Main Chart Container */}
-                        <div className="chart-container" style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(4, 1fr)",
-                            gap: "20px",
-                            alignItems: "start"
-                        }}>
-                            {/* Column 1: Quiz Table */}
-                            <div className="chart-box" style={{ flex: 1, minHeight: "550px" }}>
-                                <h3>Quiz (10)</h3>
-                                <table ref={chartRefs.quizTable} style={{ width: "100%", border: "1px solid #ddd" }}>
-                                    <tr><td>Quiz 1</td><td>9</td></tr>
-                                    <tr><td>Quiz 2</td><td>8</td></tr>
-                                    <tr><td>Quiz 3</td><td>7</td></tr>
-                                    <tr><td>Quiz 4</td><td>6</td></tr>
-                                </table>
-                            </div>
-
-                            {/* Column 2: Missing Assignment Table */}
-                            <div className="chart-box" style={{ flex: 1, minHeight: "550px" }}>
-                                <h3>Missing Assignment</h3>
-                                <table ref={chartRefs.missingAssignments} style={{ width: "100%", border: "1px solid #ddd" }}>
-                                    <tr><td>Assignment 1</td><td>Missing</td></tr>
-                                    <tr><td>Assignment 2</td><td>Missing</td></tr>
-                                    <tr><td>Assignment 3</td><td>Missing</td></tr>
-                                </table>
-                            </div>
-
-                            {/* Column 3: Attendance (Top) & Current Score (Bottom) */}
-                            <div className="chart-column" style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px" }}>
-                                <div className="chart-box" style={{ minHeight: "300px" }}>
-                                    <h3>Attendance</h3>
-                                    <svg ref={chartRefs.attendanceLineChart} width={300} height={200}></svg>
-                                </div>
-
-                                <div className="chart-box" style={{ minHeight: "200px" }}>
-                                    <h3>Current Score</h3>
-                                    <div style={{ textAlign: "center" }}>
-                                        <p style={{ fontSize: "36px", color: "green", fontWeight: "bold" }}>43</p>
-                                        <p>Average is 45</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Column 4: Assignment Submission Donut Chart */}
-                            <div className="chart-box" style={{ minHeight: "550px" }}>
-                                <h3>Assignment Submission</h3>
-                                <svg ref={chartRefs.subjectDonut} width={300} height={300}></svg>
-                            </div>
-
-                        </div>
-                    </div>
-
-                )}
-
             </div>
         </div >
     );

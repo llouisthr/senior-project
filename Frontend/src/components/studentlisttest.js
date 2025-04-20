@@ -619,7 +619,7 @@ input[type="range"].slightly::-moz-range-thumb {
                         cursor: "pointer",
                         textDecoration: "underline",
                       }}
-                      onClick={() => navigate(`/student-profile/${student.id}/${courseId}`)}
+                      onClick={() => navigate(`/student-profile/${student.id}/${courseId}/overview`)}
                     >
                       {student.name}
                     </span>
