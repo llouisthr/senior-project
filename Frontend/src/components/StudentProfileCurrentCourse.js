@@ -11,7 +11,7 @@ const StudentProfileB = () => {
     const isCurrentCourse = location.pathname.includes("current-course");
     const [expandedMenu, setExpandedMenu] = useState(null);
     const [expandedSubmenu, setExpandedSubmenu] = useState(null);
-    const [infoOption, setInfoOption] = useState("overall");
+    const [infoOption, setInfoOption] = useState("current-course");
     const [quizScores, setQuizScores] = useState([]);
     const [missingAssignments, setMissingAssignments] = useState([]);
     const [attendanceLine, setAttendanceLine] = useState([]);
@@ -299,7 +299,7 @@ const StudentProfileB = () => {
                             />
                         </div>
 
-                        <div className="student-info">
+                        <div className="student-info" style={{marginLeft: "30px"}}>
                             <h2>Student Information</h2>
                             {studentInfo ? (
                                 <>
@@ -323,7 +323,7 @@ const StudentProfileB = () => {
                         alignItems: "start"
                     }}>
                         {/* Quiz Table */}
-                        <div className="chart-box" style={{ flex: 1, minHeight: "550px" }}>
+                        <div className="chart-box" style={{ flex: 1, minHeight: "550px", minWidth: "340px", maxWidth: "52%"}}>
                             <h3>Quiz (10)</h3>
                             <table style={{ width: "100%", border: "1px solid #ddd" }}>
                                 <thead>
@@ -346,9 +346,9 @@ const StudentProfileB = () => {
                         </div>
 
                         {/* Missing Assignments */}
-                        <div className="chart-box" style={{ flex: 1, minHeight: "550px" }}>
+                        <div className="chart-box" style={{ flex: 1, minHeight: "550px",  minWidth: "340px", maxWidth: "48%"}}>
                             <h3>Missing Assignment</h3>
-                            <table style={{ width: "100%", border: "1px solid #ddd" }}>
+                            <table style={{ width: "100%", border: "1px solid #ddd", marginTop: "0", verticalAlign: "top" }}>
                                 <thead>
                                     <tr><th>Assignment</th><th>Status</th></tr>
                                 </thead>
@@ -374,12 +374,12 @@ const StudentProfileB = () => {
                             flexDirection: "column",
                             gap: "20px"
                         }}>
-                            <div className="chart-box" style={{ minHeight: "300px" }}>
+                            <div className="chart-box" style={{ minHeight: "300px" ,  minWidth: "340px", maxWidth: "48%"}}>
                                 <h3>Attendance</h3>
                                 <svg ref={chartRefs.attendanceLineChart} width={300} height={200}></svg>
                             </div>
 
-                            <div className="chart-box" style={{ minHeight: "200px", textAlign: "center" }}>
+                            <div className="chart-box" style={{ minHeight: "200px", textAlign: "center" , marginTop: "-20px",  minWidth: "340px", maxWidth: "48%"}}>
                                 <h3>Current Score</h3>
                                 <p style={{
                                     fontSize: "36px",

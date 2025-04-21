@@ -1,5 +1,6 @@
 /* Layout Container */
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -12,47 +13,96 @@ body, html {
   overflow: hidden;
 }
 
-/* Sidebar */
+.sidebar-title {
+  cursor: pointer;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
 .sidebar {
   width: 250px;
-  background-color: #000fdf;
-  color: white;
-  padding: 16px;
+  background: #000fdf;
+  color: #fff;
+  height: 100vh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-}
+  overflow: hidden;
 
-.sidebar h2 {
-  margin-bottom: 30px;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
+  .menu-heading {
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    background-color: #207ad7;
+    padding: 15px 30px 15px 0px;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 1px solid #004ea2; /* 🔹 Small separating line */
+    transition: background-color 0.3s ease, padding-left 0.3s ease,
+      transform 0.3s ease;
+  }
 
-.menu-heading {
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
+  .menu-heading:hover {
+    background-color: #1a48aa;
+    padding-left: 8px;
+    transform: scale(1.02);
+  }
 
-.submenu a {
-  text-decoration: none;
-  color: white;
-  display: block;
-  padding: 5px 0;
-  cursor: pointer;
-}
+  .submenu a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    padding: 15px 30px 15px 0px;
+    cursor: pointer;
+    text-align: center;
+    background-color: #5797ff;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 1px solid #4c86dc; /* 🔹 Slightly darker border */
+    transition: background-color 0.3s ease, padding-left 0.3s ease,
+      transform 0.3s ease;
+  }
 
-.submenu a:hover {
-  background-color: #1a48aa;
-  border-radius: 4px;
-  padding-left: 8px;
-}
+  .submenu a:hover {
+    background-color: #1a48aa;
+    padding-left: 8px;
+    transform: scale(1.02);
+  }
 
-.nested-submenu a {
-  margin-left: 10px;
-  font-size: 0.95rem;
+  .nested-submenu a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    padding: 15px 30px 15px 25px;
+    cursor: pointer;
+    text-align: center;
+    background-color: #77abff;
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 1px solid #6399e5; /* 🔹 Border separation */
+    transition: background-color 0.3s ease, padding-left 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .nested-submenu a:hover {
+    background-color: #1a48aa;
+    padding-left: 8px;
+    transform: scale(1.02);
+  }
+
+  .menu-heading,
+  .submenu a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .menu-icon {
+    display: flex;
+    align-items: center;
+  }
 }
 
 /* Sidebar Footer */

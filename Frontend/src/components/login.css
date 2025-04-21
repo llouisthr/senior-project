@@ -1,92 +1,123 @@
-/* login.css */
-/* Add this wrapper for centering */
 .login-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-    background-color: #f0f2f5;
-    padding: 20px;
-  }
-  
-  /* Optional styling for the heading */
-  .login-title {
-    font-size: 26px;
-    color: #00468b;
-    text-align: center;
-    margin-bottom: 20px;
-    font-weight: bold;
-  }  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f6fa;
+  font-family: "Arial", sans-serif;
+}
 
 .login-container {
-    max-width: 400px;
-    margin: 40px auto;
-    padding: 30px;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: "Arial", sans-serif;
-    text-align: left;
-    background-color: #fff;
-  }
-  
-  .login-container h2 {
-    font-size: 20px;
-    margin-bottom: 10px;
-    color: #1a1a1a;
-  }
-  
-  .login-container form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .login-container input[type="text"],
-  .login-container input[type="password"] {
-    padding: 10px 12px;
-    margin-bottom: 15px;
-    border: 1px solid #c5c5c5;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: #f2f5f7;
-  }
-  
-  .login-container button {
-    padding: 10px;
-    background-color: #00468b;
-    color: white;
-    border: none;
-    border-radius: 2px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .login-container button:hover {
-    background-color: #003366;
-  }
-  
-  .error-message {
-    color: red;
-    margin-top: 10px;
-    font-size: 13px;
-  }
-  
-  .login-container p {
-    font-size: 12px;
-    color: #555;
-    margin: 10px 0 0;
-    line-height: 1.4;
-  }
-  
-  .login-container a {
-    color: #0073e6;
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 12px;
-  }
-  
-  .login-container a:hover {
-    text-decoration: underline;
-  }
-  
+  width: 400px;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.mu-logo-svg {
+  width: 100%;
+  max-width: 320px;
+  display: block;
+  margin: 0 auto 16px auto;
+}
+
+.divider {
+  border: none;
+  height: 1px;
+  background-color: #ddd;
+  margin: 16px 0;
+}
+
+.form-title {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+.form-description {
+  font-size: 13px;
+  text-align: left;
+  color: #555;
+  margin-top: 0px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input[type="text"],
+input[type="password"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #eef1f5;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.sign-in-button {
+  background-color: #003366;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.sign-in-button:hover {
+  background-color: #002244;
+}
+
+.first-time-box {
+  text-align: left;
+  font-size: 15px;
+  color: #000;
+}
+
+.first-time-box p:first-child strong {
+  font-weight: bold;
+  color: #000;
+  font-size: 20px;
+}
+
+.first-time-box a {
+  color: #1e7c91;
+  font-weight: bold;
+  text-decoration: none;
+  padding-left: 70px;
+}
+
+.first-time-box a:hover {
+  text-decoration: underline;
+}
+
+.first-time-box p:last-child strong {
+  font-weight: bold;
+  margin-right: 4px;
+  padding-left: 70px;
+}
+
+.teacher-example {
+  padding-left: 94px;
+  display: inline-block;
+}
+
+.version {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 16px;
+  margin-bottom: 0px;
+  color: #000;
+}
+
+.error-message {
+  color: red;
+  font-size: 13px;
+  margin-top: 8px;
+}

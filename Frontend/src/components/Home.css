@@ -119,11 +119,17 @@ h3 {
 }
 
 .course-info {
-  padding: 100px 10px 15px;
+  padding: 100px 10px 100px 10px;
   text-align: left;
   font-size: 1rem;
   font-weight: 600;
   color: #333;
+
+  .icon-bottom-right {
+    position: absolute;
+    bottom: 10px; /* Adjust as needed */
+    right: 10px;  /* Adjust as needed */
+  }
 }
 
 .course-card:hover {

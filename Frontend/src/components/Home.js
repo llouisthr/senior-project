@@ -30,7 +30,8 @@ const Home = () => {
 
     setIsLoading(true);
     // Fetch instructor data related to courses
-    axios.get(`http://localhost:5000/sidebar/${instructorId}`)
+    axios
+      .get(`http://localhost:5000/sidebar/${instructorId}`)
       .then((response) => {
         if (response.data && Array.isArray(response.data)) {
           setCourses(response.data);
@@ -65,48 +66,56 @@ const Home = () => {
   return (
     <div className="home-wrapper">
       {/* Main Content */}
-        <h3>Courses</h3>
-        {/* Top Right Search Box */}
-        <div className="search-bar">
-          <label>Search via Name:</label>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Enter course name..."
-          />
-        </div>
-        {/* Registered Courses Box */}
-        <div className="registered-courses-box">
-          <span>Registered Courses</span>
-          <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-            <option value="name">Sort by Name</option>
-            <option value="date">Sort by Date</option>
-          </select>
-        </div>
-        
-        {isLoading ? (
-          <div className="loading-message">Loading courses...</div>
-        ) : error ? (
-          <div className="error-message">{error}</div>
-        ) : (
-          <div className="courses">
-            {courses.map((course, index) => (
-              <div
-                key={index}
-                className="course-card clickable"
-                onClick={async () => {
-                  try {
-                    const instructorId = localStorage.getItem("instructorId");
-                    const res = await axios.get(`http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`);
-                    const { semester_id } = res.data;
-                    navigate(`/course/${course.course_id}/all/${semester_id}/dashboard`);
-                  } catch (err) {
-                    console.error("Error fetching course details", err);
-                  }
-                }}                
-                style={{ cursor: "pointer" }}>
-                <div className="course-info">
+      <h3>Courses</h3>
+      {/* Top Right Search Box */}
+      <div className="search-bar">
+        <label>Search via Name:</label>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Enter course name..."
+        />
+      </div>
+      {/* Registered Courses Box */}
+      <div className="registered-courses-box">
+        <span>Registered Courses</span>
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+        >
+          <option value="name">Sort by Name</option>
+          <option value="date">Sort by Date</option>
+        </select>
+      </div>
+
+      {isLoading ? (
+        <div className="loading-message">Loading courses...</div>
+      ) : error ? (
+        <div className="error-message">{error}</div>
+      ) : (
+        <div className="courses">
+          {courses.map((course, index) => (
+            <div
+              key={index}
+              className="course-card clickable"
+              onClick={async () => {
+                try {
+                  const instructorId = localStorage.getItem("instructorId");
+                  const res = await axios.get(
+                    `http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`
+                  );
+                  const { semester_id } = res.data;
+                  navigate(
+                    `/course/${course.course_id}/all/${semester_id}/dashboard`
+                  );
+                } catch (err) {
+                  console.error("Error fetching course details", err);
+                }
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="course-info">
                 {course.course_id} {course.course_name}
                 <div className="icon-bottom-right">
                   <svg
@@ -138,10 +147,10 @@ const Home = () => {
                   </svg>
                 </div>
               </div>
-              </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

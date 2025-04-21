@@ -28,10 +28,11 @@ router.get('/:studentId/:courseId/overview', async (req, res) => {
 
     // Fetch skills for the student
     const [skills] = await db.promise().query(
-      `SELECT skill_name, SUM(hour_score) as total_hours 
-       FROM activity 
-       WHERE student_id = ?
-       GROUP BY skill_name`, [studentId]
+      `SELECT skill_name, skill_category, SUM(hour_score) as total_hours 
+      FROM activity 
+      WHERE student_id = ?
+      GROUP BY skill_name, skill_category
+      `, [studentId]
     );    
 
     // Fetch assignment summary for the student

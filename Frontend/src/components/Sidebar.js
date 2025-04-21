@@ -6,7 +6,7 @@ import { LogOut } from "lucide-react";
 const Sidebar = () => {
   const navigate = useNavigate();
   const [expandedMenu, setExpandedMenu] = useState(null);
-  const [expandedSubmenu, setExpandedSubmenu] = useState(null);
+  const [expandedSubmenus, setExpandedSubmenus] = useState([]);
   const [courses, setCourses] = useState([]);
   const [instructorName, setInstructorName] = useState("");
 
@@ -14,8 +14,12 @@ const Sidebar = () => {
     setExpandedMenu(expandedMenu === menu ? null : menu);
   };
 
-  const toggleSubmenu = (submenu) => {
-    setExpandedSubmenu(expandedSubmenu === submenu ? null : submenu);
+  const toggleSubmenu = (submenuId) => {
+    if (expandedSubmenus.includes(submenuId)) {
+      setExpandedSubmenus(expandedSubmenus.filter((id) => id !== submenuId)); // close
+    } else {
+      setExpandedSubmenus([...expandedSubmenus, submenuId]); // open
+    }
   };
 
   const handleLogout = () => {
@@ -31,7 +35,8 @@ const Sidebar = () => {
       return;
     }
 
-    axios.get(`http://localhost:5000/sidebar/${instructorId}`)
+    axios
+      .get(`http://localhost:5000/sidebar/${instructorId}`)
       .then((response) => {
         if (response.data && Array.isArray(response.data)) {
           setCourses(response.data);
@@ -46,58 +51,97 @@ const Sidebar = () => {
   }, [navigate]);
 
   return (
-    <div className="sidebar" style={{
-      width: "250px", background: "#000fdf", color: "#fff", padding: "16px", height: "100vh", boxSizing: "border-box",
-      display: "flex", flexDirection: "column"
-    }}>
-      <h2 onClick={() => navigate("/")} style={{ cursor: "pointer", marginBottom: "30px" }}>
+    <div className="sidebar">
+      <h2 className="sidebar-title" onClick={() => navigate("/")}>
         MUICT LEARNING
       </h2>
 
-      <div>
-        <div className="menu-heading" onClick={() => toggleMenu("course")} style={{ cursor: "pointer", fontWeight: "bold" }}>
-          Course
-        </div>
-        {expandedMenu === "course" && (
-          <div className="submenu" style={{ cursor: "pointer" }}>
-            {courses.map((course) => (
-              <div key={course.course_id}>
-                <a onClick={() => toggleSubmenu(course.course_id)}
-                  style={{ display: "block", marginLeft: "15px", padding: "5px 0" }}
-                  >{course.course_id}</a>
-                {expandedSubmenu === course.course_id && (
-                  <div className="nested-submenu" style={{ marginLeft: "20px" }}>
-                    <a
-                      onClick={async () => {
-                        try {
-                          const instructorId = localStorage.getItem("instructorId");
-                          const res = await axios.get(`http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`);
-                          const { semester_id } = res.data;
-                          navigate(`/course/${course.course_id}/all/${semester_id}/dashboard`);
-                        } catch (err) {
-                          console.error("Failed to fetch course details", err);
-                        }
-                      }}
-                      style={{ display: "block", marginBottom: "5px" }}
-                    >
-                      Dashboard
-                    </a>
-                    <a onClick={() => navigate(`/course/${course.course_id}/student-list`)} style={{ display: "block" }}>
-                      Student List
-                    </a>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="menu-heading" onClick={() => toggleMenu("course")}>
+        <span className="menu-icon">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13 9L10 12L7 9M19 10C19 5.02944 14.9706 1 10 1C5.02944 1 1 5.02944 1 10C1 14.9706 5.02944 19 10 19C14.9706 19 19 14.9706 19 10Z"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        Course
       </div>
 
-      <div className="sidebar-footer" style={{ marginTop: "auto", paddingTop: "10px", borderTop: "1px solid #ccc" }}>
+      {expandedMenu === "course" && (
+        <div className="submenu">
+          {courses.map((course) => (
+            <div key={course.course_id}>
+              <a onClick={() => toggleSubmenu(course.course_id)}>
+                <span className="menu-icon">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M13 9L10 12L7 9M19 10C19 5.02944 14.9706 1 10 1C5.02944 1 1 5.02944 1 10C1 14.9706 5.02944 19 10 19C14.9706 19 19 14.9706 19 10Z"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                {course.course_id}
+              </a>
+              
+              {expandedSubmenus.includes(course.course_id) && (
+                <div className="nested-submenu">
+                  <a
+                    className="dashboard-link"
+                    onClick={async () => {
+                      try {
+                        const instructorId =
+                          localStorage.getItem("instructorId");
+                        const res = await axios.get(
+                          `http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`
+                        );
+                        const { semester_id } = res.data;
+                        navigate(
+                          `/course/${course.course_id}/all/${semester_id}/dashboard`
+                        );
+                      } catch (err) {
+                        console.error("Failed to fetch course details", err);
+                      }
+                    }}
+                  >
+                    Dashboard
+                  </a>
+                  <a
+                    className="studentlist-link"
+                    onClick={() =>
+                      navigate(`/course/${course.course_id}/student-list`)
+                    }
+                  >
+                    Student List
+                  </a>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="sidebar-footer">
         <span className="instructor-name">{instructorName}</span>
-        <button className="logout-button" onClick={handleLogout} style={{
-          background: "none", border: "none", cursor: "pointer", color: "#e9ecef", marginLeft: "10px"
-        }}>
+        <button className="logout-button" onClick={handleLogout}>
           <LogOut size={20} />
         </button>
       </div>

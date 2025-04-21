@@ -51,7 +51,7 @@ const StudentProfileB = () => {
 
         const fetchOverview = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/student-profile/${studentId}/overview`);
+                const res = await axios.get(`http://localhost:5000/student-profile/${studentId}/${courseId}/overview`);
                 const { studentInfo, activityTimeline, skills, assignmentSummary, attendanceSummary } = res.data;
 
                 setStudentInfo(studentInfo);
@@ -115,17 +115,29 @@ const StudentProfileB = () => {
         fetchActivities();
     }, [studentId]);
 
-
     useEffect(() => {
-        if (skills.length && chartRefs.skillsRadarChart.current) {
+        if (!skills.length) return;
+    
+        const literacySkills = skills.filter(skill => skill.skill_category === "literacy");
+        const softSkills = skills.filter(skill => skill.skill_category === "soft_skill");
+    
+        if (literacySkills.length && chartRefs.activityRadarChart.current) {
             renderRadarChart(
-                chartRefs.skillsRadarChart,
-                skills.map(s => ({ label: s.skill_name, value: s.total_hours })),
-                skills.map(s => s.skill_name),
-                "Skills"
+                chartRefs.activityRadarChart,
+                literacySkills.map(s => ({ label: s.skill_name, value: s.total_hours })),
+                literacySkills.map(s => s.skill_name),
+                "Literacy Skills"
             );
         }
-    }, [skills]);
+        if (softSkills.length && chartRefs.skillsRadarChart.current) {
+            renderRadarChart(
+                chartRefs.skillsRadarChart,
+                softSkills.map(s => ({ label: s.skill_name, value: s.total_hours })),
+                softSkills.map(s => s.skill_name),
+                "Soft Skills"
+            );
+        }
+    }, [skills]);    
 
     useEffect(() => {
         if (assignmentSummary) {
@@ -398,7 +410,7 @@ const StudentProfileB = () => {
                 .attr('y', y)
                 .attr('text-anchor', x > 0 ? 'start' : 'end')
                 .attr('dy', y > 0 ? '1em' : '-0.5em')
-                .style('font-size', '6px')
+                .style('font-size', '10px')
                 .style('fill', '#333')
                 .text(label);
         });
@@ -678,6 +690,7 @@ const StudentProfileB = () => {
                 <div className="student-head-box">
                     <span>Student Information</span>
 
+                    {/*Dropdown here*/}
                     <div className="flex gap-4">
                     <select
                         value={infoOption}
@@ -699,30 +712,41 @@ const StudentProfileB = () => {
                 </div>
 
                     <div>
-                        <div className="info-container">
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
+                        {/* Profile & Student Info */}
+                            <div className="info-container">
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    height: "100%"
+                                }}>
                                 <img
                                     src={personIcon}
                                     alt="Profile"
-                                    style={{ width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover" }}
-                                />
-                            </div>
-                            {/* Student Information */}
-                            <div className="student-info">
-                                <h2>Student Information</h2>
-                                {studentInfo && (
-                                    <>
+                                    style={{
+                                    width: "100px",
+                                    height: "100px",
+                                    borderRadius: "50%",
+                                    objectFit: "cover"
+                                }}/>
+                                </div>
+                        
+                                <div className="student-info" style={{marginLeft: "30px"}}>
+                                    <h2>Student Information</h2>
+                                        {studentInfo ? (
+                                        <>
                                         <p><strong>Name:</strong> {studentInfo.fname} {studentInfo.lname}</p>
                                         <p><strong>ID:</strong> {studentInfo.student_id}</p>
                                         <p><strong>Email:</strong> {studentInfo.email}</p>
-                                        <p><strong>Advisor:</strong> {studentInfo.advisor || "Not assigned"}</p>
-                                        <p><strong>Staff:</strong> {studentInfo.staff || "Not assigned"}</p>
-                                    </>
-                                )}
-
-                            </div>
-
-                        </div>
+                                        <p><strong>Advisor:</strong> {studentInfo.advisor}</p>
+                                        <p><strong>Staff:</strong> {studentInfo.staff}</p>
+                                        </>
+                                            ) : (
+                                                <p>Loading student information...</p>
+                                            )}
+                                </div>
+                    </div>
                         <div className="timeline-box">
                             <h3>ICT Activity</h3>
                             <div className="timeline-container">

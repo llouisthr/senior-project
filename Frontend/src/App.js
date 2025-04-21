@@ -2,7 +2,7 @@ import React, { useState } from "react"; // Add useState import here
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./components/CDashboard";
-import StudentList from "./components/studentlisttest";
+import StudentList from "./components/StudentList";
 import StdOverview from "./components/StudentProfileOverview";
 import StdCurrent from "./components/StudentProfileCurrentCourse";
 import Home from "./components/Home";
