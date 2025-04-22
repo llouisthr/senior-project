@@ -3,6 +3,7 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import './StudentList.css'; // Import CSS file
 import personIcon from "./person.jpg";
 import axios from "axios";
+import { Section } from 'lucide-react';
 
 const StudentListTest = () => {
   const navigate = useNavigate(); // Hook for navigation
@@ -12,10 +13,6 @@ const StudentListTest = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("");
   const [sortOption, setSortOption] = useState("ascending");
-  const [semesterOption, setSemesterOption] = useState("name");
-  const [selectedCourse, setSelectedCourse] = useState("");
-  const [selectedSection, setSelectedSection] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("");
   const [sortField, setSortField] = useState("id"); // or default field
   const [sortOrder, setSortOrder] = useState("asc");
   const [showFilterBox, setShowFilterBox] = useState(false);
@@ -37,6 +34,7 @@ const StudentListTest = () => {
   const [tempSevereScore, setTempSevereScore] = useState(severeScore);
   const [tempSlightlyScore, setTempSlightlyScore] = useState(slightlyScore);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [realAtRiskCount, setRealAtRiskCount] = useState(0);
 
   const handleImageClick = () => {
     setIsExpanded(true);
@@ -54,7 +52,7 @@ const StudentListTest = () => {
       student.attendance,
       student.score,
       student.quiz,
-      getStudentStatus(student),
+      getStatusLabel(student),
     ]);
 
     let csvContent =
@@ -72,6 +70,24 @@ const StudentListTest = () => {
 
   const { courseId } = useParams();
   const [students, setStudents] = useState([]);
+
+  useEffect(() => {
+    if (!courseId) return;
+  
+    const fetchAtRiskCount = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/dashboard/${courseId}/all/202401/at-risk`);
+        const riskCount = response.data.riskStudents;
+  
+        setRealAtRiskCount(riskCount); // <- store for initial display
+        sessionStorage.setItem("atRiskCount", riskCount);
+      } catch (error) {
+        console.error("Failed to fetch at-risk data:", error);
+      }
+    };
+  
+    fetchAtRiskCount();
+  }, [courseId]);
 
   useEffect(() => {
     if (!courseId) return;
@@ -127,6 +143,12 @@ const StudentListTest = () => {
     return " ";
   };
 
+  const getStatusLabel = (student) => {
+    const symbol = getStudentStatus(student);
+    if (symbol === "🔴") return "Severe";
+    if (symbol === "🟡") return "Slightly";
+    return "Normal";
+  };  
 
   const filteredStudents = students.filter((student) => {
     const riskStatus = getRiskStatus(student.attendance, student.score);
@@ -219,6 +241,9 @@ const StudentListTest = () => {
     (student) => getRiskStatus(Number(student.attendance), Number(student.score)) === "🟡"
   ).length;
 
+  const totalRisk = severeCount + slightCount;
+  sessionStorage.setItem("atRiskCount", totalRisk);
+
   return (
     <div className="student-profile-container">
       <div className="main-content">
@@ -237,9 +262,9 @@ const StudentListTest = () => {
         <div className="risk-filter-container">
           <div className="risk-legend">
             <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <span>
-                <strong>{severeCount + slightCount} Total At-Risk Students</strong>
-              </span>
+            <span>
+              <strong>{severeCount + slightCount} Total At-Risk Students</strong>
+            </span>
               <span>🔴 {severeCount} Severe At-Risk Student</span>
               <span>🟡 {slightCount} Slightly At-Risk Student</span>
             </div>

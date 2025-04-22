@@ -208,36 +208,37 @@ router.get("/:courseId/:sectionId/:semesterId/at-risk", (req, res) => {
     });
 });
 
-router.get("/:courseId/:sectionId/:semesterId/low-scoring-quizzes", (req, res) => {
+router.get("/:courseId/:sectionId/:semesterId/quizzes", (req, res) => {
     const { courseId, sectionId, semesterId } = req.params;
+
     const query = `
     SELECT 
-    cs.course_id,
-    cs.semester_id,
-    cs.section,
-    ai.assess_item_name, 
-    ROUND(AVG(sub.score), 2) AS avg,
-    ai.max_score
+        ai.assess_item_name, 
+        ai.max_score,
+        ROUND(AVG(sub.score), 2) AS avg_score,
+        MAX(sub.score) AS max_score,
+        MIN(sub.score) AS min_score
     FROM 
         assignment_submit sub
     JOIN 
-        class_list cl ON sub.class_list_id = cl.class_list_id
-    JOIN 
         assessment_item ai ON sub.assess_item_id = ai.assess_item_id
+    JOIN 
+        class_list cl ON sub.class_list_id = cl.class_list_id
     JOIN 
         course_section cs ON cl.course_sect_id = cs.course_sect_id
     WHERE 
-        LOWER(ai.assess_item_name) LIKE '%quiz%' AND cs.course_id = ? AND cs.semester_id = ?
+        LOWER(ai.assess_item_name) LIKE '%quiz%'
+        AND cs.course_id = ? AND cs.semester_id = ?
         ${sectionId !== "all" ? "AND cs.section = ?" : ""}
     GROUP BY 
-        cs.course_id, cs.semester_id, cs.section, ai.assess_item_name
+        ai.assess_item_name, ai.max_score
     ORDER BY 
-    ai.assess_item_name ASC;
-    `;
+        ai.assess_item_name;
+  `;
     const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
     db.query(query, params, (err, results) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ lowScoringQuizzes: results });
+      res.json({ Quizzes: results });
     });
 });
 

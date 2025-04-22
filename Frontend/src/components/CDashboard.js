@@ -24,7 +24,7 @@ const Dashboard = () => {
     const [data, setData] = useState({
         enrollment: 0,
         engagement: 0,
-        lowScoringQuizzes: [],
+        Quizzes: [],
         riskStudents: 0,
         atRiskStudentsName: [],
         rawScores: [],
@@ -93,7 +93,7 @@ const Dashboard = () => {
 
         const fetchAll = async () => {
             try {
-                const [enr, eng, att, sub, raw, rawStats, risk, low] = await Promise.all([
+                const [enr, eng, att, sub, raw, rawStats, risk, quiz] = await Promise.all([
                     axios.get(`${base}/enrollment`).then(res => res.data),
                     axios.get(`${base}/engagement`).then(res => res.data),
                     axios.get(`${base}/attendance`).then(res => res.data),
@@ -101,7 +101,7 @@ const Dashboard = () => {
                     axios.get(`${base}/raw-scores`).then(res => res.data),
                     axios.get(`${base}/raw-stats`).then(res => res.data),
                     axios.get(`${base}/at-risk`).then(res => res.data),
-                    axios.get(`${base}/low-scoring-quizzes`).then(res => res.data),
+                    axios.get(`${base}/quizzes`).then(res => res.data),
                 ]);
             console.log("Test API enroll", enr);
                 setData({
@@ -115,9 +115,9 @@ const Dashboard = () => {
                         { label: "Mean", value: Number(rawStats.mean_score) || 0 },
                         { label: "Median", value: Number(rawStats.median_score) || 0 }
                       ],
-                    riskStudents: risk.riskStudents,
+                    riskStudents: Number(sessionStorage.getItem("atRiskCount")) || risk.riskStudents,
                     atRiskStudentsName: risk.atRiskStudentsName,
-                    lowScoringQuizzes: low.lowScoringQuizzes || []
+                    Quizzes: quiz.Quizzes || []
                 });
             } catch (err) {
                 console.error("Dashboard fetch error:", err);
@@ -512,7 +512,7 @@ const Dashboard = () => {
 
                     <div className="first-row">
                         <div className="student-engagement">
-                            <h3>Attendance</h3>
+                            <h1>Class Attendance Percentage</h1>
                             <p className="engagement-percentage">{data.engagement}%</p>
                         </div>
 
@@ -552,14 +552,19 @@ const Dashboard = () => {
                             </div>
 
                             <div className="low-scoring-quiz">
-                                <h3>Low Scoring Quizzes</h3>
+                                <h3>Quiz Statistics</h3>
                                 <div className="quiz-list">
-                                {Array.isArray(data.lowScoringQuizzes) && data.lowScoringQuizzes.length > 0 ? (
-                                    data.lowScoringQuizzes.map((quiz, i) => (
-                                        <p key={i}>{quiz.assess_item_name}: {quiz.avg} / {quiz.max_score}</p>
-                                    ))
-                                    ) : (
-                                    <p>No low scoring quizzes found.</p>
+                                {data.Quizzes && data.Quizzes.length > 0 && (
+                                  <div className="quiz-stats">                    
+                                    {data.Quizzes.map((quiz, index) => (
+                                      <div key={index} style={{ marginBottom: '1rem' }}>
+                                        <strong>{quiz.assess_item_name}:</strong> {quiz.avg_score} / {quiz.max_score}<br />
+                                        <span style={{ marginLeft: '1rem' }}>
+                                          Max: {quiz.max_score} &nbsp;&nbsp; Min: {quiz.min_score}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
                                 )}
                                 </div>
                             </div>
