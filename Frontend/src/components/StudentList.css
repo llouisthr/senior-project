@@ -14,6 +14,10 @@ html, body {
   flex-wrap: wrap; /* Allow content to wrap on smaller screens */
 }
 
+.box {
+  margin-bottom: 30px; /* give box bottom spacing */
+}
+
 .sidebar {
   width: 250px;
   background-color: #093BCD;
@@ -51,7 +55,7 @@ html, body {
 .main-content {
   flex-grow: 1; /* Take up remaining space */
   background-color: #f4f4f4;
-  padding: 20px;
+  padding: 10px;
   overflow-x: auto; /* Allow horizontal scrolling if needed */
   height: 100%;
   box-sizing: border-box; /* Prevent width overflow */

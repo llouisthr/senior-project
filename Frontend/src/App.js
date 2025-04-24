@@ -25,7 +25,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="/course/:course/:section/:semester/dashboard" element={<Dashboard criteria={criteria} />} />
-          <Route path="/course/:courseId/student-list" element={<StudentList criteria={criteria} />} />
+          <Route path="/course/:courseId/:sectionId/:semesterId/student-list" element={<StudentList criteria={criteria} />} />
           <Route path="/student-profile/:studentId/:courseId/overview" element={<StdOverview />} />
           <Route path="/student-profile/:studentId/:courseId/current-course" element={<StdCurrent />} />
         </Route>

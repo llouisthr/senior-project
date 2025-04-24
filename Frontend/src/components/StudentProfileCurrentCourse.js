@@ -94,14 +94,13 @@ const StudentProfileB = () => {
     }, [attendanceLine]);
 
     const score = Number(currentScore);
-    const average = Number(avgScore);
 
     const renderSecondLineChart = (ref, data) => {
         const svg = d3.select(ref.current);
         svg.selectAll("*").remove();
 
         const width = 250, height = 300;
-        const margin = { top: 20, right: -40, bottom: 120, left: 30 };
+        const margin = { top: 20, right: -40, bottom: 120, left: 40 };
 
         // Create x scale (using the week labels as the domain)
         const x = d3.scalePoint()
@@ -128,8 +127,11 @@ const StudentProfileB = () => {
             .attr("transform", `translate(${margin.left},0)`)
             .call(d3.axisLeft(y)
                 .tickValues([0, 1])  // Show only 0 and 1 on the y-axis
-                .tickFormat(d3.format("d"))  // Format ticks as integers (d stands for integer format)
-            );
+                .tickFormat(d => d === 1 ? "Present" : "Absent")
+            )
+            .selectAll("text")
+            .style("font-size", "9px")
+            .style("font-family", "Arial");
 
         // Line path
         svg.append("path")
@@ -383,12 +385,12 @@ const StudentProfileB = () => {
                                 <h3>Current Score</h3>
                                 <p style={{
                                     fontSize: "36px",
-                                    color: score >= average ? "green" : "red",
+                                    color: score >= avgScore ? "green" : "orange",
                                     fontWeight: "bold"
                                 }}>
                                     {score || score === 0 ? score : "--"}
                                 </p>
-                                <p>Average is {average ?? "--"}</p>
+                                <p>Average is {avgScore ?? "--"}</p>
 
                             </div>
                         </div>

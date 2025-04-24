@@ -88,9 +88,8 @@ const Login = () => {
           </p>
           <p>
             <strong>Ex.</strong>
-            u6488xxx (for student),
+            10x, e.g. 101, 102 (for teacher)
             <br />
-            <span className="teacher-example">pxxxx.xxx (for teacher)</span>
           </p>
         </div>
 

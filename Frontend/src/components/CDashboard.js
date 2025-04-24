@@ -545,7 +545,10 @@ const Dashboard = () => {
                         <div className="at-risk-detect-container">
                             <div className="student-detect">
                                 <h3>Student Detect</h3>
-                                <div className="detect-box risk-student">
+                                <div className="detect-box risk-student" 
+                                  onClick={() =>
+                                  navigate(`/course/${course}/student-list`)
+                                  }>
                                     <p className="detect-number">{data.riskStudents}</p>
                                     <p className="detect-label">At-Risk Students</p>
                                 </div>
@@ -558,8 +561,8 @@ const Dashboard = () => {
                                   <div className="quiz-stats">                    
                                     {data.Quizzes.map((quiz, index) => (
                                       <div key={index} style={{ marginBottom: '1rem' }}>
-                                        <strong>{quiz.assess_item_name}:</strong> {quiz.avg_score} / {quiz.max_score}<br />
-                                        <span style={{ marginLeft: '1rem' }}>
+                                        <strong>{quiz.assess_item_name} Average:</strong> {quiz.avg_score} / {quiz.max_score}<br />
+                                        <span>
                                           Max: {quiz.max_score} &nbsp;&nbsp; Min: {quiz.min_score}
                                         </span>
                                       </div>

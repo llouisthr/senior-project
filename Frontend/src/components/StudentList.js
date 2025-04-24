@@ -8,6 +8,7 @@ import { Section } from 'lucide-react';
 const StudentListTest = () => {
   const navigate = useNavigate(); // Hook for navigation
   const location = useLocation();
+  const { courseId, sectionId, semesterId } = useParams();
   const [expandedMenu, setExpandedMenu] = useState(null);
   const [expandedSubmenu, setExpandedSubmenu] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,7 +35,11 @@ const StudentListTest = () => {
   const [tempSevereScore, setTempSevereScore] = useState(severeScore);
   const [tempSlightlyScore, setTempSlightlyScore] = useState(slightlyScore);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [realAtRiskCount, setRealAtRiskCount] = useState(0);
+  const [availableSemesters, setAvailableSemesters] = useState([]);
+  const [availableSections, setAvailableSections] = useState([]);
+  const [selectedSection, setSelectedSection] = useState(sectionId || "all");
+  const [selectedSemester, setSelectedSemester] = useState(semesterId || "");
+  const [RealAtRiskCount, setRealAtRiskCount] = useState();
 
   const handleImageClick = () => {
     setIsExpanded(true);
@@ -68,31 +73,59 @@ const StudentListTest = () => {
     document.body.removeChild(link);
   };
 
-  const { courseId } = useParams();
   const [students, setStudents] = useState([]);
+
+  // Load semesters
+  useEffect(() => {
+    axios.get("http://localhost:5000/dashboard/semesters")
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          setAvailableSemesters(res.data);
+          if (!selectedSemester && res.data.length > 0) {
+            setSelectedSemester(res.data[0].semester_id);
+          }
+        }
+      })
+      .catch(err => console.error("Failed to fetch semesters:", err));
+  }, []);
+
+  // Load sections when courseId and selectedSemester are available
+  useEffect(() => {
+    if (!courseId || !selectedSemester) return;
+
+    axios.get(`http://localhost:5000/dashboard/${courseId}/${selectedSemester}/sections`)
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          const sortedSections = res.data.sort((a, b) =>
+            a.localeCompare(b, undefined, { numeric: true }));
+          setAvailableSections(sortedSections);
+        }
+      })
+      .catch(err => console.error("Failed to fetch sections:", err));
+  }, [courseId, selectedSemester]);
 
   useEffect(() => {
     if (!courseId) return;
-  
+
     const fetchAtRiskCount = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/dashboard/${courseId}/all/202401/at-risk`);
         const riskCount = response.data.riskStudents;
-  
+
         setRealAtRiskCount(riskCount); // <- store for initial display
         sessionStorage.setItem("atRiskCount", riskCount);
       } catch (error) {
         console.error("Failed to fetch at-risk data:", error);
       }
     };
-  
+
     fetchAtRiskCount();
   }, [courseId]);
 
   useEffect(() => {
-    if (!courseId) return;
-
-    axios.get(`http://localhost:5000/studentList/${courseId}`)
+    if (!courseId || !selectedSection || !selectedSemester) return;
+  
+    axios.get(`http://localhost:5000/studentList/${courseId}/${selectedSection}/${selectedSemester}`)
       .then(res => {
         const uniqueStudentsMap = new Map();
         res.data.forEach(student => {
@@ -101,7 +134,7 @@ const StudentListTest = () => {
             id: student.student_id,
             name: student.student_name,
             attendance: student.attendance,
-            score: student.average_score,
+            score: student.total_score,
             quiz: student.missing_quizzes,
             link: `/student-profile/${student.student_id}`
           });
@@ -109,8 +142,8 @@ const StudentListTest = () => {
         setStudents(Array.from(uniqueStudentsMap.values()));
       })
       .catch(err => console.error("Error loading students:", err));
-  }, [courseId]);
-
+  }, [courseId, selectedSection, selectedSemester]); // ← updated!
+  
   const getRiskStatus = (attendance, score) => {
     if (criteriaAttendance && !criteriaScore) {
       if (attendance <= severeAttendance) return "🔴";
@@ -148,7 +181,7 @@ const StudentListTest = () => {
     if (symbol === "🔴") return "Severe";
     if (symbol === "🟡") return "Slightly";
     return "Normal";
-  };  
+  };
 
   const filteredStudents = students.filter((student) => {
     const riskStatus = getRiskStatus(student.attendance, student.score);
@@ -259,12 +292,40 @@ const StudentListTest = () => {
             placeholder="Enter student name/ID..."
           />
         </div>
+        <div className="box">
+          <div className="box-left">Student List in this class</div>
+          <div className="box-right">
+            <select className="dropdown"
+              value={selectedSection}
+              onChange={(e) => {
+                setSelectedSection(e.target.value);
+                navigate(`/course/${courseId}/${e.target.value}/${selectedSemester}/student-list`);
+              }}
+            >
+              <option value="all">All Sections</option>
+              {availableSections.map((section, i) => (
+                <option key={i} value={section}>{section}</option>
+              ))}
+            </select>
+            <select className="dropdown" value={selectedSemester}
+              onChange={(e) => {
+                const newSemester = e.target.value;
+                setSelectedSemester(newSemester);
+                navigate(`/course/${courseId}/${selectedSection}/${newSemester}/student-list`);
+              }}>{availableSemesters.map((sem, i) => (
+                <option key={i} value={sem.semester_id}>
+                  Semester {sem.semester_id % 100} / {Math.floor(sem.semester_id / 100)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="risk-filter-container">
           <div className="risk-legend">
             <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            <span>
-              <strong>{severeCount + slightCount} Total At-Risk Students</strong>
-            </span>
+              <span>
+                <strong>{severeCount + slightCount} Total At-Risk Students</strong>
+              </span>
               <span>🔴 {severeCount} Severe At-Risk Student</span>
               <span>🟡 {slightCount} Slightly At-Risk Student</span>
             </div>
@@ -272,7 +333,7 @@ const StudentListTest = () => {
           </div>
 
           {/* Export Button */}
-          <div style={{ marginTop: "0px", textAlign: "right" , marginLeft: "500px"}}>
+          <div style={{ marginTop: "0px", textAlign: "right", marginLeft: "500px" }}>
             <button
               onClick={handleExport}
               style={{

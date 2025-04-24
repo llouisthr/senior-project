@@ -126,9 +126,19 @@ const Sidebar = () => {
                   </a>
                   <a
                     className="studentlist-link"
-                    onClick={() =>
-                      navigate(`/course/${course.course_id}/student-list`)
-                    }
+                    onClick={async() => {
+                      try {
+                        const instructorId =
+                          localStorage.getItem("instructorId");
+                        const res = await axios.get(
+                          `http://localhost:5000/sidebar/${course.course_id}/${instructorId}/findmaxsem`
+                        );
+                        const { semester_id } = res.data;
+                        navigate(`/course/${course.course_id}/all/${semester_id}/student-list`)
+                      } catch (err) {
+                        console.error("Failed to fetch course details", err);
+                      }
+                    }}
                   >
                     Student List
                   </a>

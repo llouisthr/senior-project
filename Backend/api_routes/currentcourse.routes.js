@@ -43,8 +43,40 @@ router.get('/:studentId/:courseId/current-course', async (req, res) => {
       ORDER BY a.attendance_week ASC
     `, [studentId, courseId]);
 
-    const currentScore = quizScores.reduce((sum, q) => sum + (q.score || 0), 0);
-    const avgScore = quizScores.length ? currentScore / quizScores.length : 0;
+    const [currentScoreResult] = await db.promise().query(`
+      SELECT ROUND(SUM(weighted_score), 2) AS current_score
+      FROM (
+        SELECT ((sub.score / ai.max_score) * ai.weight) * a.weight * 100 AS weighted_score
+        FROM assignment_submit sub
+        JOIN assessment_item ai ON sub.assess_item_id = ai.assess_item_id
+        JOIN assessment a ON ai.assessment_id = a.assessment_id
+        JOIN class_list cl ON cl.class_list_id = sub.class_list_id
+        JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
+        WHERE cl.student_id = ? AND cs.course_id = ?
+      ) AS subquery
+    `, [studentId, courseId]);
+    const currentScore = currentScoreResult[0]?.current_score || 0;
+
+    const [avgScoreResult] = await db.promise().query(`
+      WITH StudentScores AS (
+      SELECT inner_scores.student_id,
+            SUM(inner_scores.weighted_score) AS total_score
+      FROM (
+        SELECT DISTINCT sub.submit_id, cl.student_id,
+              ((sub.score / ai.max_score) * ai.weight) * a.weight * 100 AS weighted_score
+        FROM assignment_submit sub
+        JOIN assessment_item ai ON sub.assess_item_id = ai.assess_item_id
+        JOIN assessment a ON ai.assessment_id = a.assessment_id
+        JOIN class_list cl ON cl.class_list_id = sub.class_list_id
+        JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
+        WHERE cs.course_id = ?
+      ) AS inner_scores
+      GROUP BY inner_scores.student_id
+    )
+    SELECT ROUND(AVG(total_score), 2) AS avg_score FROM StudentScores;
+    `, [courseId]);
+    const rawAvg = avgScoreResult[0]?.avg_score;
+    const avgScore = isNaN(rawAvg) ? 0 : Number(parseFloat(rawAvg).toFixed(2));
 
     const [submissionSummary] = await db.promise().query(`
       SELECT 
@@ -59,7 +91,6 @@ router.get('/:studentId/:courseId/current-course', async (req, res) => {
         SELECT course_sect_id FROM course_section WHERE course_id = ?
       )
     `, [studentId, courseId]);
-
     
     const submission = submissionSummary[0] || {
       on_time: 0,
