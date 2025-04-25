@@ -407,21 +407,21 @@ const StudentListTest = () => {
   sessionStorage.setItem("atRiskCount", totalRisk);
 
   return (
-    <div style={{ marginTop: "-50px" }} className="student-profile-container">
-      <h3 style={{ marginTop: "0px" }}>
-        {courseId ? `${courseId} > Student List` : "Select a Course"}
-      </h3>
+    <div className="student-profile-container">
+      <div className="header-row">
+        <h3>{courseId ? `${courseId} > Student List` : "Select a Course"}</h3>
 
-      {/* Top Right Search Box */}
-      <div className="search-bar">
-        <label>Search:</label>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Enter student name/ID..."
-        />
+        <div className="search-bar">
+          <label>Search:</label>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter student name/ID..."
+          />
+        </div>
       </div>
+
       <div className="box">
         <div className="box-left">
           Student List in this class 📚 {enrollmentCount} Students Enrolled
