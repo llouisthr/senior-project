@@ -31,8 +31,7 @@ router.get('/:courseId/:sectionId/:semesterId', (req, res) => {
       FROM student s
       JOIN class_list cl ON s.student_id = cl.student_id
       JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
-      WHERE cs.course_id = ?
-        AND cs.semester_id = ? ${sectionId !== "all" ? "AND cs.section = ?" : ""}
+      WHERE cs.course_id = ? AND cs.semester_id = ? ${sectionId !== "all" ? "AND cs.section = ?" : ""}
       GROUP BY s.student_id, s.fname, s.lname, cl.at_risk_status
     `;
   

@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/:studentId/:courseId/current-course', async (req, res) => {
-  const { studentId, courseId } = req.params;
+router.get('/:studentId/:courseId/:sectionId/:semester/current-course', async (req, res) => {
+  const { studentId, courseId, sectionId, semester } = req.params;
 
   try {
     const [studentInfo] = await db.promise().query(
@@ -12,16 +12,22 @@ router.get('/:studentId/:courseId/current-course', async (req, res) => {
        WHERE s.student_id = ?`, [studentId]
     );
 
-    const [quizScores] = await db.promise().query(`
+    let quizQuery = `
       SELECT ai.assess_item_name, sub.score
       FROM assessment_item ai
       JOIN assignment_submit sub ON ai.assess_item_id = sub.assess_item_id
       JOIN class_list cl ON cl.class_list_id = sub.class_list_id
       JOIN assessment a ON ai.assessment_id = a.assessment_id
-      WHERE cl.student_id = ? AND a.course_sect_id IN (
-        SELECT course_sect_id FROM course_section WHERE course_id = ?
-      ) AND ai.assess_item_name LIKE 'Quiz%'
-    `, [studentId, courseId]);
+      JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
+      WHERE cl.student_id = ? AND cs.course_id = ?
+      ${sectionId !== "all" ? "AND cs.section = ?" : ""}
+      AND cs.semester_id = ?
+    `;
+    const quizParams = sectionId !== "all"
+      ? [studentId, courseId, sectionId, semester]
+      : [studentId, courseId, semester];
+
+    const [quizScores] = await db.promise().query(quizQuery, quizParams);
 
     const [missingAssignments] = await db.promise().query(`
       SELECT ai.assess_item_name
@@ -34,14 +40,27 @@ router.get('/:studentId/:courseId/current-course', async (req, res) => {
       ) AND sub.submit_date IS NULL
     `, [studentId, courseId]);
 
-    const [attendanceLine] = await db.promise().query(`
+    let query = `
       SELECT a.attendance_week, a.attendance_status
       FROM attendance a
       JOIN class_list cl ON cl.class_list_id = a.class_list_id
       JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
-      WHERE cl.student_id = ? AND cs.course_id = ?
+      WHERE cl.student_id = ?
+        AND cs.course_id = ?
+        ${sectionId !== "all" ? "AND cs.section = ?" : ""}
+        AND cs.semester_id = ?
       ORDER BY a.attendance_week ASC
-    `, [studentId, courseId]);
+    `;
+
+    const queryParams = sectionId !== "all"
+      ? [studentId, courseId, sectionId, semester]
+      : [studentId, courseId, semester];
+
+    const [attendanceLine] = await db.promise().query(query, queryParams);
+
+    const currentScoreParams = sectionId !== "all"
+  ? [studentId, courseId, sectionId, semester]
+  : [studentId, courseId, semester];
 
     const [currentScoreResult] = await db.promise().query(`
       SELECT ROUND(SUM(weighted_score), 2) AS current_score
@@ -53,28 +72,39 @@ router.get('/:studentId/:courseId/current-course', async (req, res) => {
         JOIN class_list cl ON cl.class_list_id = sub.class_list_id
         JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
         WHERE cl.student_id = ? AND cs.course_id = ?
+        ${sectionId !== "all" ? "AND cs.section = ?" : ""}
+        AND cs.semester_id = ?
       ) AS subquery
-    `, [studentId, courseId]);
+    `, currentScoreParams);
     const currentScore = currentScoreResult[0]?.current_score || 0;
 
-    const [avgScoreResult] = await db.promise().query(`
+    let avgScoreQuery = `
       WITH StudentScores AS (
-      SELECT inner_scores.student_id,
-            SUM(inner_scores.weighted_score) AS total_score
-      FROM (
-        SELECT DISTINCT sub.submit_id, cl.student_id,
-              ((sub.score / ai.max_score) * ai.weight) * a.weight * 100 AS weighted_score
-        FROM assignment_submit sub
-        JOIN assessment_item ai ON sub.assess_item_id = ai.assess_item_id
-        JOIN assessment a ON ai.assessment_id = a.assessment_id
-        JOIN class_list cl ON cl.class_list_id = sub.class_list_id
-        JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
-        WHERE cs.course_id = ?
-      ) AS inner_scores
-      GROUP BY inner_scores.student_id
-    )
-    SELECT ROUND(AVG(total_score), 2) AS avg_score FROM StudentScores;
-    `, [courseId]);
+        SELECT inner_scores.student_id,
+              SUM(inner_scores.weighted_score) AS total_score
+        FROM (
+          SELECT DISTINCT sub.submit_id, cl.student_id,
+                ((sub.score / ai.max_score) * ai.weight) * a.weight * 100 AS weighted_score
+          FROM assignment_submit sub
+          JOIN assessment_item ai ON sub.assess_item_id = ai.assess_item_id
+          JOIN assessment a ON ai.assessment_id = a.assessment_id
+          JOIN class_list cl ON cl.class_list_id = sub.class_list_id
+          JOIN course_section cs ON cl.course_sect_id = cs.course_sect_id
+          WHERE cs.course_id = ?
+          ${sectionId !== "all" ? "AND cs.section = ?" : ""}
+          AND cs.semester_id = ?
+        ) AS inner_scores
+        GROUP BY inner_scores.student_id
+      )
+      SELECT ROUND(AVG(total_score), 2) AS avg_score FROM StudentScores;
+    `;
+
+    const avgScoreParams = sectionId !== "all"
+      ? [courseId, sectionId, semester]
+      : [courseId, semester];
+
+    const [avgScoreResult] = await db.promise().query(avgScoreQuery, avgScoreParams);
+
     const rawAvg = avgScoreResult[0]?.avg_score;
     const avgScore = isNaN(rawAvg) ? 0 : Number(parseFloat(rawAvg).toFixed(2));
 

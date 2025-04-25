@@ -208,7 +208,7 @@ router.get("/:courseId/:sectionId/:semesterId/at-risk", (req, res) => {
     });
 });
 
-router.get("/:courseId/:sectionId/:semesterId/quizzes", (req, res) => {
+router.get("/:courseId/:sectionId/:semesterId/assignItems", (req, res) => {
     const { courseId, sectionId, semesterId } = req.params;
 
     const query = `
@@ -216,8 +216,8 @@ router.get("/:courseId/:sectionId/:semesterId/quizzes", (req, res) => {
         ai.assess_item_name, 
         ai.max_score,
         ROUND(AVG(sub.score), 2) AS avg_score,
-        MAX(sub.score) AS max_score,
-        MIN(sub.score) AS min_score
+        MAX(sub.score) AS highest_score,
+        MIN(sub.score) AS lowest_score
     FROM 
         assignment_submit sub
     JOIN 
@@ -227,7 +227,8 @@ router.get("/:courseId/:sectionId/:semesterId/quizzes", (req, res) => {
     JOIN 
         course_section cs ON cl.course_sect_id = cs.course_sect_id
     WHERE 
-        LOWER(ai.assess_item_name) LIKE '%quiz%'
+        LOWER(ai.assess_item_name) NOT LIKE '%midterm%'
+        AND LOWER(ai.assess_item_name) NOT LIKE '%final%'
         AND cs.course_id = ? AND cs.semester_id = ?
         ${sectionId !== "all" ? "AND cs.section = ?" : ""}
     GROUP BY 
@@ -238,7 +239,7 @@ router.get("/:courseId/:sectionId/:semesterId/quizzes", (req, res) => {
     const params = sectionId !== "all" ? [courseId, semesterId, sectionId] : [courseId, semesterId];
     db.query(query, params, (err, results) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ Quizzes: results });
+      res.json({ assignItems: results });
     });
 });
 
