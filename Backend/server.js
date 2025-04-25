@@ -30,7 +30,7 @@ db.connect((err) => {
   console.log("Connected to MySQL database");
 });
 
-// Expose db globallys
+// Expose db globally
 global.db = db;
 
 // Modular routes
