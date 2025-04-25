@@ -24,7 +24,7 @@ const Dashboard = () => {
     const [data, setData] = useState({
         enrollment: 0,
         engagement: 0,
-        Quizzes: [],
+        assignItems: [],
         riskStudents: 0,
         atRiskStudentsName: [],
         rawScores: [],
@@ -36,12 +36,6 @@ const Dashboard = () => {
     const submissionChartRef = useRef(null);
     const scoreChartRef = useRef(null);
     const statsChartRef = useRef(null);
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("instructorId");
-        navigate("/login");
-      };
 
     useEffect(() => {
         if (course && section && semester) {
@@ -93,7 +87,7 @@ const Dashboard = () => {
 
         const fetchAll = async () => {
             try {
-                const [enr, eng, att, sub, raw, rawStats, risk, quiz] = await Promise.all([
+                const [enr, eng, att, sub, raw, rawStats, risk, aItems] = await Promise.all([
                     axios.get(`${base}/enrollment`).then(res => res.data),
                     axios.get(`${base}/engagement`).then(res => res.data),
                     axios.get(`${base}/attendance`).then(res => res.data),
@@ -101,9 +95,8 @@ const Dashboard = () => {
                     axios.get(`${base}/raw-scores`).then(res => res.data),
                     axios.get(`${base}/raw-stats`).then(res => res.data),
                     axios.get(`${base}/at-risk`).then(res => res.data),
-                    axios.get(`${base}/quizzes`).then(res => res.data),
+                    axios.get(`${base}/assignItems`).then(res => res.data),
                 ]);
-            console.log("Test API enroll", enr);
                 setData({
                     enrollment: enr.total_students || 0,
                     engagement: eng.engagement || 0,
@@ -117,7 +110,7 @@ const Dashboard = () => {
                       ],
                     riskStudents: Number(sessionStorage.getItem("atRiskCount")) || risk.riskStudents,
                     atRiskStudentsName: risk.atRiskStudentsName,
-                    Quizzes: quiz.Quizzes || []
+                    aItems: aItems.assignItems || []
                 });
             } catch (err) {
                 console.error("Dashboard fetch error:", err);
@@ -132,15 +125,22 @@ const Dashboard = () => {
         if (attendanceChartRef.current && Array.isArray(data.attendance) && data.attendance.length > 0) {
             const width = attendanceChartRef.current.clientWidth;
             const height = attendanceChartRef.current.clientHeight;
+            const margin = { top: 30, right: 30, bottom: 40, left: 40 };
             const svg = d3.select(attendanceChartRef.current);
             svg.selectAll("*").remove();
             svg.append("svg")
             .attr("viewBox", `0 0 ${width} ${height}`)
             .attr("preserveAspectRatio", "xMidYMid meet")
             .style("width", "100%")
-            .style("height", "auto");            
-
-          const margin = { top: 30, right: 30, bottom: 40, left: 40 };
+            .style("height", "auto");    
+            svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2)
+            .attr("y", 10) 
+            .attr("text-anchor", "middle")
+            .attr("font-size", "12px")
+            .attr("fill", "#333")
+            .text("Number of Students");        
       
           const cleanedData = data.attendance
             .filter(d => d.attendance_week !== null)
@@ -244,6 +244,18 @@ const Dashboard = () => {
                 .style("width", "100%")
                 .style("height", "auto");
 
+            const chartGroup = svg.append("g")
+                .attr("transform", `translate(${margin.left}, 0)`);
+
+              svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", 20) // ⬅️ increase to push it right if needed (try 20–30)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "24px")
+                .attr("fill", "#333")
+                .text("Number of Submissions");
+              
             const filtered = data.submission.filter(d =>
                 !/midterm|final/i.test(d.assignment)
             );
@@ -268,13 +280,13 @@ const Dashboard = () => {
             const stack = d3.stack().keys(keys);
             const stackedData = stack(filtered);
 
-            const group = svg.selectAll("g.layer")
+            const groups = chartGroup.selectAll("g.layer")
                 .data(stackedData)
                 .enter()
                 .append("g")
                 .attr("fill", d => colors[d.key]);
 
-            group.selectAll("rect")
+            groups.selectAll("rect")
                 .data(d => d)
                 .enter()
                 .append("rect")
@@ -284,7 +296,7 @@ const Dashboard = () => {
                 .attr("width", x.bandwidth());
 
             // Text labels for each segment
-            group.selectAll("text")
+            groups.selectAll("text")
                 .data(d => d)
                 .enter()
                 .append("text")
@@ -300,7 +312,7 @@ const Dashboard = () => {
                 .attr("fill", "#333");
 
             // X-axis
-            svg.append("g")
+            chartGroup.append("g")
                 .attr("transform", `translate(0,${height - margin.bottom})`)
                 .call(d3.axisBottom(x))
                 .selectAll("text")
@@ -309,7 +321,7 @@ const Dashboard = () => {
                 .style("text-anchor", "end");
 
             // Y-axis
-            svg.append("g")
+            chartGroup.append("g")
                 .attr("transform", `translate(${margin.left},0)`)
                 .call(d3.axisLeft(y).ticks(5))
                 .selectAll("text")
@@ -320,7 +332,7 @@ const Dashboard = () => {
         // Score Chart
         if (scoreChartRef.current && data.rawScores && Object.keys(data.rawScores).length > 0) {
             const width = 400;
-            const height = 220;
+            const height = 180;
             const margin = { top: 20, right: 20, bottom: 40, left: 40 };
             const container = d3.select(scoreChartRef.current);
             container.selectAll("svg").remove(); // Clear previous chart    
@@ -342,7 +354,7 @@ const Dashboard = () => {
             const rawMax = d3.max(bins, d => d.students) || 10;
             const yMax = Math.ceil(rawMax / 10) * 10;  // Round up to nearest 10
             const y = d3.scaleLinear()
-                .domain([0, yMax])             // 👈 fixed Y-axis range
+                .domain([0, yMax])             // fixed Y-axis range
                 .range([height, 0])
                 .nice();
 
@@ -392,7 +404,7 @@ const Dashboard = () => {
             .attr("x", d => x(d.range) + x.bandwidth() / 2)
             .attr("y", d => y(d.students) + (height - y(d.students)) / 2)  // vertical center of the bar
             .attr("text-anchor", "middle")
-            .style("dominant-baseline", "middle")  // ✅ aligns text to vertical center
+            .style("dominant-baseline", "middle")  // aligns text to vertical center
             .attr("fill", "#fff")
             .attr("font-size", "12px")
             .attr("font-weight", "bold");
@@ -400,65 +412,79 @@ const Dashboard = () => {
 
         // Stats Chart with labels
         if (statsChartRef.current && data.rawStats) {
-            const container = d3.select(statsChartRef.current);
-            container.selectAll("svg").remove();
+          const container = d3.select(statsChartRef.current);
+          container.selectAll("svg").remove();
           
-            const width = 300;
-            const height = 220;
-            const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+          const width = 300;
+          const height = 240;
+          const margin = { top: 20, right: 20, bottom: 40, left: 50 };
           
-            const svg = container.append("svg")
-              .attr("width", width + margin.left + margin.right)
-              .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", `translate(${margin.left},${margin.top})`);
+          const svg = container.append("svg")
+            .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .style("width", "100%")
+            .style("height", "auto");
           
-            const bars = data.rawStats || [];
+          // Shift drawing group
+          const chartGroup = svg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
           
-            const x = d3.scaleBand()
-              .domain(bars.map(d => d.label))
-              .range([0, width])
-              .padding(0.3);
+          const bars = data.rawStats || [];
           
-            const y = d3.scaleLinear()
-              .domain([0, 100])  // scores are percentages
-              .range([height, 0])
-              .nice();
+          const x = d3.scaleBand()
+            .domain(bars.map(d => d.label))
+            .range([0, width])
+            .padding(0.3);
           
-            // Axes
-            svg.append("g")
-              .call(d3.axisLeft(y).ticks(5));
+          const y = d3.scaleLinear()
+            .domain([0, 100])  // scores are percentages
+            .range([height, 0])
+            .nice();
           
-            svg.append("g")
-              .attr("transform", `translate(0,${height})`)
-              .call(d3.axisBottom(x));
+          // Add Y-axis label
+          svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -height / 2 - margin.top)
+            .attr("y", 15)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "18px")
+            .attr("fill", "#333")
+            .text("Class Score");
           
-            // Bars
-            svg.selectAll("rect")
-              .data(bars)
-              .enter()
-              .append("rect")
-              .attr("x", d => x(d.label))
-              .attr("y", d => y(d.value))
-              .attr("width", x.bandwidth())
-              .attr("height", d => height - y(d.value))
-              .attr("fill", "#00bcd4");
+          // Axes
+          chartGroup.append("g")
+            .call(d3.axisLeft(y).ticks(5));
           
-            // Value labels inside bars
-            svg.selectAll("text.stat-label")
-              .data(bars)
-              .enter()
-              .append("text")
-              .attr("class", "stat-label")
-              .text(d => d.value.toFixed(1))
-              .attr("x", d => x(d.label) + x.bandwidth() / 2)
-              .attr("y", d => y(d.value) + (height - y(d.value)) / 2)
-              .attr("text-anchor", "middle")
-              .style("dominant-baseline", "middle")
-              .attr("fill", "#fff")
-              .attr("font-size", "12px")
-              .attr("font-weight", "bold");
-          }          
+          chartGroup.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x));
+          
+          // Bars
+          chartGroup.selectAll("rect")
+            .data(bars)
+            .enter()
+            .append("rect")
+            .attr("x", d => x(d.label))
+            .attr("y", d => y(d.value))
+            .attr("width", x.bandwidth())
+            .attr("height", d => height - y(d.value))
+            .attr("fill", "#00bcd4");
+          
+          // Value labels inside bars
+          chartGroup.selectAll("text.stat-label")
+            .data(bars)
+            .enter()
+            .append("text")
+            .attr("class", "stat-label")
+            .text(d => d.value.toFixed(1))
+            .attr("x", d => x(d.label) + x.bandwidth() / 2)
+            .attr("y", d => y(d.value) + (height - y(d.value)) / 2)
+            .attr("text-anchor", "middle")
+            .style("dominant-baseline", "middle")
+            .attr("fill", "#fff")
+            .attr("font-size", "12px")
+            .attr("font-weight", "bold");
+        }
     }, [data]);
 
     const toggleMenu = (menu) => {
@@ -555,15 +581,15 @@ const Dashboard = () => {
                             </div>
 
                             <div className="low-scoring-quiz">
-                                <h3>Quiz Statistics</h3>
+                                <h3>Assignment Statistics</h3>
                                 <div className="quiz-list">
-                                {data.Quizzes && data.Quizzes.length > 0 && (
+                                {data.aItems && data.aItems.length > 0 && (
                                   <div className="quiz-stats">                    
-                                    {data.Quizzes.map((quiz, index) => (
+                                    {data.aItems.map((item, index) => (
                                       <div key={index} style={{ marginBottom: '1rem' }}>
-                                        <strong>{quiz.assess_item_name} Average:</strong> {quiz.avg_score} / {quiz.max_score}<br />
+                                        <strong>{item.assess_item_name} Average:</strong> {item.avg_score} / {item.max_score}<br />
                                         <span>
-                                          Max: {quiz.max_score} &nbsp;&nbsp; Min: {quiz.min_score}
+                                          Max: {item.highest_score} &nbsp;&nbsp; Min: {item.lowest_score}
                                         </span>
                                       </div>
                                     ))}
@@ -574,7 +600,7 @@ const Dashboard = () => {
                         </div>
 
                         <div className="chart-box">
-                            <h4>Score Distribution</h4>
+                            <h4>Score Range</h4>
                             <div ref={scoreChartRef}></div>
                         </div>
                         

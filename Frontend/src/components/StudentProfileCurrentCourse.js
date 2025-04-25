@@ -40,15 +40,14 @@ const StudentProfileB = () => {
     };
 
     const [studentInfo, setStudentInfo] = useState(null); // for name, email, advisor, etc.
-    // 🔹 Fetch MySQL data via API
-    const { studentId, courseId } = useParams();
+    const { studentId, courseId, sectionId, semester } = useParams();
 
     useEffect(() => {
         if (!studentId) return;
 
         const fetchOverview = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/student-profile/${studentId}/${courseId}/current-course`);
+                const res = await axios.get(`http://localhost:5000/student-profile/${studentId}/${courseId}/${sectionId}/${semester}/current-course`);
                 const { studentInfo, quizScores,
                     missingAssignments,
                     attendanceLine,
@@ -78,7 +77,7 @@ const StudentProfileB = () => {
                 { label: "On Time", value: Number(submissionSummary.on_time || 0) },
                 { label: "Late", value: Number(submissionSummary.late || 0) },
                 { label: "No submission", value: Number(submissionSummary.no_submission || 0) }
-            ];            
+            ];
             renderDonutChart(chartRefs.subjectDonut, data);
         }
     }, [submissionSummary]);
@@ -251,9 +250,9 @@ const StudentProfileB = () => {
     };
 
     return (
-        <div className="student-profile-page-b-container">
-            <div className="main-content">
-                <h3>
+        <div style={{marginTop:"-120px", marginBottom:"0px"}} className="student-profile-page-b-container">
+            <div style={{marginTop:"100px", marginBottom:"-20px"}} className="main-content">
+                <h3 style={{marginTop:"30px"}}>
                     {courseId} &gt; Student List &gt; {studentId} &gt; {isCurrentCourse ? "Current Course" : "Overall"}
                 </h3>
 
@@ -262,20 +261,20 @@ const StudentProfileB = () => {
 
                     {/* Dropdown with options */}
                     <div className="flex gap-4">
-                    <select
-                        value={infoOption}
-                        onChange={(e) => {
-                            const selected = e.target.value;
-                            setInfoOption(selected);
-                            if (selected === "overall") {
-                            navigate(`/student-profile/${studentId}/${courseId}/overview`);
-                            } else if (selected === "current-course") {
-                            navigate(`/student-profile/${studentId}/${courseId}/current-course`);
-                            }
-                        }}
-                        className="px-4 py-2 rounded border border-gray-300">
-                        <option value="overall">Overview</option>
-                        <option value="current-course">Current Course</option>
+                        <select
+                            value={infoOption}
+                            onChange={(e) => {
+                                const selected = e.target.value;
+                                setInfoOption(selected);
+                                if (selected === "overall") {
+                                    navigate(`/student-profile/${studentId}/${courseId}/${sectionId}/${semester}/overview`);
+                                } else if (selected === "current-course") {
+                                    navigate(`/student-profile/${studentId}/${courseId}/${sectionId}/${semester}/current-course`);
+                                }
+                            }}
+                            className="px-4 py-2 rounded border border-gray-300">
+                            <option value="current-course">Current Course</option>
+                            <option value="overall">Overview</option>
                         </select>
                     </div>
                 </div>
@@ -301,7 +300,7 @@ const StudentProfileB = () => {
                             />
                         </div>
 
-                        <div className="student-info" style={{marginLeft: "30px"}}>
+                        <div className="student-info" style={{ marginLeft: "30px" }}>
                             <h2>Student Information</h2>
                             {studentInfo ? (
                                 <>
@@ -325,11 +324,11 @@ const StudentProfileB = () => {
                         alignItems: "start"
                     }}>
                         {/* Quiz Table */}
-                        <div className="chart-box" style={{ flex: 1, minHeight: "550px", minWidth: "340px", maxWidth: "52%"}}>
-                            <h3>Quiz (10)</h3>
+                        <div className="chart-box" style={{ flex: 1, minHeight: "550px", minWidth: "340px", maxWidth: "52%" }}>
+                            <h3>Assignments Done</h3>
                             <table style={{ width: "100%", border: "1px solid #ddd" }}>
                                 <thead>
-                                    <tr><th>Quiz</th><th>Score</th></tr>
+                                    <tr><th>Item Name</th><th>Score</th></tr>
                                 </thead>
                                 <tbody>
                                     {Array.isArray(quizScores) && quizScores.length > 0 ? (
@@ -340,7 +339,7 @@ const StudentProfileB = () => {
                                             </tr>
                                         ))
                                     ) : (
-                                        <tr><td colSpan="2">No quizzes available</td></tr>
+                                        <tr><td colSpan="2">No record found</td></tr>
                                     )}
 
                                 </tbody>
@@ -348,7 +347,7 @@ const StudentProfileB = () => {
                         </div>
 
                         {/* Missing Assignments */}
-                        <div className="chart-box" style={{ flex: 1, minHeight: "550px",  minWidth: "340px", maxWidth: "48%"}}>
+                        <div className="chart-box" style={{ flex: 1, minHeight: "550px", minWidth: "340px", maxWidth: "48%" }}>
                             <h3>Missing Assignment</h3>
                             <table style={{ width: "100%", border: "1px solid #ddd", marginTop: "0", verticalAlign: "top" }}>
                                 <thead>
@@ -376,12 +375,31 @@ const StudentProfileB = () => {
                             flexDirection: "column",
                             gap: "20px"
                         }}>
-                            <div className="chart-box" style={{ minHeight: "300px" ,  minWidth: "340px", maxWidth: "48%"}}>
+                            <div className="chart-box" style={{ minHeight: "300px", minWidth: "340px", maxWidth: "48%" }}>
                                 <h3>Attendance</h3>
-                                <svg ref={chartRefs.attendanceLineChart} width={300} height={200}></svg>
+                                <table className="attendance-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Week</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {attendanceLine.length === 0 ? (
+                                            <tr><td colSpan="2">No attendance available</td></tr>
+                                        ) : (attendanceLine.map((entry, index) => (
+                                            <tr key={index}>
+                                                <td>Week {entry.attendance_week}</td>
+                                                <td>{entry.attendance_status}</td>
+                                            </tr>
+                                        ))
+                                    )}
+                                    </tbody>
+                                </table>
                             </div>
 
-                            <div className="chart-box" style={{ minHeight: "200px", textAlign: "center" , marginTop: "-20px",  minWidth: "340px", maxWidth: "48%"}}>
+
+                            <div className="chart-box" style={{ minHeight: "200px", textAlign: "center", marginTop: "-20px", minWidth: "340px", maxWidth: "48%" }}>
                                 <h3>Current Score</h3>
                                 <p style={{
                                     fontSize: "36px",

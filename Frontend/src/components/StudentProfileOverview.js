@@ -42,9 +42,7 @@ const StudentProfileB = () => {
 
     const [studentInfo, setStudentInfo] = useState(null); // for name, email, advisor, etc.
     const [activityTimeline, setActivityTimeline] = useState([]);
-
-    // 🔹 Fetch MySQL data via API
-    const { studentId, courseId } = useParams();
+    const { studentId, courseId, sectionId, semester } = useParams();
 
     useEffect(() => {
         if (!studentId) return;
@@ -117,7 +115,7 @@ const StudentProfileB = () => {
 
     useEffect(() => {
         if (!skills.length) return;
-    
+        d3.select(".tooltip-radar").remove();
         const literacySkills = skills.filter(skill => skill.skill_category === "literacy");
         const softSkills = skills.filter(skill => skill.skill_category === "soft_skill");
     
@@ -358,13 +356,24 @@ const StudentProfileB = () => {
         // Clear any existing SVG content
         d3.select(ref.current).selectAll("*").remove();
 
+        const tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip-radar")
+            .style("position", "absolute")
+            .style("padding", "6px 10px")
+            .style("background", "rgba(0,0,0,0.7)")
+            .style("color", "#fff")
+            .style("border-radius", "5px")
+            .style("font-size", "12px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+
         const svg = d3.select(ref.current)
             .append('svg')
             .attr('width', width + margin * 2)  // Add margin to width
             .attr('height', height + margin * 2) // Add margin to height
             .append('g')
             .attr('transform', `translate(${(width + margin) / 2}, ${(height + margin) / 2})`); // Center chart
-
 
         const radialScale = d3.scaleLinear()
             .domain([0, 20])
@@ -428,15 +437,27 @@ const StudentProfileB = () => {
             .attr('stroke-width', 2);
 
         svg.selectAll('.dot')
-            .data(polygonPoints)
+            .data(data)
             .enter().append('circle')
-            .attr('cx', d => d[0])
-            .attr('cy', d => d[1])
-            .attr('r', 4)
-            .attr('fill', 'blue');
+            .attr('class', 'dot')
+            .attr('cx', (d, i) => radialScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
+            .attr('cy', (d, i) => radialScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
+            .attr('r', 5)
+            .attr('fill', 'blue')
+            .on("mouseover", (event, d) => {
+                tooltip
+                    .style("opacity", 1)
+                    .html(`<strong>${d.label}</strong><br/>${d.value} hours`);
+            })
+            .on("mousemove", (event) => {
+                tooltip
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 20) + "px");            
+            })
+            .on("mouseout", function () {
+                tooltip.transition().duration(300).style("opacity", 0);
+            });
     };
-
-
 
     const renderDonutChart = (ref, data) => {
         const svg = d3.select(ref.current);
@@ -686,7 +707,7 @@ const StudentProfileB = () => {
     return (
         <div className="student-profile-page-b-container">
             <div className="main-content">
-                <h3>{courseId} &gt; Student List &gt; {studentId}</h3>
+                <h3>Student List &gt; {studentId} &gt; Overview</h3>
                 <div className="student-head-box">
                     <span>Student Information</span>
 
@@ -698,9 +719,9 @@ const StudentProfileB = () => {
                             const selected = e.target.value;
                             setInfoOption(selected);
                             if (selected === "overall") {
-                            navigate(`/student-profile/${studentId}/${courseId}/overview`);
+                            navigate(`/student-profile/${studentId}/${courseId}/${sectionId}/${semester}/overview`);
                             } else if (selected === "current-course") {
-                            navigate(`/student-profile/${studentId}/${courseId}/current-course`);
+                            navigate(`/student-profile/${studentId}/${courseId}/${sectionId}/${semester}/current-course`);
                             }
                         }}
                         className="px-4 py-2 rounded border border-gray-300">
@@ -772,7 +793,7 @@ const StudentProfileB = () => {
 
                         <div className="second-chart-row">
                             <div className="chart-box">
-                                <h3>AT Related Skills</h3>
+                                <h3>AT Related Skills (Hours)</h3>
                                 <div className="radar-charts-container">
                                     <svg ref={chartRefs.activityRadarChart} width={250} height={250}></svg>
                                     <svg ref={chartRefs.skillsRadarChart} width={250} height={250}></svg>

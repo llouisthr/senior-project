@@ -184,6 +184,17 @@ body {
     justify-content: center;
 }
 
+.tooltip-radar {
+    position: absolute;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    border-radius: 5px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 10;
+}
+
 .timeline-box {
     text-align: center;
     padding: 20px;

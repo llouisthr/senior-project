@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import './StudentList.css'; // Import CSS file
 import personIcon from "./person.jpg";
@@ -9,8 +9,6 @@ const StudentListTest = () => {
   const navigate = useNavigate(); // Hook for navigation
   const location = useLocation();
   const { courseId, sectionId, semesterId } = useParams();
-  const [expandedMenu, setExpandedMenu] = useState(null);
-  const [expandedSubmenu, setExpandedSubmenu] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("");
   const [sortOption, setSortOption] = useState("ascending");
@@ -40,6 +38,50 @@ const StudentListTest = () => {
   const [selectedSection, setSelectedSection] = useState(sectionId || "all");
   const [selectedSemester, setSelectedSemester] = useState(semesterId || "");
   const [RealAtRiskCount, setRealAtRiskCount] = useState();
+  const [enrollmentCount, setEnrollmentCount] = useState(0);
+  const [initialStudents, setInitialStudents] = useState([]);
+  const filterBoxRef = useRef(null);
+  const criteriaBoxRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterBoxRef.current && !filterBoxRef.current.contains(event.target)) {
+        setShowFilterBox(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!courseId || !selectedSection || !selectedSemester) return;
+  
+    const fetchEnrollment = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/dashboard/${courseId}/${selectedSection}/${selectedSemester}/enrollment`);
+        setEnrollmentCount(res.data.total_students || 0);
+      } catch (err) {
+        console.error("Enrollment fetch error:", err);
+        setEnrollmentCount(0);
+      }
+    };
+    fetchEnrollment();
+  }, [courseId, selectedSection, selectedSemester]);
+  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (criteriaBoxRef.current && !criteriaBoxRef.current.contains(event.target)) {
+        setShowCriteriaBox(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
 
   const handleImageClick = () => {
     setIsExpanded(true);
@@ -124,7 +166,7 @@ const StudentListTest = () => {
 
   useEffect(() => {
     if (!courseId || !selectedSection || !selectedSemester) return;
-  
+
     axios.get(`http://localhost:5000/studentList/${courseId}/${selectedSection}/${selectedSemester}`)
       .then(res => {
         const uniqueStudentsMap = new Map();
@@ -139,11 +181,72 @@ const StudentListTest = () => {
             link: `/student-profile/${student.student_id}`
           });
         });
-        setStudents(Array.from(uniqueStudentsMap.values()));
+        const finalList = Array.from(uniqueStudentsMap.values());
+        setInitialStudents(finalList);
+        setStudents(finalList);
       })
       .catch(err => console.error("Error loading students:", err));
-  }, [courseId, selectedSection, selectedSemester]); // ← updated!
-  
+  }, [courseId, selectedSection, selectedSemester]); 
+
+  useEffect(() => {
+    updateStudentStatus({
+      criteriaAttendance,
+      criteriaScore,
+      severeAttendance,
+      slightlyAttendance,
+      severeScore,
+      slightlyScore,
+    });
+  }, [
+    criteriaAttendance,
+    criteriaScore,
+    severeAttendance,
+    slightlyAttendance,
+    severeScore,
+    slightlyScore,
+  ]);
+
+  const updateStudentStatus = ({
+    criteriaAttendance,
+    criteriaScore,
+    severeAttendance,
+    slightlyAttendance,
+    severeScore,
+    slightlyScore
+  }) => {
+    const updated = initialStudents.map((student) => {
+      let attendanceStatus = "normal";
+      let scoreStatus = "normal";
+    
+      if (criteriaAttendance) {
+        if (student.attendance <= severeAttendance) {
+          attendanceStatus = "severe";
+        } else if (student.attendance <= slightlyAttendance) {
+          attendanceStatus = "slightly";
+        }
+      }
+    
+      if (criteriaScore) {
+        if (student.score <= severeScore) {
+          scoreStatus = "severe";
+        } else if (student.score <= slightlyScore) {
+          scoreStatus = "slightly";
+        }
+      }
+    
+      let finalStatus = "normal";
+      if (attendanceStatus === "severe" || scoreStatus === "severe") {
+        finalStatus = "severe";
+      } else if (attendanceStatus === "slightly" || scoreStatus === "slightly") {
+        finalStatus = "slightly";
+      }
+    
+      return { ...student, status: finalStatus };
+    });    
+
+    setStudents(updated);
+  };
+
   const getRiskStatus = (attendance, score) => {
     if (criteriaAttendance && !criteriaScore) {
       if (attendance <= severeAttendance) return "🔴";
@@ -158,24 +261,12 @@ const StudentListTest = () => {
     return " ";
   };
 
-
   const getStudentStatus = (student) => {
-    if (criteriaAttendance && !criteriaScore) {
-      if (student.attendance <= severeAttendance) return "🔴";
-      if (student.attendance <= slightlyAttendance) return "🟡";
-      return " ";
-    }
-
-    if (criteriaScore && !criteriaAttendance) {
-      if (student.score <= severeScore) return "🔴";
-      if (student.score <= slightlyScore) return "🟡";
-      return " ";
-    }
-
-    // If both are selected or none, treat as Normal
+    if (student.status === "severe") return "🔴";
+    if (student.status === "slightly") return "🟡";
     return " ";
   };
-
+  
   const getStatusLabel = (student) => {
     const symbol = getStudentStatus(student);
     if (symbol === "🔴") return "Severe";
@@ -215,6 +306,7 @@ const StudentListTest = () => {
       setSortOrder("asc");
     }
   };
+
 
   const sortedStudents = useMemo(() => {
     return [...filteredStudents].sort((a, b) => {
@@ -278,9 +370,9 @@ const StudentListTest = () => {
   sessionStorage.setItem("atRiskCount", totalRisk);
 
   return (
-    <div className="student-profile-container">
-      <div className="main-content">
-        <h3>{courseId ? `${courseId} > Student List` : "Select a Course"}</h3>
+    <div style={{marginTop:"-50px"}} className="student-profile-container">
+      <div  style={{marginTop:"30px", overflowY: "auto", maxHeight: "100vh"}} className="main-content">
+        <h3 style={{marginTop:"0px"}}>{courseId ? `${courseId} > Student List` : "Select a Course"}</h3>
 
         {/* Top Right Search Box */}
         <div className="search-bar">
@@ -293,7 +385,7 @@ const StudentListTest = () => {
           />
         </div>
         <div className="box">
-          <div className="box-left">Student List in this class</div>
+          <div className="box-left">Student List in this class  📚 {enrollmentCount} Students Enrolled</div>
           <div className="box-right">
             <select className="dropdown"
               value={selectedSection}
@@ -320,6 +412,7 @@ const StudentListTest = () => {
             </select>
           </div>
         </div>
+
         <div className="risk-filter-container">
           <div className="risk-legend">
             <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
@@ -350,15 +443,19 @@ const StudentListTest = () => {
           </div>
 
           <div className="filter-section" style={{ position: "relative", display: "flex", flexDirection: "column" }}>
-            <button onClick={() => setShowFilterBox(!showFilterBox)}>Filter</button>
+            <button onClick={(e) => {
+              e.stopPropagation(); // Prevent outside click logic from firing
+              setShowFilterBox((prev) => !prev);
+            }}>Filter</button>
 
             {showFilterBox && (
               <div
                 className="filter-box"
+                ref={filterBoxRef}
                 style={{
                   position: "absolute",
                   top: "40px",
-                  left: "0",
+                  left: "-10px",
                   background: "#fff",
                   padding: "10px",
                   boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
@@ -366,7 +463,7 @@ const StudentListTest = () => {
                   display: "flex",
                   flexDirection: "column",
                   gap: "10px",
-                  width: "250px",
+                  width: "220px",
                 }}
               >
                 {/* Checkboxes for filtering options */}
@@ -424,11 +521,14 @@ const StudentListTest = () => {
             )}
           </div>
 
-
           <div className="criteria-section" style={{ position: "relative", display: "flex", flexDirection: "column" }}>
-            <button onClick={() => setShowCriteriaBox(!showCriteriaBox)}>Criteria Setting</button>
+            <button onClick={(e) => {
+              e.stopPropagation(); // Prevents the click event from propagating and closing the box
+              setShowCriteriaBox((prev) => !prev); // Toggles the criteria box visibility
+            }}>Criteria Setting</button>
+
             {showCriteriaBox && (
-              <div className="criteria-box" style={{
+              <div className="criteria-box" ref={criteriaBoxRef} style={{
                 position: "absolute",
                 top: "40px",
                 left: "-130px",
@@ -444,36 +544,35 @@ const StudentListTest = () => {
                 <style>
                   {`
           input[type="range"]::-webkit-slider-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  cursor: pointer;
-  margin-top: -6px;
-}
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px;
+          }
 
-input[type="range"].severe::-webkit-slider-thumb {
-  background-color: red;
-}
+          input[type="range"].severe::-webkit-slider-thumb {
+            background-color: red;
+          }
 
-input[type="range"].slightly::-webkit-slider-thumb {
-  background-color: yellow;
-}
+          input[type="range"].slightly::-webkit-slider-thumb {
+            background-color: yellow;
+          }
 
-input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  cursor: pointer;
-}
+          input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+          }
 
-input[type="range"].severe::-moz-range-thumb {
-  background-color: red;
-}
+          input[type="range"].severe::-moz-range-thumb {
+            background-color: red;
+          }
 
-input[type="range"].slightly::-moz-range-thumb {
-  background-color: yellow;
-}
-
+          input[type="range"].slightly::-moz-range-thumb {
+            background-color: yellow;
+          }
         `}
                 </style>
 
@@ -519,7 +618,6 @@ input[type="range"].slightly::-moz-range-thumb {
                           }}
                         />
                       )}
-
                       {/* Severe Slider */}
                       <input
                         type="range"
@@ -544,7 +642,6 @@ input[type="range"].slightly::-moz-range-thumb {
                     </div>
                   </>
                 )}
-
 
                 {/* Score Criteria */}
                 {criteriaScore && (
@@ -581,7 +678,6 @@ input[type="range"].slightly::-moz-range-thumb {
                           }}
                         />
                       )}
-
                       {/* Severe Slider */}
                       <input
                         type="range"
@@ -607,19 +703,35 @@ input[type="range"].slightly::-moz-range-thumb {
                   </>
                 )}
 
-
                 {/* Save Button */}
                 <button
                   onClick={() => {
-                    setSevereAttendance(tempSevereAttendance);
-                    setSlightlyAttendance(tempSlightlyAttendance);
-                    setSevereScore(tempSevereScore);
-                    setSlightlyScore(tempSlightlyScore);
+                    if (criteriaAttendance) {
+                      setSevereAttendance(tempSevereAttendance);
+                      setSlightlyAttendance(tempSlightlyAttendance);
+                    }
+                    if (criteriaScore) {
+                      setSevereScore(tempSevereScore);
+                      setSlightlyScore(tempSlightlyScore);
+                    }
+
+                    updateStudentStatus({
+                      criteriaAttendance,
+                      criteriaScore,
+                      severeAttendance: tempSevereAttendance,
+                      slightlyAttendance: tempSlightlyAttendance,
+                      severeScore: tempSevereScore,
+                      slightlyScore: tempSlightlyScore,
+                    });
+
+                    setTimeout(() => {
+                      setStudents((prev) => [...prev]);
+                    }, 0);
                   }}
-                  style={{ marginTop: "10px", padding: "5px 10px" }}
                 >
                   Save
                 </button>
+
               </div>
             )}
           </div>
@@ -640,13 +752,13 @@ input[type="range"].slightly::-moz-range-thumb {
                   Student Name <span>{sortField === "name" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</span>
                 </th>
                 <th style={{ width: "120px" }} onClick={() => toggleSort("attendance")}>
-                  Attendance Max (9 Times) <span>{sortField === "attendance" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</span>
+                  Attendance (9 Times) <span>{sortField === "attendance" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</span>
                 </th>
                 <th style={{ width: "120px" }} onClick={() => toggleSort("score")}>
-                  Score Max (50 Score) <span>{sortField === "score" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</span>
+                  Score (50 Score) <span>{sortField === "score" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</span>
                 </th>
                 <th style={{ width: "120px" }} onClick={() => toggleSort("quiz")}>
-                  Missing Quizzes Max (10 Times) <span>{sortField === "quiz" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</span>
+                  Missing Quizzes (10 Times) <span>{sortField === "quiz" ? (sortOrder === "asc" ? "▲" : "▼") : ""}</span>
                 </th>
               </tr>
             </thead>
@@ -705,7 +817,7 @@ input[type="range"].slightly::-moz-range-thumb {
                         cursor: "pointer",
                         textDecoration: "underline",
                       }}
-                      onClick={() => navigate(`/student-profile/${student.id}/${courseId}/overview`)}
+                      onClick={() => navigate(`/student-profile/${student.id}/${courseId}/${selectedSection}/${selectedSemester}/current-course`)}
                     >
                       {student.name}
                     </span>

@@ -314,7 +314,7 @@
     flex-direction: column;
     align-items: center;
     background-color: #fff; /* Ensure white background */
-    padding: 20px; /* Add padding around the chart */
+    padding: 10px; /* Add padding around the chart */
     margin-bottom: 20px; /* Add space between chart boxes */
     border-radius: 8px; /* Rounded corners */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: add shadow for better look */
