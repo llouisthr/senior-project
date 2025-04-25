@@ -65,17 +65,19 @@ const Home = () => {
 
   return (
     <div className="home-wrapper">
-      {/* Main Content */}
-      <h3>Courses</h3>
-      {/* Top Right Search Box */}
-      <div className="search-bar">
-        <label>Search via Name:</label>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Enter course name..."
-        />
+      <div className="header-row">
+        {/* Main Content */}
+        <h3>Courses</h3>
+        {/* Top Right Search Box */}
+        <div className="search-bar">
+          <label>Search via Name:</label>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter course name..."
+          />
+        </div>
       </div>
       {/* Registered Courses Box */}
       <div className="registered-courses-box">
