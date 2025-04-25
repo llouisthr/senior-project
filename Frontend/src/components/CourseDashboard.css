@@ -24,6 +24,11 @@
     border: 1px solid #ccc;
 }
 
+.box-right {
+  display: flex;
+  gap: 12px; /* or whatever spacing you prefer */
+}
+
 /* Single Main Card */
 .card {
   background-color: white;
@@ -46,7 +51,6 @@
   align-items: center; /* Aligns items vertically */
   flex-wrap: nowrap; /* Prevents wrapping */
   padding: 10px 20px;
-  background-color: #f8f8f8;
 }
 
 
@@ -81,12 +85,29 @@
 }
 
 .card .first-row .enrollment {
-    display: flex;
-    align-items: flex-start; /* Align text to the left */
-    gap: 5px; /* Small spacing between elements */
-    margin-bottom: 200px;
+  display: flex;
+  align-items: center; /* Vertically align icon and text */
+  gap: 12px; /* Add spacing between icon and text */
+  margin-bottom: 20px; /* Reduce spacing if it was for layout purposes */
 }
 
+.card .first-row .enrollment,
+.card-header .enrollment {
+  display: flex;
+  align-items: center; /* Aligns SVG and text vertically */
+  gap: 10px;           /* Space between SVG and text */
+}
+
+.enrollment-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.enrollment-number {
+  font-size: 30px;
+  font-weight: bold;
+}
 
 .card .first-row .enrollment div {
     display: flex;

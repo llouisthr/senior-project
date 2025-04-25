@@ -1,111 +1,62 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    overflow-x: hidden;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  overflow-x: hidden;
 }
 
 .student-profile-page-b-container {
-    display: flex;
-    width: 100%;
-    min-height: 100vh;
-    overflow: hidden;
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px;
-    background-color: #000fdf;
-    padding: 16px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+.instructor-name {
+  font-weight: 500;
+  color: #e9ecef;
 }
-  
-  .sidebar-content {
-    flex-grow: 1;
-    overflow-y: auto; /* Scrollable if content too tall */
-  }
-  
-  .sidebar-footer {
-    border-top: 1px solid #ccc;
-    padding-top: 10px;
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .instructor-name {
-    font-weight: 500;
-    color: #e9ecef;
-  }
-  
-  .logout-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    display: flex;
-    align-items: center;
-    color: #e9ecef;
-    transition: color 0.2s;
-  }
 
-.sidebar h2 {
-    margin-bottom: 30px;
+.logout-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  color: #e9ecef;
+  transition: color 0.2s;
 }
 
 .menu-heading {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-.sidebar a {
-    text-decoration: none;
-    color: white;
-    display: block;
-    margin: 5px 0;
-    padding: 8px 15px;
-    border-radius: 5px;
-}
-
-.sidebar a:hover {
-    background-color: #207AD7;
-}
-
-.sidebar a.active {
-    background-color: #207AD7;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .main-content {
-    padding: 20px;
-    min-height: 100vh;
-    overflow-y: auto;
-    background-color: #f4f4f4;
-    box-sizing: border-box;
+  padding: 20px;
+  min-height: 100vh;
+  overflow-y: auto;
+  background-color: #f4f4f4;
+  box-sizing: border-box;
 }
-
 
 /* Header */
 .header {
-    width: calc(100% - 250px); /* Prevent overlap */
-    position: fixed;
-    top: 0;
-    left: 250px;
-    background-color: #ffffff;
-    padding: 15px 20px;
-    z-index: 1000;
+  width: calc(100% - 250px); /* Prevent overlap */
+  position: fixed;
+  top: 0;
+  left: 250px;
+  background-color: #ffffff;
+  padding: 15px 20px;
+  z-index: 1000;
 }
 
 .student-head-box {
-    display: flex;
+  display: flex;
   justify-content: space-between;
   align-items: center;
   background: white;
@@ -114,295 +65,301 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   margin-top: 0px;
-  }
-  
-  .student-head-box span {
-    font-weight: bold;
+}
+
+.student-head-box span {
+  font-weight: bold;
   color: #333;
-  }
-  
-  .student-head-box select {
-    padding: 6px;
+}
+
+.student-head-box select {
+  padding: 6px;
   border-radius: 5px;
   border: 1px solid #ccc;
   outline: none;
   cursor: pointer;
-  }
-  
+}
 
 .dashboard-title {
-    font-size: 1.5rem;
-    font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .student-info-container {
-    display: flex;
-    align-items: center; /* Align items vertically */
-    justify-content: space-between; /* Space between student info and chart */
+  display: flex;
+  align-items: center; /* Align items vertically */
+  justify-content: space-between; /* Space between student info and chart */
 }
 
 .info-container,
 .ict-activity-box,
 .chart-box {
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-top: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-top: 20px;
 }
 
 .info-container h3,
 .ict-activity-box h3,
 .chart-box h3 {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .info-container {
-    display: flex;
-    justify-content: space-between; /* Spread both sections */
-    align-items: flex-start; /* Align headings to the top */
-    width: 100%;
+  display: flex;
+  justify-content: space-between; /* Spread both sections */
+  align-items: flex-start; /* Align headings to the top */
+  width: 100%;
 }
 
 .student-info {
-    flex: 1; /* Allow this section to take up available space */
-    line-height: 1.5;
+  flex: 1; /* Allow this section to take up available space */
+  line-height: 1.5;
 }
 
 .grade-trend {
-    flex: 1; /* Allow this section to take up available space */
-    display: flex;
-    flex-direction: column; /* Stack heading and chart vertically */
-    align-items: center; /* Center chart horizontally */
+  flex: 1; /* Allow this section to take up available space */
+  display: flex;
+  flex-direction: column; /* Stack heading and chart vertically */
+  align-items: center; /* Center chart horizontally */
 }
 
 .chart-container {
-    flex: 1; /* Ensures the chart stays inside the student info box */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  flex: 1; /* Ensures the chart stays inside the student info box */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .tooltip-radar {
-    position: absolute;
-    padding: 6px 10px;
-    background: rgba(0, 0, 0, 0.75);
-    color: #fff;
-    border-radius: 5px;
-    font-size: 12px;
-    pointer-events: none;
-    z-index: 10;
+  position: absolute;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  border-radius: 5px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .timeline-box {
-    text-align: center;
-    padding: 20px;
-    width: 80%;
-    margin: auto;
-    position: relative;
+  text-align: center;
+  padding: 20px;
+  width: 80%;
+  margin: auto;
+  position: relative;
 }
 
 .timeline-container {
-    position: relative;
-    width: 100%;
-    height: 80px;
-    margin-top: 20px;
+  position: relative;
+  width: 100%;
+  height: 80px;
+  margin-top: 20px;
 }
 
 .timeline-line {
-    position: absolute;
-    top: 50%;
-    left: 0%;
-    width: 100%;
-    height: 4px;
-    background-color: #000000;
-    transform: translateY(-50%);
-    z-index: 1;
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 100%;
+  height: 4px;
+  background-color: #000000;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 .timeline-event {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    z-index: 2;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  z-index: 2;
 }
 
 .dot {
-    width: 14px;
-    height: 14px;
-    background-color: #007bff;
-    border-radius: 50%;
-    margin: auto;
-    position: relative;
-    z-index: 3;
+  width: 14px;
+  height: 14px;
+  background-color: #007bff;
+  border-radius: 50%;
+  margin: auto;
+  position: relative;
+  z-index: 3;
 }
 
 .event-label-1 {
-    position: absolute;
-    top: -50px; /* Moves the text above the dot */
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    white-space: nowrap;
-    font-weight: bold;
-    color: #333;
+  position: absolute;
+  top: -50px; /* Moves the text above the dot */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #333;
 }
 
 .event-label-2 {
-    position: absolute;
-    bottom: -30px; /* Moves the text above the dot */
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    white-space: nowrap;
-    font-weight: bold;
-    color: #333;
+  position: absolute;
+  bottom: -30px; /* Moves the text above the dot */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #333;
 }
 
 .event-date-1 {
-    position: absolute;
-    top: -30px; /* Moves the text above the dot */
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    font-weight: regular;
-    color: #333;
+  position: absolute;
+  top: -30px; /* Moves the text above the dot */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  font-weight: regular;
+  color: #333;
 }
 
 .event-date-2 {
-    position: absolute;
-    bottom: -50px; /* Moves the text above the dot */
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    font-weight: regular;
-    color: #333;
+  position: absolute;
+  bottom: -50px; /* Moves the text above the dot */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  font-weight: regular;
+  color: #333;
 }
 
 .second-chart-row {
-    display: flex;
-    justify-content: space-between; /* Spread charts evenly */
-    gap: 20px; /* Maintain proper spacing */
-    width: 100%; /* Ensure full-width alignment */
+  display: flex;
+  justify-content: space-between; /* Spread charts evenly */
+  gap: 20px; /* Maintain proper spacing */
+  width: 100%; /* Ensure full-width alignment */
 }
 
 .chart-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .radar-chart-box {
-    display: flex;
-    flex: 1; /* Allow each chart box to expand */
-    flex-direction: column; /* Stack title and charts vertically */
-    align-items: flex-start; /* Align title to left */
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background: white;
-    width: 100%;
-    height: 80%;
+  display: flex;
+  flex: 1; /* Allow each chart box to expand */
+  flex-direction: column; /* Stack title and charts vertically */
+  align-items: flex-start; /* Align title to left */
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  width: 100%;
+  height: 80%;
 }
 
 .chart-box {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center; /* Center content horizontally */
-    justify-content: center; /* Center content vertically */
-    text-align: flex-start; /* Ensure text alignment */
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background: white;
-    min-width: 300px;
-    position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+  justify-content: center; /* Center content vertically */
+  text-align: flex-start; /* Ensure text alignment */
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  min-width: 300px;
+  position: relative;
 }
 
 .chart-box h3 {
-    position: absolute;
-    top: 10px;
-    left: 15px;
-    margin: 0;
-    text-align: left;
-    width: auto;
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  margin: 0;
+  text-align: left;
+  width: auto;
 }
 
 /* Heatmap styles */
-.color-empty { fill: #ebedf0; }
-.color-scale-1 { fill: #c6e48b; }
-.color-scale-2 { fill: #7bc96f; }
-.color-scale-3 { fill: #239a3b; }
-.color-scale-4 { fill: #196127; }
+.color-empty {
+  fill: #ebedf0;
+}
+.color-scale-1 {
+  fill: #c6e48b;
+}
+.color-scale-2 {
+  fill: #7bc96f;
+}
+.color-scale-3 {
+  fill: #239a3b;
+}
+.color-scale-4 {
+  fill: #196127;
+}
 
 .radar-charts-container {
-    display: flex;
-    justify-content: center; /* Align radar charts horizontally */
-    align-items: flex-start;
-    gap: 20px; /* Space between radar charts */
-    width: 100%;
+  display: flex;
+  justify-content: center; /* Align radar charts horizontally */
+  align-items: flex-start;
+  gap: 20px; /* Space between radar charts */
+  width: 100%;
 }
-
 
 .chart-container {
-    display: flex;
-    justify-content: center; /* Keep charts in the center */
-    align-items: flex-start;
-    gap: 20px; /* Add spacing between radar charts */
-    width: 100%;
+  display: flex;
+  justify-content: center; /* Keep charts in the center */
+  align-items: flex-start;
+  gap: 20px; /* Add spacing between radar charts */
+  width: 100%;
 }
 
-
 svg {
-    display: block;
-    margin: 0 auto;
+  display: block;
+  margin: 0 auto;
 }
 
 .legend {
-    font-size: 12px;
-    fill: #333;
+  font-size: 12px;
+  fill: #333;
 }
 
 .grid-line text {
-    font-size: 10px;
-    fill: #333;
+  font-size: 10px;
+  fill: #333;
 }
 
-
 .logout {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    font-size: 24px;
-    color: #fff;
-    transition: color 0.3s ease;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 24px;
+  color: #fff;
+  transition: color 0.3s ease;
 }
 
 .sidebar {
-    position: relative;
+  position: relative;
 }
 
 .logout a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .logout a:hover img {
-    filter: brightness(1.2);
+  filter: brightness(1.2);
 }
